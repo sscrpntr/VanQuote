@@ -1,20 +1,18 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  origin: MyString
-  destination: MyString
-  distance_km: 9.99
-  estimated_duration_minutes: 1
-  fuel_cost: 9.99
-  toll_cost: 9.99
-  vehicle_cost: 9.99
-  driver_cost: 9.99
-  loading_cost: 9.99
-  waiting_cost: 9.99
-  other_cost: 9.99
-  total_cost: 9.99
-  margin: 9.99
-  recommended_price: 9.99
+  origin: Barcelona
+  destination: Madrid
+  distance_km: 620
+  estimated_duration_minutes: 360
+  fuel_cost: 80
+  toll_cost: 35
+  vehicle_cost: 120
+  driver_cost: 150
+  loading_cost: 30
+  waiting_cost: 20
+  other_cost: 10
+  margin: 25
 
 two:
   origin: MyString
