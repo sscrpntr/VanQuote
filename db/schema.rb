@@ -10,8 +10,26 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 0) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_05_162149) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
+  create_table "quotes", force: :cascade do |t|
+    t.string "origin"
+    t.string "destination"
+    t.decimal "distance_km"
+    t.integer "estimated_duration_minutes"
+    t.decimal "fuel_cost"
+    t.decimal "toll_cost"
+    t.decimal "vehicle_cost"
+    t.decimal "driver_cost"
+    t.decimal "loading_cost"
+    t.decimal "waiting_cost"
+    t.decimal "other_cost"
+    t.decimal "total_cost"
+    t.decimal "margin"
+    t.decimal "recommended_price"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 end

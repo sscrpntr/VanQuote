@@ -1,0 +1,33 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  origin: MyString
+  destination: MyString
+  distance_km: 9.99
+  estimated_duration_minutes: 1
+  fuel_cost: 9.99
+  toll_cost: 9.99
+  vehicle_cost: 9.99
+  driver_cost: 9.99
+  loading_cost: 9.99
+  waiting_cost: 9.99
+  other_cost: 9.99
+  total_cost: 9.99
+  margin: 9.99
+  recommended_price: 9.99
+
+two:
+  origin: MyString
+  destination: MyString
+  distance_km: 9.99
+  estimated_duration_minutes: 1
+  fuel_cost: 9.99
+  toll_cost: 9.99
+  vehicle_cost: 9.99
+  driver_cost: 9.99
+  loading_cost: 9.99
+  waiting_cost: 9.99
+  other_cost: 9.99
+  total_cost: 9.99
+  margin: 9.99
+  recommended_price: 9.99
