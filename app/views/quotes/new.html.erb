@@ -1,0 +1,71 @@
+<div>
+  <h1>VanQuote</h1>
+
+  <p>Calcula cuánto deberías cobrar por un transporte.</p>
+
+  <%= form_with model: @quote, local: true do |form| %>
+    <div>
+      <%= form.label :origin, "Origen" %>
+      <%= form.text_field :origin %>
+    </div>
+
+    <div>
+      <%= form.label :destination, "Destino" %>
+      <%= form.text_field :destination %>
+    </div>
+
+    <div>
+      <%= form.label :distance_km, "Distancia (km)" %>
+      <%= form.number_field :distance_km, step: 0.1 %>
+    </div>
+
+    <div>
+      <%= form.label :estimated_duration_minutes, "Duración estimada (minutos)" %>
+      <%= form.number_field :estimated_duration_minutes %>
+    </div>
+
+    <div>
+      <%= form.label :fuel_cost, "Combustible (€)" %>
+      <%= form.number_field :fuel_cost, step: 0.01 %>
+    </div>
+
+    <div>
+      <%= form.label :toll_cost, "Peajes (€)" %>
+      <%= form.number_field :toll_cost, step: 0.01 %>
+    </div>
+
+    <div>
+      <%= form.label :vehicle_cost, "Coste vehículo (€)" %>
+      <%= form.number_field :vehicle_cost, step: 0.01 %>
+    </div>
+
+    <div>
+      <%= form.label :driver_cost, "Coste conductor (€)" %>
+      <%= form.number_field :driver_cost, step: 0.01 %>
+    </div>
+
+    <div>
+      <%= form.label :loading_cost, "Carga / descarga (€)" %>
+      <%= form.number_field :loading_cost, step: 0.01 %>
+    </div>
+
+    <div>
+      <%= form.label :waiting_cost, "Espera (€)" %>
+      <%= form.number_field :waiting_cost, step: 0.01 %>
+    </div>
+
+    <div>
+      <%= form.label :other_cost, "Otros costes (€)" %>
+      <%= form.number_field :other_cost, step: 0.01 %>
+    </div>
+
+    <div>
+      <%= form.label :margin, "Margen (%)" %>
+      <%= form.number_field :margin, step: 0.1, value: 25 %>
+    </div>
+
+    <div>
+      <%= form.submit "Calcular presupuesto" %>
+    </div>
+  <% end %>
+</div>

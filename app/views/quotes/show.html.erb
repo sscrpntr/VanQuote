@@ -1,0 +1,32 @@
+<div>
+  <h1>Presupuesto de transporte</h1>
+
+  <p>
+    <strong>Origen:</strong>
+    <%= @quote.origin %>
+  </p>
+
+  <p>
+    <strong>Destino:</strong>
+    <%= @quote.destination %>
+  </p>
+
+  <hr>
+
+  <p>
+    <strong>Coste real:</strong>
+    <%= number_to_currency(@quote.total_cost, unit: "€") %>
+  </p>
+
+  <p>
+    <strong>Margen:</strong>
+    <%= @quote.margin %>%
+  </p>
+
+  <h2>
+    Precio recomendado:
+    <%= number_to_currency(@quote.recommended_price, unit: "€") %>
+  </h2>
+
+  <%= link_to "Nueva cotización", root_path %>
+</div>
