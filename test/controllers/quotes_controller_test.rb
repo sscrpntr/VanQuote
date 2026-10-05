@@ -33,9 +33,9 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     get quote_path(quote)
 
     assert_response :success
-      assert_includes response.body, "€489.50"
-      assert_includes response.body, "€556.25"
-      assert_includes response.body, "€623.00"
+    assert_includes response.body, "€489.50"
+    assert_includes response.body, "€556.25"
+    assert_includes response.body, "€623.00"
   end
   test "does not create an invalid quote" do
     assert_no_difference("Quote.count") do
