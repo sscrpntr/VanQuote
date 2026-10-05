@@ -1,4 +1,6 @@
 class Quote < ApplicationRecord
+  has_one :lead
+
   validates :origin, presence: true
   validates :destination, presence: true
 

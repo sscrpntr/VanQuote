@@ -17,7 +17,9 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
           waiting_cost: 30,
           other_cost: 10,
           margin: 25
-        }
+        },
+        email: "customer@example.com",
+        consent_given: "1"
       }
     end
 
@@ -44,7 +46,9 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
           waiting_cost: 9999,
           other_cost: 9999,
           margin: 999
-        }
+        },
+        email: "customer@example.com",
+        consent_given: "1"
       }
     end
 

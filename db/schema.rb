@@ -10,9 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_05_162149) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_05_212643) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "leads", force: :cascade do |t|
+    t.bigint "quote_id", null: false
+    t.string "email", null: false
+    t.boolean "consent_given", null: false
+    t.datetime "consent_at", null: false
+    t.string "status", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["quote_id"], name: "index_leads_on_quote_id"
+  end
 
   create_table "quotes", force: :cascade do |t|
     t.string "origin"
@@ -32,4 +43,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_162149) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
+
+  add_foreign_key "leads", "quotes"
 end
