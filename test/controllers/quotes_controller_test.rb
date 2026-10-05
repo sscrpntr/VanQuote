@@ -157,4 +157,23 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
   end
+
+  test "strips whitespace from lead email" do
+  assert_difference("Lead.count", 1) do
+    post quotes_path, params: {
+      quote: {
+        origin: "Barcelona",
+        destination: "Madrid",
+        distance_km: 620,
+        estimated_duration_minutes: 360
+      },
+      email: "  customer@example.com  ",
+      consent_given: "1"
+    }
+  end
+
+  lead = Lead.last
+
+  assert_equal "customer@example.com", lead.email
+end
 end
