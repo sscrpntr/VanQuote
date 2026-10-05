@@ -30,6 +30,29 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 395.5.to_d, quote.recommended_price
   end
 
+  test "creates a lead when creating a quote" do
+    assert_difference("Lead.count", 1) do
+      post quotes_path, params: {
+        quote: {
+          origin: "Barcelona",
+          destination: "Madrid",
+          distance_km: 620,
+          estimated_duration_minutes: 360
+        },
+        email: "customer@example.com",
+        consent_given: "1"
+      }
+    end
+
+    lead = Lead.last
+
+    assert_equal "customer@example.com", lead.email
+    assert_equal true, lead.consent_given
+    assert_not_nil lead.consent_at
+    assert_equal "NEW", lead.status
+    assert_equal Quote.last.id, lead.quote_id
+  end
+
   test "ignores internal costs submitted by the customer" do
     assert_difference("Quote.count", 1) do
       post quotes_path, params: {
@@ -78,6 +101,44 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_not_includes response.body, "Margen"
   end
 
+  test "does not create a lead without consent" do
+    assert_no_difference("Quote.count") do
+      assert_no_difference("Lead.count") do
+        post quotes_path, params: {
+          quote: {
+            origin: "Barcelona",
+            destination: "Madrid",
+            distance_km: 620,
+            estimated_duration_minutes: 360
+          },
+          email: "customer@example.com",
+          consent_given: "0"
+        }
+      end
+    end
+
+    assert_response :unprocessable_entity
+  end
+
+  test "does not create a lead with an invalid email" do
+    assert_no_difference("Quote.count") do
+      assert_no_difference("Lead.count") do
+        post quotes_path, params: {
+          quote: {
+            origin: "Barcelona",
+            destination: "Madrid",
+            distance_km: 620,
+            estimated_duration_minutes: 360
+          },
+          email: "not-an-email",
+          consent_given: "1"
+        }
+      end
+    end
+
+    assert_response :unprocessable_entity
+  end
+
   test "does not create an invalid quote" do
     assert_no_difference("Quote.count") do
       post quotes_path, params: {
@@ -88,7 +149,9 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
           estimated_duration_minutes: 0,
           fuel_cost: -10,
           margin: -5
-        }
+        },
+        email: "customer@example.com",
+        consent_given: "1"
       }
     end
 
