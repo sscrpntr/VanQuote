@@ -27,7 +27,16 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 445.to_d, quote.total_cost
     assert_equal 556.25.to_d, quote.recommended_price
   end
+  test "shows the three price options" do
+    quote = quotes(:one)
 
+    get quote_path(quote)
+
+    assert_response :success
+      assert_includes response.body, "€489.50"
+      assert_includes response.body, "€556.25"
+      assert_includes response.body, "€623.00"
+  end
   test "does not create an invalid quote" do
     assert_no_difference("Quote.count") do
       post quotes_path, params: {

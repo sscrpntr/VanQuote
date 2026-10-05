@@ -15,7 +15,7 @@
 
   <p>
     <strong>Coste real:</strong>
-    <%= number_to_currency(@quote.total_cost, unit: "€") %>
+    <%= number_to_currency(@calculator.total_cost, unit: "€") %>
   </p>
 
   <p>
@@ -23,10 +23,22 @@
     <%= @quote.margin %>%
   </p>
 
-  <h2>
-    Precio recomendado:
-    <%= number_to_currency(@quote.recommended_price, unit: "€") %>
-  </h2>
+  <h2>Opciones de precio</h2>
+
+  <p>
+    <strong>Precio mínimo:</strong>
+    <%= number_to_currency(@calculator.minimum_price, unit: "€") %>
+  </p>
+
+  <p>
+    <strong>Precio recomendado:</strong>
+    <%= number_to_currency(@calculator.recommended_price, unit: "€") %>
+  </p>
+
+  <p>
+    <strong>Precio premium:</strong>
+    <%= number_to_currency(@calculator.premium_price, unit: "€") %>
+  </p>
 
   <%= link_to "Nueva cotización", root_path %>
 </div>

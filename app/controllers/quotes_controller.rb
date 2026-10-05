@@ -21,6 +21,7 @@ class QuotesController < ApplicationController
 
   def show
     @quote = Quote.find(params[:id])
+    @calculator = QuoteCalculator.new(@quote)
   end
 
   private
