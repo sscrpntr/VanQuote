@@ -13,22 +13,23 @@
 
   <hr>
 
-  <h2>Opciones de precio</h2>
+  <h2>Precio del transporte</h2>
 
   <p>
-    <strong>Precio mínimo:</strong>
-    <%= number_to_currency(@calculator.minimum_price, unit: "€") %>
+    <strong><%= number_to_currency(@calculator.recommended_price, unit: "€") %></strong>
   </p>
+
+  <h2>¿Te interesa este presupuesto?</h2>
+
+  <p>Elige cómo quieres continuar:</p>
+
+  <div>
+    <button type="button">Enviar presupuesto por email</button>
+    <button type="button">Quiero recibir una llamada</button>
+    <button type="button">Quiero recibir contacto por email</button>
+  </div>
 
   <p>
-    <strong>Precio recomendado:</strong>
-    <%= number_to_currency(@calculator.recommended_price, unit: "€") %>
+    <%= link_to "Nueva cotización", root_path %>
   </p>
-
-  <p>
-    <strong>Precio premium:</strong>
-    <%= number_to_currency(@calculator.premium_price, unit: "€") %>
-  </p>
-
-  <%= link_to "Nueva cotización", root_path %>
 </div>
