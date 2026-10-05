@@ -7,12 +7,22 @@ class QuotesController < ApplicationController
     @quote = Quote.new(quote_params)
     apply_internal_defaults(@quote)
 
-    if @quote.valid?
+    if quote_input_valid?
       calculator = QuoteCalculator.new(@quote)
 
       @quote.total_cost = calculator.total_cost
       @quote.recommended_price = calculator.recommended_price
-      @quote.save!
+
+      Quote.transaction do
+        @quote.save!
+
+        @quote.create_lead!(
+          email: params[:email].to_s.strip,
+          consent_given: true,
+          consent_at: Time.current,
+          status: "NEW"
+        )
+      end
 
       redirect_to quote_path(@quote)
     else
@@ -26,6 +36,16 @@ class QuotesController < ApplicationController
   end
 
   private
+
+  def quote_input_valid?
+    email = params[:email].to_s.strip
+    consent_given = ActiveModel::Type::Boolean.new.cast(params[:consent_given])
+
+    email.present? &&
+      email.match?(URI::MailTo::EMAIL_REGEXP) &&
+      consent_given &&
+      @quote.valid?
+  end
 
   def apply_internal_defaults(quote)
     distance = quote.distance_km.to_d

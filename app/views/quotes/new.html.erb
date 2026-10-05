@@ -25,43 +25,13 @@
     </div>
 
     <div>
-      <%= form.label :fuel_cost, "Combustible (€)" %>
-      <%= form.number_field :fuel_cost, step: 0.01 %>
+      <%= label_tag :email, "Email" %>
+      <%= email_field_tag :email, params[:email], required: true %>
     </div>
 
     <div>
-      <%= form.label :toll_cost, "Peajes (€)" %>
-      <%= form.number_field :toll_cost, step: 0.01 %>
-    </div>
-
-    <div>
-      <%= form.label :vehicle_cost, "Coste vehículo (€)" %>
-      <%= form.number_field :vehicle_cost, step: 0.01 %>
-    </div>
-
-    <div>
-      <%= form.label :driver_cost, "Coste conductor (€)" %>
-      <%= form.number_field :driver_cost, step: 0.01 %>
-    </div>
-
-    <div>
-      <%= form.label :loading_cost, "Carga / descarga (€)" %>
-      <%= form.number_field :loading_cost, step: 0.01 %>
-    </div>
-
-    <div>
-      <%= form.label :waiting_cost, "Espera (€)" %>
-      <%= form.number_field :waiting_cost, step: 0.01 %>
-    </div>
-
-    <div>
-      <%= form.label :other_cost, "Otros costes (€)" %>
-      <%= form.number_field :other_cost, step: 0.01 %>
-    </div>
-
-    <div>
-      <%= form.label :margin, "Margen (%)" %>
-      <%= form.number_field :margin, step: 0.1, value: 25 %>
+      <%= check_box_tag :consent_given, "1", false, required: true %>
+      <%= label_tag :consent_given, "Acepto recibir este presupuesto y ser contactado por email." %>
     </div>
 
     <div>
