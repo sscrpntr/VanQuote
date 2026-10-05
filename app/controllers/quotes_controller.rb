@@ -5,6 +5,7 @@ class QuotesController < ApplicationController
 
   def create
     @quote = Quote.new(quote_params)
+    apply_internal_defaults(@quote)
 
     if @quote.valid?
       calculator = QuoteCalculator.new(@quote)
@@ -26,20 +27,26 @@ class QuotesController < ApplicationController
 
   private
 
+  def apply_internal_defaults(quote)
+    distance = quote.distance_km.to_d
+    duration_hours = quote.estimated_duration_minutes.to_d / 60
+
+    quote.fuel_cost = distance * 0.12
+    quote.toll_cost = 0
+    quote.vehicle_cost = distance * 0.10
+    quote.driver_cost = duration_hours * 25
+    quote.loading_cost = 20
+    quote.waiting_cost = 0
+    quote.other_cost = 10
+    quote.margin = 25
+  end
+
   def quote_params
     params.require(:quote).permit(
       :origin,
       :destination,
       :distance_km,
-      :estimated_duration_minutes,
-      :fuel_cost,
-      :toll_cost,
-      :vehicle_cost,
-      :driver_cost,
-      :loading_cost,
-      :waiting_cost,
-      :other_cost,
-      :margin
+      :estimated_duration_minutes
     )
   end
 end
