@@ -88,17 +88,16 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 395.5.to_d, quote.recommended_price
   end
 
-  test "shows the three price options" do
+  test "shows the transport price" do
     quote = quotes(:one)
 
     get quote_path(quote)
 
     assert_response :success
-    assert_includes response.body, "€489.50"
     assert_includes response.body, "€556.25"
-    assert_includes response.body, "€623.00"
-    assert_not_includes response.body, "Coste real"
-    assert_not_includes response.body, "Margen"
+    assert_not_includes response.body, "Precio mínimo"
+    assert_not_includes response.body, "Precio recomendado"
+    assert_not_includes response.body, "Precio premium"
   end
 
   test "does not create a lead without consent" do
