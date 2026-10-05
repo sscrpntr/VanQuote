@@ -89,4 +89,74 @@ class LeadTest < ActiveSupport::TestCase
     assert_not lead.valid?
     assert lead.errors[:quote].any?
   end
+
+  test "can be marked as contacted" do
+    lead = Lead.create!(
+      quote: quotes(:one),
+      email: "customer@example.com",
+      consent_given: true,
+      consent_at: Time.current,
+      status: "NEW"
+    )
+
+    lead.contact!
+
+    assert_equal "CONTACTED", lead.status
+  end
+
+  test "can be marked as quoted" do
+    lead = Lead.create!(
+      quote: quotes(:one),
+      email: "customer@example.com",
+      consent_given: true,
+      consent_at: Time.current,
+      status: "CONTACTED"
+    )
+
+    lead.mark_quoted!
+
+    assert_equal "QUOTED", lead.status
+  end
+
+  test "can be accepted" do
+    lead = Lead.create!(
+      quote: quotes(:one),
+      email: "customer@example.com",
+      consent_given: true,
+      consent_at: Time.current,
+      status: "QUOTED"
+    )
+
+    lead.accept!
+
+    assert_equal "ACCEPTED", lead.status
+  end
+
+  test "can be rejected" do
+    lead = Lead.create!(
+      quote: quotes(:one),
+      email: "customer@example.com",
+      consent_given: true,
+      consent_at: Time.current,
+      status: "QUOTED"
+    )
+
+    lead.reject!
+
+    assert_equal "REJECTED", lead.status
+  end
+
+  test "can be completed" do
+    lead = Lead.create!(
+      quote: quotes(:one),
+      email: "customer@example.com",
+      consent_given: true,
+      consent_at: Time.current,
+      status: "ACCEPTED"
+    )
+
+    lead.complete!
+
+    assert_equal "COMPLETED", lead.status
+  end
 end

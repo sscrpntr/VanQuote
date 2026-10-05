@@ -12,7 +12,9 @@ one:
   loading_cost: 30
   waiting_cost: 20
   other_cost: 10
+  total_cost: 445
   margin: 25
+  recommended_price: 556.25
 
 two:
   origin: MyString

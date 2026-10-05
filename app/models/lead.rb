@@ -22,4 +22,24 @@ class Lead < ApplicationRecord
 
   validates :status,
             inclusion: { in: STATUSES }
+
+  def contact!
+    update!(status: "CONTACTED")
+  end
+
+  def mark_quoted!
+    update!(status: "QUOTED")
+  end
+
+  def accept!
+    update!(status: "ACCEPTED")
+  end
+
+  def reject!
+    update!(status: "REJECTED")
+  end
+
+  def complete!
+    update!(status: "COMPLETED")
+  end
 end

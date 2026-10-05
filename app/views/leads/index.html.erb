@@ -1,0 +1,40 @@
+<div>
+  <h1>Leads</h1>
+
+  <% if @leads.empty? %>
+    <p>No hay leads todavía.</p>
+  <% else %>
+    <table>
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Origen</th>
+          <th>Destino</th>
+          <th>Precio recomendado</th>
+          <th>Estado</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% @leads.each do |lead| %>
+          <tr>
+            <td><%= lead.email %></td>
+            <td><%= lead.quote.origin %></td>
+            <td><%= lead.quote.destination %></td>
+            <td>
+              <%= number_to_currency(
+                lead.quote.recommended_price,
+                unit: "€"
+              ) %>
+            </td>
+            <td><%= lead.status %></td>
+            <td>
+              <%= l(lead.created_at, format: :short) %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+</div>
