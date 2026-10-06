@@ -1,64 +1,115 @@
-<div>
-  <h1>Presupuesto de transporte</h1>
+<div class="quote-page">
+  <div class="quote-container">
+    <header class="quote-header">
+      <h1 class="quote-logo">VanQuote</h1>
 
-  <p>
-    <strong>Origen:</strong>
-    <%= @quote.origin %>
-  </p>
+      <p class="quote-subtitle">
+        Presupuesto estimado de tu transporte
+      </p>
+    </header>
 
-  <p>
-    <strong>Destino:</strong>
-    <%= @quote.destination %>
-  </p>
-
-  <hr>
-
-  <h2>Precio del transporte</h2>
-
-  <p>
-    <strong><%= number_to_currency(@calculator.recommended_price, unit: "€") %></strong>
-  </p>
-
-  <% if notice.present? %>
-    <p>
-      <strong><%= notice %></strong>
-    </p>
-
-    <p>
-      <%= link_to "Cambiar método de contacto", quote_path(@quote) %>
-    </p>
-  <% elsif @quote.lead.present? %>
-    <h2>¿Te interesa este presupuesto?</h2>
-
-    <p>Elige cómo quieres continuar:</p>
-
-    <div>
-      <%= form_with model: @quote.lead, url: lead_path(@quote.lead), method: :patch do |form| %>
-        <%= form.hidden_field :contact_preference, value: "EMAIL_QUOTE" %>
-        <%= form.submit "Enviar presupuesto por email" %>
-      <% end %>
-
-      <%= form_with model: @quote.lead, url: lead_path(@quote.lead), method: :patch do |form| %>
-        <%= form.hidden_field :contact_preference, value: "PHONE" %>
-
-        <div>
-          <%= form.label :phone, "Número de teléfono" %>
-          <%= form.telephone_field :phone,
-                                   required: true,
-                                   placeholder: "+41 79 123 45 67" %>
+    <div class="quote-card quote-result-card">
+      <div class="route-summary">
+        <div class="route-point">
+          <span class="route-label">Origen</span>
+          <span class="route-address"><%= @quote.origin %></span>
         </div>
 
-        <%= form.submit "Quiero recibir una llamada" %>
+        <div class="route-arrow" aria-hidden="true">
+          ↓
+        </div>
+
+        <div class="route-point">
+          <span class="route-label">Destino</span>
+          <span class="route-address"><%= @quote.destination %></span>
+        </div>
+      </div>
+
+      <div class="price-section">
+        <p class="price-label">Precio del transporte</p>
+
+        <p class="price-value">
+          <%= number_to_currency(
+                @calculator.recommended_price,
+                unit: "€",
+                format: "%n %u"
+              ) %>
+        </p>
+
+        <p class="price-description">
+          Precio estimado del servicio de transporte.
+        </p>
+      </div>
+
+      <% if notice.present? %>
+        <div class="confirmation-message">
+          <strong><%= notice %></strong>
+        </div>
+
+        <%= link_to "Cambiar método de contacto",
+              quote_path(@quote),
+              class: "secondary-link" %>
+      <% elsif @quote.lead.present? %>
+        <div class="contact-section">
+          <h2>¿Cómo quieres continuar?</h2>
+
+          <p class="contact-description">
+            Elige cómo quieres recibir el presupuesto o ponerte en contacto
+            con nosotros.
+          </p>
+
+          <div class="contact-options">
+            <%= form_with model: @quote.lead,
+                  url: lead_path(@quote.lead),
+                  method: :patch,
+                  class: "contact-option" do |form| %>
+
+              <%= form.hidden_field :contact_preference,
+                    value: "EMAIL_QUOTE" %>
+
+              <%= form.submit "Enviar presupuesto por email",
+                    class: "contact-button" %>
+            <% end %>
+
+            <%= form_with model: @quote.lead,
+                  url: lead_path(@quote.lead),
+                  method: :patch,
+                  class: "contact-option" do |form| %>
+
+              <%= form.hidden_field :contact_preference,
+                    value: "PHONE" %>
+
+              <%= form.label :phone,
+                    "Número de teléfono",
+                    class: "form-label" %>
+
+              <%= form.telephone_field :phone,
+                    required: true,
+                    placeholder: "+41 79 123 45 67",
+                    class: "form-input" %>
+
+              <%= form.submit "Quiero recibir una llamada",
+                    class: "contact-button" %>
+            <% end %>
+
+            <%= form_with model: @quote.lead,
+                  url: lead_path(@quote.lead),
+                  method: :patch,
+                  class: "contact-option" do |form| %>
+
+              <%= form.hidden_field :contact_preference,
+                    value: "EMAIL_CONTACT" %>
+
+              <%= form.submit "Quiero recibir contacto por email",
+                    class: "contact-button" %>
+            <% end %>
+          </div>
+        </div>
       <% end %>
 
-      <%= form_with model: @quote.lead, url: lead_path(@quote.lead), method: :patch do |form| %>
-        <%= form.hidden_field :contact_preference, value: "EMAIL_CONTACT" %>
-        <%= form.submit "Quiero recibir contacto por email" %>
-      <% end %>
+      <%= link_to "Nueva cotización",
+            root_path,
+            class: "secondary-link new-quote-link" %>
     </div>
-  <% end %>
-
-  <p>
-    <%= link_to "Nueva cotización", root_path %>
-  </p>
+  </div>
 </div>

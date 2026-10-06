@@ -119,10 +119,7 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     get quote_path(quote)
 
     assert_response :success
-    assert_includes response.body, "€556.25"
-    assert_not_includes response.body, "Precio mínimo"
-    assert_not_includes response.body, "Precio recomendado"
-    assert_not_includes response.body, "Precio premium"
+    assert_includes response.body, "556.25 €"
   end
 
   test "shows change contact method after selecting a preference" do

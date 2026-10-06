@@ -1,10 +1,150 @@
-/*
- * This is a manifest file that'll be compiled into application.css.
- *
- * With Propshaft, assets are served efficiently without preprocessing steps. You can still include
- * application-wide styles in this file, but keep in mind that CSS precedence will follow the standard
- * cascading order, meaning styles declared later in the document or manifest will override earlier ones,
- * depending on specificity.
- *
- * Consider organizing styles into separate files for maintainability.
- */
+.quote-result-card {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.route-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.route-point {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.route-label {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.route-address {
+  color: #172033;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.route-arrow {
+  color: #98a2b3;
+  font-size: 22px;
+  line-height: 1;
+  text-align: center;
+}
+
+.price-section {
+  padding: 28px 20px;
+  border-top: 1px solid #e4e7ec;
+  border-bottom: 1px solid #e4e7ec;
+  text-align: center;
+}
+
+.price-label {
+  margin: 0 0 8px;
+  color: #667085;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.price-value {
+  margin: 0;
+  color: #172033;
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.price-description {
+  margin: 8px 0 0;
+  color: #98a2b3;
+  font-size: 13px;
+}
+
+.contact-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contact-section h2 {
+  margin: 0;
+  color: #172033;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.contact-description {
+  margin: -8px 0 0;
+  color: #667085;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.contact-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.contact-option {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.contact-button {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 1px solid #172033;
+  border-radius: 10px;
+  background: #172033;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.contact-button:hover {
+  background: #273449;
+}
+
+.contact-button:active {
+  transform: translateY(1px);
+}
+
+.confirmation-message {
+  padding: 16px;
+  border: 1px solid #d0d5dd;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #344054;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.secondary-link {
+  display: inline-block;
+  color: #667085;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+}
+
+.secondary-link:hover {
+  color: #172033;
+  text-decoration: underline;
+}
+
+.new-quote-link {
+  padding-top: 4px;
+}

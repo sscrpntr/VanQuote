@@ -1,49 +1,73 @@
-<div
-  data-controller="place-autocomplete"
-  data-place-autocomplete-api-key-value="<%= ENV["GOOGLE_MAPS_BROWSER_API_KEY"] %>"
->
-  <h1>VanQuote</h1>
+<div class="quote-page">
+  <div class="quote-container">
+    <header class="quote-header">
+      <h1 class="quote-logo">VanQuote</h1>
 
-  <p>Calcula cuánto deberías cobrar por un transporte.</p>
+      <p class="quote-subtitle">
+        Calcula qué precio tiene el transporte de tus sueños
+      </p>
+    </header>
 
-  <%= form_with model: @quote, local: true do |form| %>
-    <div>
-      <%= form.label :origin, "Origen" %>
+    <div
+      class="quote-card"
+      data-controller="place-autocomplete"
+      data-place-autocomplete-api-key-value="<%= ENV["GOOGLE_MAPS_BROWSER_API_KEY"] %>"
+    >
+      <%= form_with model: @quote,
+            local: true,
+            class: "quote-form" do |form| %>
 
-      <%= form.text_field :origin,
-            placeholder: "Escribe una dirección de origen",
-            data: {
-              place_autocomplete_target: "originInput"
-            } %>
+        <div class="form-field">
+          <%= form.label :origin,
+                "Origen",
+                class: "form-label" %>
+
+          <%= form.text_field :origin,
+                placeholder: "Escribe una dirección de origen",
+                class: "form-input",
+                data: {
+                  place_autocomplete_target: "originInput"
+                } %>
+        </div>
+
+        <div class="form-field">
+          <%= form.label :destination,
+                "Destino",
+                class: "form-label" %>
+
+          <%= form.text_field :destination,
+                placeholder: "Escribe una dirección de destino",
+                class: "form-input",
+                data: {
+                  place_autocomplete_target: "destinationInput"
+                } %>
+        </div>
+
+        <div class="form-field">
+          <%= label_tag :email,
+                "Email",
+                class: "form-label" %>
+
+          <%= email_field_tag :email,
+                params[:email],
+                required: true,
+                placeholder: "tu@email.com",
+                class: "form-input" %>
+        </div>
+
+        <div class="form-consent">
+          <%= check_box_tag :consent_given,
+                "1",
+                false,
+                required: true %>
+
+          <%= label_tag :consent_given,
+                "Acepto recibir este presupuesto y ser contactado por email." %>
+        </div>
+
+        <%= form.submit "Calcular presupuesto",
+              class: "form-submit" %>
+      <% end %>
     </div>
-
-    <div>
-      <%= form.label :destination, "Destino" %>
-
-      <%= form.text_field :destination,
-            placeholder: "Escribe una dirección de destino",
-            data: {
-              place_autocomplete_target: "destinationInput"
-            } %>
-    </div>
-
-    <div>
-      <%= label_tag :email, "Email" %>
-
-      <%= email_field_tag :email,
-            params[:email],
-            required: true %>
-    </div>
-
-    <div>
-      <%= check_box_tag :consent_given, "1", false, required: true %>
-
-      <%= label_tag :consent_given,
-            "Acepto recibir este presupuesto y ser contactado por email." %>
-    </div>
-
-    <div>
-      <%= form.submit "Calcular presupuesto" %>
-    </div>
-  <% end %>
+  </div>
 </div>
