@@ -28,4 +28,104 @@ class LeadsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "No hay leads todavía."
   end
+
+  test "updates contact preference to email quote" do
+    quote = quotes(:one)
+
+    lead = Lead.create!(
+      quote: quote,
+      email: "customer@example.com",
+      consent_given: true,
+      consent_at: Time.current,
+      status: "NEW"
+    )
+
+    patch lead_path(lead), params: {
+      lead: {
+        contact_preference: "EMAIL_QUOTE"
+      }
+    }
+
+    lead.reload
+
+    assert_redirected_to quote_path(quote)
+    assert_equal "EMAIL_QUOTE", lead.contact_preference
+    assert_equal "Te enviaremos el presupuesto por email.", flash[:notice]
+  end
+
+  test "updates contact preference to phone" do
+    quote = quotes(:one)
+
+    lead = Lead.create!(
+      quote: quote,
+      email: "customer@example.com",
+      consent_given: true,
+      consent_at: Time.current,
+      status: "NEW"
+    )
+
+    patch lead_path(lead), params: {
+      lead: {
+        contact_preference: "PHONE"
+      }
+    }
+
+    lead.reload
+
+    assert_redirected_to quote_path(quote)
+    assert_equal "PHONE", lead.contact_preference
+    assert_equal "Perfecto. Nos pondremos en contacto contigo por teléfono.", flash[:notice]
+  end
+
+  test "updates contact preference to email contact" do
+    quote = quotes(:one)
+
+    lead = Lead.create!(
+      quote: quote,
+      email: "customer@example.com",
+      consent_given: true,
+      consent_at: Time.current,
+      status: "NEW"
+    )
+
+    patch lead_path(lead), params: {
+      lead: {
+        contact_preference: "EMAIL_CONTACT"
+      }
+    }
+
+    lead.reload
+
+    assert_redirected_to quote_path(quote)
+    assert_equal "EMAIL_CONTACT", lead.contact_preference
+    assert_equal "Perfecto. Nos pondremos en contacto contigo por email.", flash[:notice]
+  end
+
+    test "rejects an invalid contact preference" do
+      quote = quotes(:one)
+
+      lead = Lead.create!(
+        quote: quote,
+        email: "customer@example.com",
+        consent_given: true,
+        consent_at: Time.current,
+        status: "NEW"
+      )
+
+      patch lead_path(lead), params: {
+        lead: {
+          contact_preference: "INVALID"
+        }
+      }
+
+      assert_response :bad_request
+
+      lead.reload
+
+      assert_nil lead.contact_preference
+
+    lead.reload
+
+    assert_nil lead.contact_preference
+  end
 end

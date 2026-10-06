@@ -19,15 +19,32 @@
     <strong><%= number_to_currency(@calculator.recommended_price, unit: "€") %></strong>
   </p>
 
-  <h2>¿Te interesa este presupuesto?</h2>
+  <% if notice.present? %>
+    <p>
+      <strong><%= notice %></strong>
+    </p>
+  <% elsif @quote.lead.present? %>
+    <h2>¿Te interesa este presupuesto?</h2>
 
-  <p>Elige cómo quieres continuar:</p>
+    <p>Elige cómo quieres continuar:</p>
 
-  <div>
-    <button type="button">Enviar presupuesto por email</button>
-    <button type="button">Quiero recibir una llamada</button>
-    <button type="button">Quiero recibir contacto por email</button>
-  </div>
+    <div>
+      <%= form_with model: @quote.lead, url: lead_path(@quote.lead), method: :patch do |form| %>
+        <%= form.hidden_field :contact_preference, value: "EMAIL_QUOTE" %>
+        <%= form.submit "Enviar presupuesto por email" %>
+      <% end %>
+
+      <%= form_with model: @quote.lead, url: lead_path(@quote.lead), method: :patch do |form| %>
+        <%= form.hidden_field :contact_preference, value: "PHONE" %>
+        <%= form.submit "Quiero recibir una llamada" %>
+      <% end %>
+
+      <%= form_with model: @quote.lead, url: lead_path(@quote.lead), method: :patch do |form| %>
+        <%= form.hidden_field :contact_preference, value: "EMAIL_CONTACT" %>
+        <%= form.submit "Quiero recibir contacto por email" %>
+      <% end %>
+    </div>
+  <% end %>
 
   <p>
     <%= link_to "Nueva cotización", root_path %>
