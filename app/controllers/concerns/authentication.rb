@@ -13,6 +13,7 @@ module Authentication
   end
 
   private
+
     def authenticated?
       resume_session
     end
@@ -31,17 +32,46 @@ module Authentication
 
     def request_authentication
       session[:return_to_after_authenticating] = request.url
+
       redirect_to new_session_path
     end
 
     def after_authentication_url
+      attach_public_quote_to_current_user
+
       session.delete(:return_to_after_authenticating) || root_url
     end
 
+    def attach_public_quote_to_current_user
+      token = session.delete(:quote_token_after_authenticating)
+
+      return if token.blank? || Current.user.nil?
+
+      quote = Quote.find_signed!(
+        token,
+        purpose: :public_view
+      )
+
+      return if quote.user_id.present?
+
+      quote.update!(user: Current.user)
+    rescue ActiveSupport::MessageVerifier::InvalidSignature,
+           ActiveRecord::RecordNotFound
+      nil
+    end
+
     def start_new_session_for(user)
-      user.sessions.create!(user_agent: request.user_agent, ip_address: request.remote_ip).tap do |session|
+      user.sessions.create!(
+        user_agent: request.user_agent,
+        ip_address: request.remote_ip
+      ).tap do |session|
         Current.session = session
-        cookies.signed.permanent[:session_id] = { value: session.id, httponly: true, same_site: :lax }
+
+        cookies.signed.permanent[:session_id] = {
+          value: session.id,
+          httponly: true,
+          same_site: :lax
+        }
       end
     end
 
