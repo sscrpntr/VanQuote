@@ -17,7 +17,7 @@ class LeadsController < ApplicationController
   private
 
   def contact_preference_param
-    value = params.require(:lead).permit(:contact_preference)[:contact_preference]
+    value = lead_params[:contact_preference]
 
     unless Lead::CONTACT_PREFERENCES.include?(value)
       raise ActionController::BadRequest, "Invalid contact preference"
@@ -27,7 +27,14 @@ class LeadsController < ApplicationController
   end
 
   def phone_param
-    params.require(:lead).permit(:phone)[:phone].to_s.strip.presence
+    lead_params[:phone].to_s.strip.presence
+  end
+
+  def lead_params
+    params.require(:lead).permit(
+      :contact_preference,
+      :phone
+    )
   end
 
   def confirmation_message(preference)

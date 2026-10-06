@@ -15,16 +15,6 @@
     </div>
 
     <div>
-      <%= form.label :distance_km, "Distancia (km)" %>
-      <%= form.number_field :distance_km, step: 0.1 %>
-    </div>
-
-    <div>
-      <%= form.label :estimated_duration_minutes, "Duración estimada (minutos)" %>
-      <%= form.number_field :estimated_duration_minutes %>
-    </div>
-
-    <div>
       <%= label_tag :email, "Email" %>
       <%= email_field_tag :email, params[:email], required: true %>
     </div>
