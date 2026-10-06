@@ -1,14 +1,37 @@
 require "test_helper"
 
 class QuotesControllerTest < ActionDispatch::IntegrationTest
+  class FakeRoutesService
+    def initialize(origin:, destination:)
+      @origin = origin
+      @destination = destination
+    end
+
+    def call
+      {
+        distance_km: 620,
+        duration_minutes: 360
+      }
+    end
+  end
+
+  setup do
+    @original_routes_service_class = QuotesController.routes_service_class
+    QuotesController.routes_service_class = FakeRoutesService
+  end
+
+  teardown do
+    QuotesController.routes_service_class = @original_routes_service_class
+  end
+
   test "creates a quote" do
     assert_difference("Quote.count", 1) do
       post quotes_path, params: {
         quote: {
           origin: "Barcelona",
           destination: "Madrid",
-          distance_km: 620,
-          estimated_duration_minutes: 360,
+          distance_km: 999,
+          estimated_duration_minutes: 999,
           fuel_cost: 80,
           toll_cost: 35,
           vehicle_cost: 120,
@@ -28,6 +51,8 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to quote_path(quote)
     assert_equal 316.4.to_d, quote.total_cost
     assert_equal 395.5.to_d, quote.recommended_price
+    assert_equal 620.to_d, quote.distance_km
+    assert_equal 360.to_d, quote.estimated_duration_minutes
   end
 
   test "creates a lead when creating a quote" do
@@ -36,8 +61,8 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
         quote: {
           origin: "Barcelona",
           destination: "Madrid",
-          distance_km: 620,
-          estimated_duration_minutes: 360
+          distance_km: 999,
+          estimated_duration_minutes: 999
         },
         email: "customer@example.com",
         consent_given: "1"
@@ -59,8 +84,8 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
         quote: {
           origin: "Barcelona",
           destination: "Madrid",
-          distance_km: 620,
-          estimated_duration_minutes: 360,
+          distance_km: 999,
+          estimated_duration_minutes: 999,
           fuel_cost: 9999,
           toll_cost: 9999,
           vehicle_cost: 9999,
@@ -132,8 +157,8 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
           quote: {
             origin: "Barcelona",
             destination: "Madrid",
-            distance_km: 620,
-            estimated_duration_minutes: 360
+            distance_km: 999,
+            estimated_duration_minutes: 999
           },
           email: "customer@example.com",
           consent_given: "0"
@@ -151,8 +176,8 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
           quote: {
             origin: "Barcelona",
             destination: "Madrid",
-            distance_km: 620,
-            estimated_duration_minutes: 360
+            distance_km: 999,
+            estimated_duration_minutes: 999
           },
           email: "not-an-email",
           consent_given: "1"
@@ -188,8 +213,8 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
         quote: {
           origin: "Barcelona",
           destination: "Madrid",
-          distance_km: 620,
-          estimated_duration_minutes: 360
+          distance_km: 999,
+          estimated_duration_minutes: 999
         },
         email: "  customer@example.com  ",
         consent_given: "1"

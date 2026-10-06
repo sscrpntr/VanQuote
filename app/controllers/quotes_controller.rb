@@ -1,10 +1,32 @@
 class QuotesController < ApplicationController
+  class_attribute :routes_service_class, default: GoogleRoutesService
+
   def new
     @quote = Quote.new
   end
 
   def create
     @quote = Quote.new(quote_params)
+
+    begin
+      route = routes_service_class.new(
+        origin: @quote.origin,
+        destination: @quote.destination
+      ).call
+
+      @quote.distance_km = route[:distance_km]
+      @quote.estimated_duration_minutes = route[:duration_minutes]
+    rescue StandardError => e
+      @quote.errors.add(
+        :base,
+        "No se ha podido calcular la ruta. Inténtalo de nuevo."
+      )
+
+      Rails.logger.error("Google Routes error: #{e.message}")
+
+      return render :new, status: :unprocessable_entity
+    end
+
     apply_internal_defaults(@quote)
 
     if quote_input_valid?
@@ -64,9 +86,7 @@ class QuotesController < ApplicationController
   def quote_params
     params.require(:quote).permit(
       :origin,
-      :destination,
-      :distance_km,
-      :estimated_duration_minutes
+      :destination
     )
   end
 end
