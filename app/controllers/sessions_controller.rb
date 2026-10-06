@@ -13,11 +13,16 @@ class SessionsController < ApplicationController
     if params[:quote_token].present?
       session[:quote_token_after_authenticating] = params[:quote_token]
     end
+
+    if params[:contact_preference].present?
+      session[:contact_preference_after_authenticating] =
+        params[:contact_preference]
+    end
   end
 
   def create
     if user = User.authenticate_by(params.permit(:email_address, :password))
-      start_new_session_for user
+      start_new_session_for(user)
       redirect_to after_authentication_url
     else
       redirect_to new_session_path,

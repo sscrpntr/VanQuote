@@ -51,15 +51,33 @@
 
         <div class="contact-options">
           <%= link_to "Enviar presupuesto por email",
-                new_session_path,
+                new_session_path(
+                  quote_token: @quote.signed_id(
+                    purpose: :public_view,
+                    expires_in: 24.hours
+                  ),
+                  contact_preference: "EMAIL_QUOTE"
+                ),
                 class: "contact-button" %>
 
           <%= link_to "Quiero recibir una llamada",
-                new_session_path,
+                new_session_path(
+                  quote_token: @quote.signed_id(
+                    purpose: :public_view,
+                    expires_in: 24.hours
+                  ),
+                  contact_preference: "PHONE"
+                ),
                 class: "contact-button" %>
 
           <%= link_to "Quiero recibir contacto por email",
-                new_session_path,
+                new_session_path(
+                  quote_token: @quote.signed_id(
+                    purpose: :public_view,
+                    expires_in: 24.hours
+                  ),
+                  contact_preference: "EMAIL_CONTACT"
+                ),
                 class: "contact-button" %>
         </div>
       </div>
