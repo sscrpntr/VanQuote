@@ -1,8 +1,23 @@
 require "test_helper"
 
 class LeadsControllerTest < ActionDispatch::IntegrationTest
+  setup do
+    @user = User.create!(
+      email_address: "user@example.com",
+      password: "password123"
+    )
+  end
+
+  def sign_in
+    post session_path, params: {
+      email_address: @user.email_address,
+      password: "password123"
+    }
+  end
+
   test "shows leads" do
     quote = quotes(:one)
+    quote.update!(user: @user)
 
     Lead.create!(
       quote: quote,
@@ -11,6 +26,8 @@ class LeadsControllerTest < ActionDispatch::IntegrationTest
       consent_at: Time.current,
       status: "NEW"
     )
+
+    sign_in
 
     get leads_path
 
@@ -23,6 +40,8 @@ class LeadsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "shows an empty message when there are no leads" do
+    sign_in
+
     get leads_path
 
     assert_response :success
@@ -31,6 +50,7 @@ class LeadsControllerTest < ActionDispatch::IntegrationTest
 
   test "updates contact preference to email quote" do
     quote = quotes(:one)
+    quote.update!(user: @user)
 
     lead = Lead.create!(
       quote: quote,
@@ -39,6 +59,8 @@ class LeadsControllerTest < ActionDispatch::IntegrationTest
       consent_at: Time.current,
       status: "NEW"
     )
+
+    sign_in
 
     patch lead_path(lead), params: {
       lead: {
@@ -56,6 +78,7 @@ class LeadsControllerTest < ActionDispatch::IntegrationTest
 
   test "updates contact preference to phone" do
     quote = quotes(:one)
+    quote.update!(user: @user)
 
     lead = Lead.create!(
       quote: quote,
@@ -64,6 +87,8 @@ class LeadsControllerTest < ActionDispatch::IntegrationTest
       consent_at: Time.current,
       status: "NEW"
     )
+
+    sign_in
 
     patch lead_path(lead), params: {
       lead: {
@@ -82,6 +107,7 @@ class LeadsControllerTest < ActionDispatch::IntegrationTest
 
   test "updates contact preference to email contact" do
     quote = quotes(:one)
+    quote.update!(user: @user)
 
     lead = Lead.create!(
       quote: quote,
@@ -90,6 +116,8 @@ class LeadsControllerTest < ActionDispatch::IntegrationTest
       consent_at: Time.current,
       status: "NEW"
     )
+
+    sign_in
 
     patch lead_path(lead), params: {
       lead: {
@@ -107,6 +135,7 @@ class LeadsControllerTest < ActionDispatch::IntegrationTest
 
   test "rejects an invalid contact preference" do
     quote = quotes(:one)
+    quote.update!(user: @user)
 
     lead = Lead.create!(
       quote: quote,
@@ -115,6 +144,8 @@ class LeadsControllerTest < ActionDispatch::IntegrationTest
       consent_at: Time.current,
       status: "NEW"
     )
+
+    sign_in
 
     patch lead_path(lead), params: {
       lead: {
@@ -132,6 +163,7 @@ class LeadsControllerTest < ActionDispatch::IntegrationTest
 
   test "rejects phone preference without a phone number" do
     quote = quotes(:one)
+    quote.update!(user: @user)
 
     lead = Lead.create!(
       quote: quote,
@@ -140,6 +172,8 @@ class LeadsControllerTest < ActionDispatch::IntegrationTest
       consent_at: Time.current,
       status: "NEW"
     )
+
+    sign_in
 
     patch lead_path(lead), params: {
       lead: {

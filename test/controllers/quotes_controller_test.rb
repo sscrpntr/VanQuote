@@ -18,6 +18,11 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
   setup do
     @original_routes_service_class = QuotesController.routes_service_class
     QuotesController.routes_service_class = FakeRoutesService
+
+    @user = User.create!(
+      email_address: "user@example.com",
+      password: "password123"
+    )
   end
 
   teardown do
@@ -48,11 +53,14 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
 
     quote = Quote.last
 
-    assert_redirected_to quote_path(quote)
+    assert_response :redirect
+    assert_match %r{/quotes/public\?token=}, response.location
+
     assert_equal 316.4.to_d, quote.total_cost
     assert_equal 395.5.to_d, quote.recommended_price
     assert_equal 620.to_d, quote.distance_km
     assert_equal 360.to_d, quote.estimated_duration_minutes
+    assert_nil quote.user_id
   end
 
   test "creates a lead when creating a quote" do
@@ -113,17 +121,61 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 395.5.to_d, quote.recommended_price
   end
 
-  test "shows the transport price" do
+  test "shows the public transport price without authentication" do
     quote = quotes(:one)
 
-    get quote_path(quote)
+    token = quote.signed_id(
+      purpose: :public_view,
+      expires_in: 24.hours
+    )
+
+  get public_quotes_path,
+    params: { token: token },
+    headers: {
+      "User-Agent" => "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    }
+
+    puts "TEST REQUEST USER AGENT: #{request.user_agent.inspect}"
+    puts "TEST RESPONSE STATUS: #{response.status}"
+    puts "TEST RESPONSE CONTENT TYPE: #{response.media_type.inspect}"
+    puts "TEST RESPONSE BODY:"
+    puts response.body
+
+assert_response :success
 
     assert_response :success
     assert_includes response.body, "556.25 €"
   end
 
+  test "shows the private quote to its owner" do
+    quote = quotes(:one)
+    quote.update!(user: @user)
+
+    post session_path, params: {
+      email_address: @user.email_address,
+      password: "password123"
+    }
+
+    get quote_path(quote)
+    puts "TEST USER AGENT: #{request.user_agent.inspect}"
+    puts "TEST RESPONSE STATUS: #{response.status}"
+    puts "TEST RESPONSE LOCATION: #{response.location.inspect}"
+    assert_response :success
+    assert_includes response.body, "556.25 €"
+  end
+
+  test "does not allow an unauthenticated user to access a private quote" do
+    quote = quotes(:one)
+    quote.update!(user: @user)
+
+    get quote_path(quote)
+
+    assert_redirected_to new_session_path
+  end
+
   test "shows change contact method after selecting a preference" do
     quote = quotes(:one)
+    quote.update!(user: @user)
 
     lead = Lead.create!(
       quote: quote,
@@ -132,6 +184,11 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
       consent_at: Time.current,
       status: "NEW"
     )
+
+    post session_path, params: {
+      email_address: @user.email_address,
+      password: "password123"
+    }
 
     patch lead_path(lead), params: {
       lead: {

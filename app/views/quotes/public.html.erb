@@ -1,0 +1,72 @@
+<div class="quote-page">
+  <div class="quote-container">
+    <header class="quote-header">
+      <h1 class="quote-logo">VanQuote</h1>
+
+      <p class="quote-subtitle">
+        Presupuesto estimado de tu transporte
+      </p>
+    </header>
+
+    <div class="quote-card quote-result-card">
+      <div class="route-summary">
+        <div class="route-point">
+          <span class="route-label">Origen</span>
+          <span class="route-address"><%= @quote.origin %></span>
+        </div>
+
+        <div class="route-arrow" aria-hidden="true">
+          ↓
+        </div>
+
+        <div class="route-point">
+          <span class="route-label">Destino</span>
+          <span class="route-address"><%= @quote.destination %></span>
+        </div>
+      </div>
+
+      <div class="price-section">
+        <p class="price-label">Precio del transporte</p>
+
+        <p class="price-value">
+          <%= number_to_currency(
+                @calculator.recommended_price,
+                unit: "€",
+                format: "%n %u"
+              ) %>
+        </p>
+
+        <p class="price-description">
+          Precio estimado del servicio de transporte.
+        </p>
+      </div>
+
+      <div class="contact-section">
+        <h2>¿Cómo quieres continuar?</h2>
+
+        <p class="contact-description">
+          Elige cómo quieres recibir el presupuesto o ponerte en contacto
+          con nosotros.
+        </p>
+
+        <div class="contact-options">
+          <%= link_to "Enviar presupuesto por email",
+                new_session_path,
+                class: "contact-button" %>
+
+          <%= link_to "Quiero recibir una llamada",
+                new_session_path,
+                class: "contact-button" %>
+
+          <%= link_to "Quiero recibir contacto por email",
+                new_session_path,
+                class: "contact-button" %>
+        </div>
+      </div>
+
+      <%= link_to "Nueva cotización",
+            root_path,
+            class: "secondary-link new-quote-link" %>
+    </div>
+  </div>
+</div>

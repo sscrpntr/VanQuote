@@ -1,6 +1,8 @@
 class QuotesController < ApplicationController
   class_attribute :routes_service_class, default: GoogleRoutesService
 
+  allow_unauthenticated_access only: %i[new create public]
+
   def new
     @quote = Quote.new
   end
@@ -46,14 +48,33 @@ class QuotesController < ApplicationController
         )
       end
 
-      redirect_to quote_path(@quote)
+      redirect_to public_quotes_path(
+        token: @quote.signed_id(
+          purpose: :public_view,
+          expires_in: 24.hours
+        )
+      )
     else
       render :new, status: :unprocessable_entity
     end
   end
 
   def show
-    @quote = Quote.find(params[:id])
+    @quote = if Current.user.admin?
+      Quote.find(params[:id])
+    else
+      Current.user.quotes.find(params[:id])
+    end
+
+    @calculator = QuoteCalculator.new(@quote)
+  end
+
+  def public
+    @quote = Quote.find_signed!(
+      params[:token],
+      purpose: :public_view
+    )
+
     @calculator = QuoteCalculator.new(@quote)
   end
 
