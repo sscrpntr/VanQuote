@@ -1,11 +1,89 @@
-<%= tag.div(flash[:alert], style: "color:red") if flash[:alert] %>
-<%= tag.div(flash[:notice], style: "color:green") if flash[:notice] %>
+<div class="auth-page">
+  <div class="auth-container">
+    <div class="auth-brand">
+      <%= link_to "VanQuote", root_path, class: "auth-logo" %>
+    </div>
 
-<%= form_with url: session_path do |form| %>
-  <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", placeholder: "Enter your email address", value: params[:email_address] %><br>
-  <%= form.password_field :password, required: true, autocomplete: "current-password", placeholder: "Enter your password", maxlength: 72 %><br>
-  <%= form.submit "Sign in" %>
-<% end %>
-<br>
+    <div class="auth-card">
+      <div class="auth-header">
+        <h1>Inicia sesión</h1>
 
-<%= link_to "Forgot password?", new_password_path %>
+        <p>
+          Accede a tus presupuestos y solicitudes de transporte.
+        </p>
+      </div>
+
+      <% if flash[:alert] %>
+        <div class="auth-alert">
+          <%= flash[:alert] %>
+        </div>
+      <% end %>
+
+      <% if flash[:notice] %>
+        <div class="auth-notice">
+          <%= flash[:notice] %>
+        </div>
+      <% end %>
+
+      <%= form_with url: session_path, class: "auth-form" do |form| %>
+        <div class="auth-field">
+          <%= form.label :email_address, "Email" %>
+
+          <%= form.email_field :email_address,
+                required: true,
+                autofocus: true,
+                autocomplete: "username",
+                placeholder: "tu@email.com",
+                value: params[:email_address] %>
+        </div>
+
+        <div class="auth-field">
+          <div class="auth-field-header">
+            <%= form.label :password, "Contraseña" %>
+
+            <%= link_to "¿Has olvidado tu contraseña?",
+                  new_password_path,
+                  class: "auth-forgot-link" %>
+          </div>
+
+          <%= form.password_field :password,
+                required: true,
+                autocomplete: "current-password",
+                placeholder: "Tu contraseña",
+                maxlength: 72 %>
+        </div>
+
+        <%= form.submit "Iniciar sesión", class: "auth-submit" %>
+      <% end %>
+
+      <div class="auth-divider">
+        <span>o</span>
+      </div>
+
+      <div class="auth-social-preview">
+        <button type="button" class="auth-social-button" disabled>
+          <span class="auth-social-icon">G</span>
+          <span>Continuar con Google</span>
+        </button>
+
+        <button type="button" class="auth-social-button" disabled>
+          <span class="auth-social-icon">●</span>
+          <span>Continuar con Apple</span>
+        </button>
+
+        <p>
+          Próximamente
+        </p>
+      </div>
+
+      <div class="auth-footer">
+        <span>¿No tienes una cuenta?</span>
+        <%= link_to "Crear cuenta", "#", class: "auth-register-link" %>
+      </div>
+    </div>
+
+    <p class="auth-back-link">
+      <%= link_to "← Volver a VanQuote", root_path %>
+    </p>
+  </div>
+</div>
