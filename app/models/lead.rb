@@ -10,6 +10,12 @@ class Lead < ApplicationRecord
     COMPLETED
   ].freeze
 
+  CONTACT_PREFERENCES = %w[
+    EMAIL_QUOTE
+    PHONE
+    EMAIL_CONTACT
+  ].freeze
+
   validates :email,
             presence: true,
             format: { with: URI::MailTo::EMAIL_REGEXP }
@@ -22,6 +28,10 @@ class Lead < ApplicationRecord
 
   validates :status,
             inclusion: { in: STATUSES }
+
+  validates :contact_preference,
+            inclusion: { in: CONTACT_PREFERENCES },
+            allow_nil: true
 
   def contact!
     update!(status: "CONTACTED")
