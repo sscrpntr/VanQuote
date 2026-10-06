@@ -5,7 +5,11 @@ class LeadsController < ApplicationController
 
   def update
     @lead = Lead.find(params[:id])
-    @lead.update!(contact_preference: contact_preference_param)
+
+    @lead.update!(
+      contact_preference: contact_preference_param,
+      phone: phone_param
+    )
 
     redirect_to quote_path(@lead.quote), notice: confirmation_message(@lead.contact_preference)
   end
@@ -20,6 +24,10 @@ class LeadsController < ApplicationController
     end
 
     value
+  end
+
+  def phone_param
+    params.require(:lead).permit(:phone)[:phone].to_s.strip.presence
   end
 
   def confirmation_message(preference)

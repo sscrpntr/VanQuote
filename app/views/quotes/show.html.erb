@@ -23,6 +23,10 @@
     <p>
       <strong><%= notice %></strong>
     </p>
+
+    <p>
+      <%= link_to "Cambiar método de contacto", quote_path(@quote) %>
+    </p>
   <% elsif @quote.lead.present? %>
     <h2>¿Te interesa este presupuesto?</h2>
 
@@ -36,6 +40,14 @@
 
       <%= form_with model: @quote.lead, url: lead_path(@quote.lead), method: :patch do |form| %>
         <%= form.hidden_field :contact_preference, value: "PHONE" %>
+
+        <div>
+          <%= form.label :phone, "Número de teléfono" %>
+          <%= form.telephone_field :phone,
+                                   required: true,
+                                   placeholder: "+41 79 123 45 67" %>
+        </div>
+
         <%= form.submit "Quiero recibir una llamada" %>
       <% end %>
 

@@ -33,6 +33,10 @@ class Lead < ApplicationRecord
             inclusion: { in: CONTACT_PREFERENCES },
             allow_nil: true
 
+  validates :phone,
+            presence: true,
+            if: -> { contact_preference == "PHONE" }
+
   def contact!
     update!(status: "CONTACTED")
   end

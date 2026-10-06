@@ -100,6 +100,31 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_not_includes response.body, "Precio premium"
   end
 
+  test "shows change contact method after selecting a preference" do
+    quote = quotes(:one)
+
+    lead = Lead.create!(
+      quote: quote,
+      email: "customer@example.com",
+      consent_given: true,
+      consent_at: Time.current,
+      status: "NEW"
+    )
+
+    patch lead_path(lead), params: {
+      lead: {
+        contact_preference: "PHONE",
+        phone: "+41 79 123 45 67"
+      }
+    }
+
+    follow_redirect!
+
+    assert_response :success
+    assert_includes response.body, "Perfecto. Nos pondremos en contacto contigo por teléfono."
+    assert_includes response.body, "Cambiar método de contacto"
+  end
+
   test "does not create a lead without consent" do
     assert_no_difference("Quote.count") do
       assert_no_difference("Lead.count") do
@@ -158,21 +183,21 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "strips whitespace from lead email" do
-  assert_difference("Lead.count", 1) do
-    post quotes_path, params: {
-      quote: {
-        origin: "Barcelona",
-        destination: "Madrid",
-        distance_km: 620,
-        estimated_duration_minutes: 360
-      },
-      email: "  customer@example.com  ",
-      consent_given: "1"
-    }
+    assert_difference("Lead.count", 1) do
+      post quotes_path, params: {
+        quote: {
+          origin: "Barcelona",
+          destination: "Madrid",
+          distance_km: 620,
+          estimated_duration_minutes: 360
+        },
+        email: "  customer@example.com  ",
+        consent_given: "1"
+      }
+    end
+
+    lead = Lead.last
+
+    assert_equal "customer@example.com", lead.email
   end
-
-  lead = Lead.last
-
-  assert_equal "customer@example.com", lead.email
-end
 end
