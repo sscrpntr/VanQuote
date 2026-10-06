@@ -1,4 +1,7 @@
-<div>
+<div
+  data-controller="place-autocomplete"
+  data-place-autocomplete-api-key-value="<%= ENV["GOOGLE_MAPS_BROWSER_API_KEY"] %>"
+>
   <h1>VanQuote</h1>
 
   <p>Calcula cuánto deberías cobrar por un transporte.</p>
@@ -6,22 +9,37 @@
   <%= form_with model: @quote, local: true do |form| %>
     <div>
       <%= form.label :origin, "Origen" %>
-      <%= form.text_field :origin %>
+
+      <%= form.text_field :origin,
+            placeholder: "Escribe una dirección de origen",
+            data: {
+              place_autocomplete_target: "originInput"
+            } %>
     </div>
 
     <div>
       <%= form.label :destination, "Destino" %>
-      <%= form.text_field :destination %>
+
+      <%= form.text_field :destination,
+            placeholder: "Escribe una dirección de destino",
+            data: {
+              place_autocomplete_target: "destinationInput"
+            } %>
     </div>
 
     <div>
       <%= label_tag :email, "Email" %>
-      <%= email_field_tag :email, params[:email], required: true %>
+
+      <%= email_field_tag :email,
+            params[:email],
+            required: true %>
     </div>
 
     <div>
       <%= check_box_tag :consent_given, "1", false, required: true %>
-      <%= label_tag :consent_given, "Acepto recibir este presupuesto y ser contactado por email." %>
+
+      <%= label_tag :consent_given,
+            "Acepto recibir este presupuesto y ser contactado por email." %>
     </div>
 
     <div>
