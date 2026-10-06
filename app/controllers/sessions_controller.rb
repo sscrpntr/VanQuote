@@ -10,14 +10,7 @@ class SessionsController < ApplicationController
              }
 
   def new
-    if params[:quote_token].present?
-      session[:quote_token_after_authenticating] = params[:quote_token]
-    end
-
-    if params[:contact_preference].present?
-      session[:contact_preference_after_authenticating] =
-        params[:contact_preference]
-    end
+    remember_public_quote_context
   end
 
   def create
@@ -33,5 +26,18 @@ class SessionsController < ApplicationController
   def destroy
     terminate_session
     redirect_to new_session_path, status: :see_other
+  end
+
+  private
+
+  def remember_public_quote_context
+    if params[:quote_token].present?
+      session[:quote_token_after_authenticating] = params[:quote_token]
+    end
+
+    if params[:contact_preference].present?
+      session[:contact_preference_after_authenticating] =
+        params[:contact_preference]
+    end
   end
 end

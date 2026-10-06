@@ -3,18 +3,33 @@ class LeadsController < ApplicationController
     @leads = Lead.includes(:quote).order(created_at: :desc)
   end
 
+  def edit
+    @lead = current_user_lead
+  end
+
   def update
-    @lead = Lead.find(params[:id])
+    @lead = current_user_lead
 
     @lead.update!(
       contact_preference: contact_preference_param,
       phone: phone_param
     )
 
-    redirect_to quote_path(@lead.quote), notice: confirmation_message(@lead.contact_preference)
+    redirect_to quote_path(@lead.quote),
+                notice: confirmation_message(@lead.contact_preference)
   end
 
   private
+
+  def current_user_lead
+    lead = Lead.find(params[:id])
+
+    unless Current.user.admin? || lead.quote.user_id == Current.user.id
+      raise ActiveRecord::RecordNotFound
+    end
+
+    lead
+  end
 
   def contact_preference_param
     value = lead_params[:contact_preference]

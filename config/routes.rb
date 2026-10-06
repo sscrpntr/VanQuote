@@ -9,5 +9,5 @@ Rails.application.routes.draw do
     get :public, on: :collection
   end
 
-  resources :leads, only: [ :index, :update ]
+  resources :leads, only: [ :index, :edit, :update ]
 end

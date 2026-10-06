@@ -32,29 +32,63 @@ module Authentication
 
     def request_authentication
       session[:return_to_after_authenticating] = request.url
-
       redirect_to new_session_path
     end
 
     def after_authentication_url
-      attach_public_quote_to_current_user
+      result = attach_public_quote_to_current_user
 
-      session.delete(:return_to_after_authenticating) || root_url
+      unless result
+        return session.delete(:return_to_after_authenticating) || root_url
+      end
+
+      quote = result[:quote]
+      preference = result[:preference]
+
+      if preference == "PHONE"
+        return edit_lead_path(quote.lead)
+      end
+
+      public_quotes_path(
+        token: quote.signed_id(
+          purpose: :public_view,
+          expires_in: 24.hours
+        )
+      )
     end
 
     def attach_public_quote_to_current_user
       token = session.delete(:quote_token_after_authenticating)
+      preference = session.delete(:contact_preference_after_authenticating)
 
       return if token.blank? || Current.user.nil?
+
+      preference =
+        if Lead::CONTACT_PREFERENCES.include?(preference)
+          preference
+        end
 
       quote = Quote.find_signed!(
         token,
         purpose: :public_view
       )
 
-      return if quote.user_id.present?
+      if quote.user_id.present? && quote.user_id != Current.user.id
+        return nil
+      end
 
-      quote.update!(user: Current.user)
+      quote.update!(user: Current.user) if quote.user_id.blank?
+
+      if preference.in?(%w[EMAIL_QUOTE EMAIL_CONTACT]) && quote.lead
+        quote.lead.update!(
+          contact_preference: preference
+        )
+      end
+
+      {
+        quote: quote,
+        preference: preference
+      }
     rescue ActiveSupport::MessageVerifier::InvalidSignature,
            ActiveRecord::RecordNotFound
       nil

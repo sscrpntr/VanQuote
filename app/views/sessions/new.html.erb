@@ -77,12 +77,14 @@
       </div>
 
       <div class="auth-footer">
-        <span>¿No tienes una cuenta?</span>
-        <%= link_to "Crear cuenta",
+  <span>¿No tienes una cuenta?</span>
 
-      new_registration_path,
-
-      class: "auth-register-link" %>
+  <%= link_to "Crear cuenta",
+        new_registration_path(
+          quote_token: session[:quote_token_after_authenticating],
+          contact_preference: session[:contact_preference_after_authenticating]
+        ),
+        class: "auth-register-link" %>
       </div>
     </div>
 

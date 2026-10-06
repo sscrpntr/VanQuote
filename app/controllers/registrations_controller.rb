@@ -2,6 +2,7 @@ class RegistrationsController < ApplicationController
   allow_unauthenticated_access
 
   def new
+    remember_public_quote_context
     @user = User.new
   end
 
@@ -17,6 +18,17 @@ class RegistrationsController < ApplicationController
   end
 
   private
+
+  def remember_public_quote_context
+    if params[:quote_token].present?
+      session[:quote_token_after_authenticating] = params[:quote_token]
+    end
+
+    if params[:contact_preference].present?
+      session[:contact_preference_after_authenticating] =
+        params[:contact_preference]
+    end
+  end
 
   def user_params
     params.require(:user).permit(

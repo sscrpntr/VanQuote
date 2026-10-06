@@ -1,0 +1,64 @@
+<div class="auth-page">
+  <div class="auth-container">
+    <div class="auth-brand">
+      <%= link_to "VanQuote", root_path, class: "auth-logo" %>
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-header">
+        <h1>¿Cómo podemos contactarte?</h1>
+
+        <p>
+          Elige cómo quieres que nos pongamos en contacto contigo.
+        </p>
+      </div>
+
+      <% if @lead.errors.any? %>
+        <div class="auth-alert">
+          <%= @lead.errors.full_messages.to_sentence %>
+        </div>
+      <% end %>
+
+      <%= form_with model: @lead,
+            url: lead_path(@lead),
+            method: :patch,
+            class: "auth-form" do |form| %>
+
+        <div class="auth-field">
+          <%= form.label :contact_preference, "Método de contacto" %>
+
+          <%= form.select :contact_preference,
+                options_for_select(
+                  [
+                    [ "Enviar presupuesto por email", "EMAIL_QUOTE" ],
+                    [ "Quiero recibir una llamada", "PHONE" ],
+                    [ "Quiero recibir contacto por email", "EMAIL_CONTACT" ]
+                  ],
+                  @lead.contact_preference
+                ),
+                {},
+                required: true %>
+        </div>
+
+        <div class="auth-field">
+          <%= form.label :phone, "Teléfono" %>
+
+          <%= form.telephone_field :phone,
+                autofocus: true,
+                autocomplete: "tel",
+                placeholder: "+41 79 123 45 67" %>
+
+          <small>
+            Obligatorio si eliges recibir una llamada.
+          </small>
+        </div>
+
+        <%= form.submit "Confirmar", class: "auth-submit" %>
+      <% end %>
+
+      <p class="auth-back-link">
+        <%= link_to "← Volver a VanQuote", root_path %>
+      </p>
+    </div>
+  </div>
+</div>
