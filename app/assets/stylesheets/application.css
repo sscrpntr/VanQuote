@@ -1,3 +1,170 @@
+/*
+ * VanQuote
+ * Global application styles
+ */
+
+:root {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  color: #172033;
+  background: #f5f7fa;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: #f5f7fa;
+  color: #172033;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.quote-page {
+  min-height: 100vh;
+  padding: 48px 20px;
+}
+
+.quote-container {
+  width: 100%;
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+.quote-header {
+  margin-bottom: 32px;
+}
+
+.quote-logo {
+  margin: 0 0 8px;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.quote-subtitle {
+  margin: 0;
+  color: #667085;
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+.quote-card {
+  padding: 32px;
+  background: #ffffff;
+  border: 1px solid #e4e7ec;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(16, 24, 40, 0.06);
+}
+
+.quote-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #344054;
+}
+
+.form-input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid #d0d5dd;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #172033;
+  font-size: 16px;
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.form-input::placeholder {
+  color: #98a2b3;
+}
+
+.form-input:focus {
+  border-color: #344054;
+  box-shadow: 0 0 0 3px rgba(52, 64, 84, 0.1);
+}
+
+gmp-place-autocomplete {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+
+  color-scheme: light;
+  background-color: #ffffff;
+  color: #172033;
+
+  border: 1px solid #d0d5dd;
+  border-radius: 10px;
+
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.form-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.form-consent input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  flex: 0 0 auto;
+}
+
+.form-consent label {
+  color: #667085;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.form-submit {
+  width: 100%;
+  min-height: 50px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 10px;
+  background: #172033;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.form-submit:hover {
+  background: #273449;
+}
+
+.form-submit:active {
+  transform: translateY(1px);
+}
+
 .quote-result-card {
   display: flex;
   flex-direction: column;
@@ -147,4 +314,23 @@
 
 .new-quote-link {
   padding-top: 4px;
+}
+
+@media (max-width: 640px) {
+  .quote-page {
+    padding: 24px 16px;
+  }
+
+  .quote-card {
+    padding: 24px 20px;
+    border-radius: 14px;
+  }
+
+  .quote-logo {
+    font-size: 28px;
+  }
+
+  .quote-subtitle {
+    font-size: 16px;
+  }
 }
