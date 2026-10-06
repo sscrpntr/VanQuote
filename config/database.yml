@@ -25,6 +25,9 @@ test:
   database: van_quote_test
 
 production:
-  primary:
+  primary: &primary_production
     <<: *default
     url: <%= ENV["DATABASE_URL"] %>
+  cable:
+    <<: *primary_production
+    migrations_paths: db/cable_migrate
