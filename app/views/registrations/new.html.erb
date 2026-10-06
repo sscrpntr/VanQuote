@@ -6,12 +6,26 @@
 
     <div class="auth-card">
       <div class="auth-header">
-        <h1>Inicia sesión</h1>
+        <h1>Crea tu cuenta</h1>
 
         <p>
-          Accede a tus presupuestos y solicitudes de transporte.
+          Guarda tus presupuestos y gestiona tus solicitudes de transporte.
         </p>
       </div>
+
+      <% if @user.errors.any? %>
+        <div class="auth-alert">
+          <p>
+            No hemos podido crear tu cuenta:
+          </p>
+
+          <ul>
+            <% @user.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
 
       <% if flash[:alert] %>
         <div class="auth-alert">
@@ -25,35 +39,41 @@
         </div>
       <% end %>
 
-      <%= form_with url: session_path, class: "auth-form" do |form| %>
+      <%= form_with model: @user,
+            url: registration_path,
+            class: "auth-form" do |form| %>
+
         <div class="auth-field">
           <%= form.label :email_address, "Email" %>
 
           <%= form.email_field :email_address,
                 required: true,
                 autofocus: true,
-                autocomplete: "username",
-                placeholder: "tu@email.com",
-                value: params[:email_address] %>
+                autocomplete: "email",
+                placeholder: "tu@email.com" %>
         </div>
 
         <div class="auth-field">
-          <div class="auth-field-header">
-            <%= form.label :password, "Contraseña" %>
-
-            <%= link_to "¿Has olvidado tu contraseña?",
-                  new_password_path,
-                  class: "auth-forgot-link" %>
-          </div>
+          <%= form.label :password, "Contraseña" %>
 
           <%= form.password_field :password,
                 required: true,
-                autocomplete: "current-password",
-                placeholder: "Tu contraseña",
+                autocomplete: "new-password",
+                placeholder: "Crea una contraseña",
                 maxlength: 72 %>
         </div>
 
-        <%= form.submit "Iniciar sesión", class: "auth-submit" %>
+        <div class="auth-field">
+          <%= form.label :password_confirmation, "Repite tu contraseña" %>
+
+          <%= form.password_field :password_confirmation,
+                required: true,
+                autocomplete: "new-password",
+                placeholder: "Repite tu contraseña",
+                maxlength: 72 %>
+        </div>
+
+        <%= form.submit "Crear cuenta", class: "auth-submit" %>
       <% end %>
 
       <div class="auth-divider">
@@ -77,12 +97,11 @@
       </div>
 
       <div class="auth-footer">
-        <span>¿No tienes una cuenta?</span>
-        <%= link_to "Crear cuenta",
+        <span>¿Ya tienes una cuenta?</span>
 
-      new_registration_path,
-
-      class: "auth-register-link" %>
+        <%= link_to "Iniciar sesión",
+              new_session_path,
+              class: "auth-register-link" %>
       </div>
     </div>
 
