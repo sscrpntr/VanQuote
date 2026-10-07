@@ -45,6 +45,29 @@ en:
 
       new_quote: "New quote"
 
+    show:
+      subtitle: "Quote details"
+      origin: "Origin"
+      destination: "Destination"
+      price_label: "Transport price"
+      price_description: "Estimated price of the transport service."
+
+      contact:
+        title: "How would you like to continue?"
+        description: "Choose how you would like to receive the quote or get in touch with us."
+        email_quote: "Email me the quote"
+        email_contact: "I want to be contacted by email"
+        change_method: "Change contact method"
+
+        phone:
+          label: "Phone number"
+          submit: "I want to receive a call"
+
+      new_quote: "New quote"
+
+    errors:
+      route_calculation_failed: "We couldn't calculate the route. Please try again."
+
   sessions:
     new:
       title: "Sign in"
@@ -133,6 +156,15 @@ en:
       submit: "Save password"
       back_to_sign_in: "← Back to sign in"
       back_to_vanquote: "← Back to VanQuote"
+
+    alerts:
+      try_again_later: "Please try again later."
+      passwords_did_not_match: "The passwords did not match."
+      invalid_or_expired_link: "The password reset link is invalid or has expired."
+
+    notices:
+      reset_instructions: "Password reset instructions have been sent if an account with that email address exists."
+      reset_success: "Your password has been reset successfully."
 
   leads:
     index:

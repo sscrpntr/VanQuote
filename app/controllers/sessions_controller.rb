@@ -6,7 +6,7 @@ class SessionsController < ApplicationController
              only: :create,
              with: -> {
                redirect_to new_session_path,
-                           alert: "Try again later."
+                           alert: I18n.t("sessions.alerts.try_again_later")
              }
 
   def new
@@ -19,7 +19,7 @@ class SessionsController < ApplicationController
       redirect_to after_authentication_url
     else
       redirect_to new_session_path,
-                  alert: "Try another email address or password."
+                  alert: I18n.t("sessions.alerts.invalid_credentials")
     end
   end
 

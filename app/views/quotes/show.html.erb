@@ -4,14 +4,26 @@
       <h1 class="quote-logo">VanQuote</h1>
 
       <p class="quote-subtitle">
-        Presupuesto estimado de tu transporte
+        <%= t("quotes.show.subtitle") %>
       </p>
     </header>
 
     <div class="quote-card quote-result-card">
+      <% if flash[:notice] %>
+        <div class="auth-notice">
+          <%= flash[:notice] %>
+        </div>
+      <% end %>
+
+      <% if flash[:alert] %>
+        <div class="auth-alert">
+          <%= flash[:alert] %>
+        </div>
+      <% end %>
+
       <div class="route-summary">
         <div class="route-point">
-          <span class="route-label">Origen</span>
+          <span class="route-label"><%= t("quotes.show.origin") %></span>
           <span class="route-address"><%= @quote.origin %></span>
         </div>
 
@@ -20,13 +32,15 @@
         </div>
 
         <div class="route-point">
-          <span class="route-label">Destino</span>
+          <span class="route-label"><%= t("quotes.show.destination") %></span>
           <span class="route-address"><%= @quote.destination %></span>
         </div>
       </div>
 
       <div class="price-section">
-        <p class="price-label">Precio del transporte</p>
+        <p class="price-label">
+          <%= t("quotes.show.price_label") %>
+        </p>
 
         <p class="price-value">
           <%= number_to_currency(
@@ -37,25 +51,16 @@
         </p>
 
         <p class="price-description">
-          Precio estimado del servicio de transporte.
+          <%= t("quotes.show.price_description") %>
         </p>
       </div>
 
-      <% if notice.present? %>
-        <div class="confirmation-message">
-          <strong><%= notice %></strong>
-        </div>
-
-        <%= link_to "Cambiar método de contacto",
-              quote_path(@quote),
-              class: "secondary-link" %>
-      <% elsif @quote.lead.present? %>
+      <% if @quote.lead.present? %>
         <div class="contact-section">
-          <h2>¿Cómo quieres continuar?</h2>
+          <h2><%= t("quotes.show.contact.title") %></h2>
 
           <p class="contact-description">
-            Elige cómo quieres recibir el presupuesto o ponerte en contacto
-            con nosotros.
+            <%= t("quotes.show.contact.description") %>
           </p>
 
           <div class="contact-options">
@@ -67,7 +72,7 @@
               <%= form.hidden_field :contact_preference,
                     value: "EMAIL_QUOTE" %>
 
-              <%= form.submit "Enviar presupuesto por email",
+              <%= form.submit t("quotes.show.contact.email_quote"),
                     class: "contact-button" %>
             <% end %>
 
@@ -80,7 +85,7 @@
                     value: "PHONE" %>
 
               <%= form.label :phone,
-                    "Número de teléfono",
+                    t("quotes.show.contact.phone.label"),
                     class: "form-label" %>
 
               <%= form.telephone_field :phone,
@@ -88,7 +93,7 @@
                     placeholder: "+41 79 123 45 67",
                     class: "form-input" %>
 
-              <%= form.submit "Quiero recibir una llamada",
+              <%= form.submit t("quotes.show.contact.phone.submit"),
                     class: "contact-button" %>
             <% end %>
 
@@ -100,14 +105,18 @@
               <%= form.hidden_field :contact_preference,
                     value: "EMAIL_CONTACT" %>
 
-              <%= form.submit "Quiero recibir contacto por email",
+              <%= form.submit t("quotes.show.contact.email_contact"),
                     class: "contact-button" %>
             <% end %>
           </div>
+
+          <%= link_to t("quotes.show.contact.change_method"),
+                edit_lead_path(@quote.lead),
+                class: "secondary-link" %>
         </div>
       <% end %>
 
-      <%= link_to "Nueva cotización",
+      <%= link_to t("quotes.show.new_quote"),
             root_path,
             class: "secondary-link new-quote-link" %>
     </div>

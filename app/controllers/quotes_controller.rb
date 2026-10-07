@@ -21,7 +21,7 @@ class QuotesController < ApplicationController
     rescue StandardError => e
       @quote.errors.add(
         :base,
-        "No se ha podido calcular la ruta. Inténtalo de nuevo."
+        I18n.t("quotes.errors.route_calculation_failed")
       )
 
       Rails.logger.error("Google Routes error: #{e.message}")

@@ -45,6 +45,29 @@ ca:
 
       new_quote: "Nova cotització"
 
+    show:
+      subtitle: "Detall del teu pressupost"
+      origin: "Origen"
+      destination: "Destinació"
+      price_label: "Preu del transport"
+      price_description: "Preu estimat del servei de transport."
+
+      contact:
+        title: "Com vols continuar?"
+        description: "Tria com vols rebre el pressupost o posar-te en contacte amb nosaltres."
+        email_quote: "Enviar pressupost per email"
+        email_contact: "Vull rebre contacte per email"
+        change_method: "Canviar mètode de contacte"
+
+        phone:
+          label: "Número de telèfon"
+          submit: "Vull rebre una trucada"
+
+      new_quote: "Nova cotització"
+
+    errors:
+      route_calculation_failed: "No s'ha pogut calcular la ruta. Torna-ho a provar."
+
   sessions:
     new:
       title: "Inicia sessió"
@@ -133,6 +156,15 @@ ca:
       submit: "Desar contrasenya"
       back_to_sign_in: "← Tornar a iniciar sessió"
       back_to_vanquote: "← Tornar a VanQuote"
+
+    alerts:
+      try_again_later: "Torna-ho a provar més tard."
+      passwords_did_not_match: "Les contrasenyes no coincideixen."
+      invalid_or_expired_link: "L'enllaç per restablir la contrasenya no és vàlid o ha caducat."
+
+    notices:
+      reset_instructions: "Hem enviat les instruccions per restablir la contrasenya si existeix un compte amb aquest email."
+      reset_success: "La contrasenya s'ha restablert correctament."
 
   leads:
     index:

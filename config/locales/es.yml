@@ -12,21 +12,16 @@ es:
 
     new:
       subtitle: "Calcula qué precio tiene el transporte de tus sueños"
-
       origin:
         label: "Origen"
         placeholder: "Escribe una dirección de origen"
-
       destination:
         label: "Destino"
         placeholder: "Escribe una dirección de destino"
-
       email:
         label: "Email"
         placeholder: "tu@email.com"
-
       consent: "Acepto recibir este presupuesto y ser contactado por email."
-
       submit: "Calcular presupuesto"
 
     public:
@@ -35,85 +30,89 @@ es:
       destination: "Destino"
       price_label: "Precio del transporte"
       price_description: "Precio estimado del servicio de transporte."
-
       contact:
         title: "¿Cómo quieres continuar?"
         description: "Elige cómo quieres recibir el presupuesto o ponerte en contacto con nosotros."
         email_quote: "Enviar presupuesto por email"
         phone: "Quiero recibir una llamada"
         email_contact: "Quiero recibir contacto por email"
-
       new_quote: "Nueva cotización"
+
+    show:
+      subtitle: "Detalle de tu presupuesto"
+      origin: "Origen"
+      destination: "Destino"
+      price_label: "Precio del transporte"
+      price_description: "Precio estimado del servicio de transporte."
+      contact:
+        title: "¿Cómo quieres continuar?"
+        description: "Elige cómo quieres recibir el presupuesto o ponerte en contacto con nosotros."
+        email_quote: "Enviar presupuesto por email"
+        email_contact: "Quiero recibir contacto por email"
+        change_method: "Cambiar método de contacto"
+        phone:
+          label: "Número de teléfono"
+          submit: "Quiero recibir una llamada"
+      new_quote: "Nueva cotización"
+
+    errors:
+      route_calculation_failed: "No se ha podido calcular la ruta. Inténtalo de nuevo."
 
   sessions:
     new:
       title: "Inicia sesión"
       subtitle: "Accede a tus presupuestos y solicitudes de transporte."
-
       email:
         label: "Email"
         placeholder: "tu@email.com"
-
       password:
         label: "Contraseña"
         placeholder: "Tu contraseña"
-
       forgot_password: "¿Has olvidado tu contraseña?"
       submit: "Iniciar sesión"
-
       or: "o"
-
       google: "Continuar con Google"
       apple: "Continuar con Apple"
       coming_soon: "Próximamente"
-
       no_account: "¿No tienes una cuenta?"
       create_account: "Crear cuenta"
-
       back_to_vanquote: "← Volver a VanQuote"
+
+    alerts:
+      try_again_later: "Inténtalo de nuevo más tarde."
+      invalid_credentials: "Prueba con otro email o contraseña."
 
   registrations:
     new:
       title: "Crea tu cuenta"
       subtitle: "Guarda tus presupuestos y gestiona tus solicitudes de transporte."
-
       errors:
         title: "No hemos podido crear tu cuenta:"
-
       email:
         label: "Email"
         placeholder: "tu@email.com"
-
       password:
         label: "Contraseña"
         placeholder: "Crea una contraseña"
-
       password_confirmation:
         label: "Repite tu contraseña"
         placeholder: "Repite tu contraseña"
-
       submit: "Crear cuenta"
-
       or: "o"
-
       google: "Continuar con Google"
       apple: "Continuar con Apple"
       coming_soon: "Próximamente"
-
       already_have_account: "¿Ya tienes una cuenta?"
       sign_in: "Iniciar sesión"
-
       back_to_vanquote: "← Volver a VanQuote"
 
   passwords:
     new:
       title: "¿Has olvidado tu contraseña?"
       subtitle: "Introduce tu email y te enviaremos las instrucciones para restablecerla."
-
       email:
         label: "Email"
         placeholder: "tu@email.com"
-
       submit: "Enviar instrucciones"
       back_to_sign_in: "← Volver a iniciar sesión"
       back_to_vanquote: "← Volver a VanQuote"
@@ -121,18 +120,24 @@ es:
     edit:
       title: "Actualiza tu contraseña"
       subtitle: "Introduce tu nueva contraseña y confirma el cambio."
-
       password:
         label: "Nueva contraseña"
         placeholder: "Introduce tu nueva contraseña"
-
       password_confirmation:
         label: "Repite tu contraseña"
         placeholder: "Repite tu nueva contraseña"
-
       submit: "Guardar contraseña"
       back_to_sign_in: "← Volver a iniciar sesión"
       back_to_vanquote: "← Volver a VanQuote"
+
+    alerts:
+      try_again_later: "Inténtalo de nuevo más tarde."
+      passwords_did_not_match: "Las contraseñas no coinciden."
+      invalid_or_expired_link: "El enlace para restablecer la contraseña no es válido o ha caducado."
+
+    notices:
+      reset_instructions: "Hemos enviado las instrucciones para restablecer la contraseña si existe una cuenta con ese email."
+      reset_success: "La contraseña se ha restablecido correctamente."
 
   leads:
     index:
@@ -148,19 +153,15 @@ es:
     edit:
       title: "¿Cómo podemos contactarte?"
       subtitle: "Elige cómo quieres que nos pongamos en contacto contigo."
-
       contact_preference:
         label: "Método de contacto"
-
         options:
           email_quote: "Enviar presupuesto por email"
           phone: "Quiero recibir una llamada"
           email_contact: "Quiero recibir contacto por email"
-
       phone:
         label: "Teléfono"
         help: "Obligatorio si eliges recibir una llamada."
-
       submit: "Confirmar"
       back_to_vanquote: "← Volver a VanQuote"
 
