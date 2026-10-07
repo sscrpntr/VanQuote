@@ -6,10 +6,10 @@
 
     <div class="auth-card">
       <div class="auth-header">
-        <h1>¿Cómo podemos contactarte?</h1>
+        <h1><%= t("leads.edit.title") %></h1>
 
         <p>
-          Elige cómo quieres que nos pongamos en contacto contigo.
+          <%= t("leads.edit.subtitle") %>
         </p>
       </div>
 
@@ -25,14 +25,24 @@
             class: "auth-form" do |form| %>
 
         <div class="auth-field">
-          <%= form.label :contact_preference, "Método de contacto" %>
+          <%= form.label :contact_preference,
+                t("leads.edit.contact_preference.label") %>
 
           <%= form.select :contact_preference,
                 options_for_select(
                   [
-                    [ "Enviar presupuesto por email", "EMAIL_QUOTE" ],
-                    [ "Quiero recibir una llamada", "PHONE" ],
-                    [ "Quiero recibir contacto por email", "EMAIL_CONTACT" ]
+                    [
+                      t("leads.edit.contact_preference.options.email_quote"),
+                      "EMAIL_QUOTE"
+                    ],
+                    [
+                      t("leads.edit.contact_preference.options.phone"),
+                      "PHONE"
+                    ],
+                    [
+                      t("leads.edit.contact_preference.options.email_contact"),
+                      "EMAIL_CONTACT"
+                    ]
                   ],
                   @lead.contact_preference
                 ),
@@ -41,7 +51,8 @@
         </div>
 
         <div class="auth-field">
-          <%= form.label :phone, "Teléfono" %>
+          <%= form.label :phone,
+                t("leads.edit.phone.label") %>
 
           <%= form.telephone_field :phone,
                 autofocus: true,
@@ -49,15 +60,16 @@
                 placeholder: "+41 79 123 45 67" %>
 
           <small>
-            Obligatorio si eliges recibir una llamada.
+            <%= t("leads.edit.phone.help") %>
           </small>
         </div>
 
-        <%= form.submit "Confirmar", class: "auth-submit" %>
+        <%= form.submit t("leads.edit.submit"),
+              class: "auth-submit" %>
       <% end %>
 
       <p class="auth-back-link">
-        <%= link_to "← Volver a VanQuote", root_path %>
+        <%= link_to t("leads.edit.back_to_vanquote"), root_path %>
       </p>
     </div>
   </div>

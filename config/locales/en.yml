@@ -134,6 +134,44 @@ en:
       back_to_sign_in: "← Back to sign in"
       back_to_vanquote: "← Back to VanQuote"
 
+  leads:
+    index:
+      title: "Leads"
+      empty: "There are no leads yet."
+      email: "Email"
+      origin: "Origin"
+      destination: "Destination"
+      recommended_price: "Recommended price"
+      status: "Status"
+      date: "Date"
+
+    edit:
+      title: "How can we contact you?"
+      subtitle: "Choose how you would like us to contact you."
+
+      contact_preference:
+        label: "Contact method"
+
+        options:
+          email_quote: "Email me the quote"
+          phone: "I want to receive a call"
+          email_contact: "I want to be contacted by email"
+
+      phone:
+        label: "Phone"
+        help: "Required if you choose to receive a call."
+
+      submit: "Confirm"
+      back_to_vanquote: "← Back to VanQuote"
+
+    confirmations:
+      email_quote: "We'll send you the quote by email."
+      phone: "Perfect. We'll contact you by phone."
+      email_contact: "Perfect. We'll contact you by email."
+
+    errors:
+      invalid_contact_preference: "Invalid contact method."
+
   time:
     formats:
       short: "%d/%m/%Y %H:%M"

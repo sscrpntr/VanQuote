@@ -35,7 +35,8 @@ class LeadsController < ApplicationController
     value = lead_params[:contact_preference]
 
     unless Lead::CONTACT_PREFERENCES.include?(value)
-      raise ActionController::BadRequest, "Invalid contact preference"
+      raise ActionController::BadRequest,
+            I18n.t("leads.errors.invalid_contact_preference")
     end
 
     value
@@ -55,11 +56,11 @@ class LeadsController < ApplicationController
   def confirmation_message(preference)
     case preference
     when "EMAIL_QUOTE"
-      "Te enviaremos el presupuesto por email."
+      I18n.t("leads.confirmations.email_quote")
     when "PHONE"
-      "Perfecto. Nos pondremos en contacto contigo por teléfono."
+      I18n.t("leads.confirmations.phone")
     when "EMAIL_CONTACT"
-      "Perfecto. Nos pondremos en contacto contigo por email."
+      I18n.t("leads.confirmations.email_contact")
     end
   end
 end

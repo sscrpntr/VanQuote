@@ -134,6 +134,44 @@ es:
       back_to_sign_in: "← Volver a iniciar sesión"
       back_to_vanquote: "← Volver a VanQuote"
 
+  leads:
+    index:
+      title: "Leads"
+      empty: "No hay leads todavía."
+      email: "Email"
+      origin: "Origen"
+      destination: "Destino"
+      recommended_price: "Precio recomendado"
+      status: "Estado"
+      date: "Fecha"
+
+    edit:
+      title: "¿Cómo podemos contactarte?"
+      subtitle: "Elige cómo quieres que nos pongamos en contacto contigo."
+
+      contact_preference:
+        label: "Método de contacto"
+
+        options:
+          email_quote: "Enviar presupuesto por email"
+          phone: "Quiero recibir una llamada"
+          email_contact: "Quiero recibir contacto por email"
+
+      phone:
+        label: "Teléfono"
+        help: "Obligatorio si eliges recibir una llamada."
+
+      submit: "Confirmar"
+      back_to_vanquote: "← Volver a VanQuote"
+
+    confirmations:
+      email_quote: "Te enviaremos el presupuesto por email."
+      phone: "Perfecto. Nos pondremos en contacto contigo por teléfono."
+      email_contact: "Perfecto. Nos pondremos en contacto contigo por email."
+
+    errors:
+      invalid_contact_preference: "Método de contacto no válido."
+
   time:
     formats:
       short: "%d/%m/%Y %H:%M"

@@ -134,6 +134,44 @@ ca:
       back_to_sign_in: "← Tornar a iniciar sessió"
       back_to_vanquote: "← Tornar a VanQuote"
 
+  leads:
+    index:
+      title: "Leads"
+      empty: "Encara no hi ha leads."
+      email: "Email"
+      origin: "Origen"
+      destination: "Destinació"
+      recommended_price: "Preu recomanat"
+      status: "Estat"
+      date: "Data"
+
+    edit:
+      title: "Com podem contactar amb tu?"
+      subtitle: "Tria com vols que ens posem en contacte amb tu."
+
+      contact_preference:
+        label: "Mètode de contacte"
+
+        options:
+          email_quote: "Enviar pressupost per email"
+          phone: "Vull rebre una trucada"
+          email_contact: "Vull rebre contacte per email"
+
+      phone:
+        label: "Telèfon"
+        help: "Obligatori si tries rebre una trucada."
+
+      submit: "Confirmar"
+      back_to_vanquote: "← Tornar a VanQuote"
+
+    confirmations:
+      email_quote: "T'enviarem el pressupost per email."
+      phone: "Perfecte. Ens posarem en contacte amb tu per telèfon."
+      email_contact: "Perfecte. Ens posarem en contacte amb tu per email."
+
+    errors:
+      invalid_contact_preference: "Mètode de contacte no vàlid."
+
   time:
     formats:
       short: "%d/%m/%Y %H:%M"

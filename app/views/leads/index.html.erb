@@ -1,18 +1,18 @@
 <div>
-  <h1>Leads</h1>
+  <h1><%= t("leads.index.title") %></h1>
 
   <% if @leads.empty? %>
-    <p>No hay leads todavía.</p>
+    <p><%= t("leads.index.empty") %></p>
   <% else %>
     <table>
       <thead>
         <tr>
-          <th>Email</th>
-          <th>Origen</th>
-          <th>Destino</th>
-          <th>Precio recomendado</th>
-          <th>Estado</th>
-          <th>Fecha</th>
+          <th><%= t("leads.index.email") %></th>
+          <th><%= t("leads.index.origin") %></th>
+          <th><%= t("leads.index.destination") %></th>
+          <th><%= t("leads.index.recommended_price") %></th>
+          <th><%= t("leads.index.status") %></th>
+          <th><%= t("leads.index.date") %></th>
         </tr>
       </thead>
 
