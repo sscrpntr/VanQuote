@@ -44,3 +44,30 @@ en:
         email_contact: "I want to be contacted by email"
 
       new_quote: "New quote"
+
+  sessions:
+    new:
+      title: "Sign in"
+      subtitle: "Access your quotes and transport requests."
+
+      email:
+        label: "Email"
+        placeholder: "you@email.com"
+
+      password:
+        label: "Password"
+        placeholder: "Your password"
+
+      forgot_password: "Forgot your password?"
+      submit: "Sign in"
+
+      or: "or"
+
+      google: "Continue with Google"
+      apple: "Continue with Apple"
+      coming_soon: "Coming soon"
+
+      no_account: "Don't have an account?"
+      create_account: "Create account"
+
+      back_to_vanquote: "← Back to VanQuote"

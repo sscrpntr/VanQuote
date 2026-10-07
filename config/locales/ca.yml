@@ -44,3 +44,30 @@ ca:
         email_contact: "Vull rebre contacte per email"
 
       new_quote: "Nova cotització"
+
+  sessions:
+    new:
+      title: "Inicia sessió"
+      subtitle: "Accedeix als teus pressupostos i sol·licituds de transport."
+
+      email:
+        label: "Email"
+        placeholder: "el.teu@email.com"
+
+      password:
+        label: "Contrasenya"
+        placeholder: "La teva contrasenya"
+
+      forgot_password: "Has oblidat la teva contrasenya?"
+      submit: "Inicia sessió"
+
+      or: "o"
+
+      google: "Continua amb Google"
+      apple: "Continua amb Apple"
+      coming_soon: "Properament"
+
+      no_account: "No tens un compte?"
+      create_account: "Crear compte"
+
+      back_to_vanquote: "← Tornar a VanQuote"

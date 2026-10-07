@@ -6,10 +6,10 @@
 
     <div class="auth-card">
       <div class="auth-header">
-        <h1>Inicia sesión</h1>
+        <h1><%= t("sessions.new.title") %></h1>
 
         <p>
-          Accede a tus presupuestos y solicitudes de transporte.
+          <%= t("sessions.new.subtitle") %>
         </p>
       </div>
 
@@ -27,21 +27,21 @@
 
       <%= form_with url: session_path, class: "auth-form" do |form| %>
         <div class="auth-field">
-          <%= form.label :email_address, "Email" %>
+          <%= form.label :email_address, t("sessions.new.email.label") %>
 
           <%= form.email_field :email_address,
                 required: true,
                 autofocus: true,
                 autocomplete: "username",
-                placeholder: "tu@email.com",
+                placeholder: t("sessions.new.email.placeholder"),
                 value: params[:email_address] %>
         </div>
 
         <div class="auth-field">
           <div class="auth-field-header">
-            <%= form.label :password, "Contraseña" %>
+            <%= form.label :password, t("sessions.new.password.label") %>
 
-            <%= link_to "¿Has olvidado tu contraseña?",
+            <%= link_to t("sessions.new.forgot_password"),
                   new_password_path,
                   class: "auth-forgot-link" %>
           </div>
@@ -49,47 +49,47 @@
           <%= form.password_field :password,
                 required: true,
                 autocomplete: "current-password",
-                placeholder: "Tu contraseña",
+                placeholder: t("sessions.new.password.placeholder"),
                 maxlength: 72 %>
         </div>
 
-        <%= form.submit "Iniciar sesión", class: "auth-submit" %>
+        <%= form.submit t("sessions.new.submit"), class: "auth-submit" %>
       <% end %>
 
       <div class="auth-divider">
-        <span>o</span>
+        <span><%= t("sessions.new.or") %></span>
       </div>
 
       <div class="auth-social-preview">
         <button type="button" class="auth-social-button" disabled>
           <span class="auth-social-icon">G</span>
-          <span>Continuar con Google</span>
+          <span><%= t("sessions.new.google") %></span>
         </button>
 
         <button type="button" class="auth-social-button" disabled>
           <span class="auth-social-icon">●</span>
-          <span>Continuar con Apple</span>
+          <span><%= t("sessions.new.apple") %></span>
         </button>
 
         <p>
-          Próximamente
+          <%= t("sessions.new.coming_soon") %>
         </p>
       </div>
 
       <div class="auth-footer">
-  <span>¿No tienes una cuenta?</span>
+        <span><%= t("sessions.new.no_account") %></span>
 
-  <%= link_to "Crear cuenta",
-        new_registration_path(
-          quote_token: session[:quote_token_after_authenticating],
-          contact_preference: session[:contact_preference_after_authenticating]
-        ),
-        class: "auth-register-link" %>
+        <%= link_to t("sessions.new.create_account"),
+              new_registration_path(
+                quote_token: session[:quote_token_after_authenticating],
+                contact_preference: session[:contact_preference_after_authenticating]
+              ),
+              class: "auth-register-link" %>
       </div>
     </div>
 
     <p class="auth-back-link">
-      <%= link_to "← Volver a VanQuote", root_path %>
+      <%= link_to t("sessions.new.back_to_vanquote"), root_path %>
     </p>
   </div>
 </div>

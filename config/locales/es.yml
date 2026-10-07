@@ -44,3 +44,51 @@ es:
         email_contact: "Quiero recibir contacto por email"
 
       new_quote: "Nueva cotización"
+
+  sessions:
+    new:
+      title: "Inicia sesión"
+      subtitle: "Accede a tus presupuestos y solicitudes de transporte."
+
+      email:
+        label: "Email"
+        placeholder: "tu@email.com"
+
+      password:
+        label: "Contraseña"
+        placeholder: "Tu contraseña"
+
+      forgot_password: "¿Has olvidado tu contraseña?"
+      submit: "Iniciar sesión"
+
+      or: "o"
+
+      google: "Continuar con Google"
+      apple: "Continuar con Apple"
+      coming_soon: "Próximamente"
+
+      no_account: "¿No tienes una cuenta?"
+      create_account: "Crear cuenta"
+
+      back_to_vanquote: "← Volver a VanQuote"
+
+  time:
+    formats:
+      short: "%d/%m/%Y %H:%M"
+
+  errors:
+    messages:
+      blank: "can't be blank"
+      invalid: "is invalid"
+      confirmation: "doesn't match %{attribute}"
+      taken: "has already been taken"
+      inclusion: "is not included in the list"
+
+  activerecord:
+    errors:
+      messages:
+        blank: "can't be blank"
+        invalid: "is invalid"
+        confirmation: "doesn't match %{attribute}"
+        taken: "has already been taken"
+        inclusion: "is not included in the list"

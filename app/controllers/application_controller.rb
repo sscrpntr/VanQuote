@@ -16,7 +16,7 @@ class ApplicationController < ActionController::Base
   def set_locale
     I18n.locale =
       session[:locale].presence_in(available_locales) ||
-      I18n.default_locale
+      :es
   end
 
   def available_locales
