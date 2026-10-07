@@ -4,7 +4,7 @@
       <h1 class="quote-logo">VanQuote</h1>
 
       <p class="quote-subtitle">
-        Calcula qué precio tiene el transporte de tus sueños
+        <%= t("quotes.new.subtitle") %>
       </p>
     </header>
 
@@ -19,11 +19,11 @@
 
         <div class="form-field">
           <%= form.label :origin,
-                "Origen",
+                t("quotes.new.origin.label"),
                 class: "form-label" %>
 
           <%= form.text_field :origin,
-                placeholder: "Escribe una dirección de origen",
+                placeholder: t("quotes.new.origin.placeholder"),
                 class: "form-input",
                 data: {
                   place_autocomplete_target: "originInput"
@@ -32,11 +32,11 @@
 
         <div class="form-field">
           <%= form.label :destination,
-                "Destino",
+                t("quotes.new.destination.label"),
                 class: "form-label" %>
 
           <%= form.text_field :destination,
-                placeholder: "Escribe una dirección de destino",
+                placeholder: t("quotes.new.destination.placeholder"),
                 class: "form-input",
                 data: {
                   place_autocomplete_target: "destinationInput"
@@ -45,13 +45,13 @@
 
         <div class="form-field">
           <%= label_tag :email,
-                "Email",
+                t("quotes.new.email.label"),
                 class: "form-label" %>
 
           <%= email_field_tag :email,
                 params[:email],
                 required: true,
-                placeholder: "tu@email.com",
+                placeholder: t("quotes.new.email.placeholder"),
                 class: "form-input" %>
         </div>
 
@@ -62,10 +62,10 @@
                 required: true %>
 
           <%= label_tag :consent_given,
-                "Acepto recibir este presupuesto y ser contactado por email." %>
+                t("quotes.new.consent") %>
         </div>
 
-        <%= form.submit "Calcular presupuesto",
+        <%= form.submit t("quotes.new.submit"),
               class: "form-submit" %>
       <% end %>
     </div>

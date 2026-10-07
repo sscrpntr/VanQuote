@@ -24,6 +24,25 @@
   </head>
 
   <body>
-    <%= yield %>
+    <header>
+      <nav aria-label="Language selector">
+        <% available_locales.each do |locale| %>
+          <%= form_with url: locale_path,
+                        method: :post,
+                        local: true,
+                        class: "language-selector-form" do %>
+            <%= hidden_field_tag :locale, locale %>
+            <%= hidden_field_tag :return_to, request.path %>
+
+            <%= submit_tag locale.upcase,
+                           class: "language-selector-button #{'active' if current_locale == locale}" %>
+          <% end %>
+        <% end %>
+      </nav>
+    </header>
+
+    <main>
+      <%= yield %>
+    </main>
   </body>
 </html>

@@ -1,0 +1,46 @@
+ca:
+  language:
+    catalan: "CAT"
+    spanish: "ESP"
+    english: "ENG"
+
+  navigation:
+    home: "Inici"
+
+  quotes:
+    title: "Pressupost de transport"
+
+    new:
+      subtitle: "Calcula quin preu té el transport dels teus somnis"
+
+      origin:
+        label: "Origen"
+        placeholder: "Escriu una adreça d'origen"
+
+      destination:
+        label: "Destinació"
+        placeholder: "Escriu una adreça de destinació"
+
+      email:
+        label: "Email"
+        placeholder: "el.teu@email.com"
+
+      consent: "Accepto rebre aquest pressupost i ser contactat per email."
+
+      submit: "Calcular pressupost"
+
+    public:
+      subtitle: "Pressupost estimat del teu transport"
+      origin: "Origen"
+      destination: "Destinació"
+      price_label: "Preu del transport"
+      price_description: "Preu estimat del servei de transport."
+
+      contact:
+        title: "Com vols continuar?"
+        description: "Tria com vols rebre el pressupost o posar-te en contacte amb nosaltres."
+        email_quote: "Enviar pressupost per email"
+        phone: "Vull rebre una trucada"
+        email_contact: "Vull rebre contacte per email"
+
+      new_quote: "Nova cotització"

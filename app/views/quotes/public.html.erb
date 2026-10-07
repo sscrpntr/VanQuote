@@ -4,14 +4,14 @@
       <h1 class="quote-logo">VanQuote</h1>
 
       <p class="quote-subtitle">
-        Presupuesto estimado de tu transporte
+        <%= t("quotes.public.subtitle") %>
       </p>
     </header>
 
     <div class="quote-card quote-result-card">
       <div class="route-summary">
         <div class="route-point">
-          <span class="route-label">Origen</span>
+          <span class="route-label"><%= t("quotes.public.origin") %></span>
           <span class="route-address"><%= @quote.origin %></span>
         </div>
 
@@ -20,13 +20,13 @@
         </div>
 
         <div class="route-point">
-          <span class="route-label">Destino</span>
+          <span class="route-label"><%= t("quotes.public.destination") %></span>
           <span class="route-address"><%= @quote.destination %></span>
         </div>
       </div>
 
       <div class="price-section">
-        <p class="price-label">Precio del transporte</p>
+        <p class="price-label"><%= t("quotes.public.price_label") %></p>
 
         <p class="price-value">
           <%= number_to_currency(
@@ -37,20 +37,19 @@
         </p>
 
         <p class="price-description">
-          Precio estimado del servicio de transporte.
+          <%= t("quotes.public.price_description") %>
         </p>
       </div>
 
       <div class="contact-section">
-        <h2>¿Cómo quieres continuar?</h2>
+        <h2><%= t("quotes.public.contact.title") %></h2>
 
         <p class="contact-description">
-          Elige cómo quieres recibir el presupuesto o ponerte en contacto
-          con nosotros.
+          <%= t("quotes.public.contact.description") %>
         </p>
 
         <div class="contact-options">
-          <%= link_to "Enviar presupuesto por email",
+          <%= link_to t("quotes.public.contact.email_quote"),
                 new_session_path(
                   quote_token: @quote.signed_id(
                     purpose: :public_view,
@@ -60,7 +59,7 @@
                 ),
                 class: "contact-button" %>
 
-          <%= link_to "Quiero recibir una llamada",
+          <%= link_to t("quotes.public.contact.phone"),
                 new_session_path(
                   quote_token: @quote.signed_id(
                     purpose: :public_view,
@@ -70,7 +69,7 @@
                 ),
                 class: "contact-button" %>
 
-          <%= link_to "Quiero recibir contacto por email",
+          <%= link_to t("quotes.public.contact.email_contact"),
                 new_session_path(
                   quote_token: @quote.signed_id(
                     purpose: :public_view,
@@ -82,7 +81,7 @@
         </div>
       </div>
 
-      <%= link_to "Nueva cotización",
+      <%= link_to t("quotes.public.new_quote"),
             root_path,
             class: "secondary-link new-quote-link" %>
     </div>
