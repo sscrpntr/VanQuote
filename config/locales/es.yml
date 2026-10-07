@@ -72,6 +72,39 @@ es:
 
       back_to_vanquote: "← Volver a VanQuote"
 
+  registrations:
+    new:
+      title: "Crea tu cuenta"
+      subtitle: "Guarda tus presupuestos y gestiona tus solicitudes de transporte."
+
+      errors:
+        title: "No hemos podido crear tu cuenta:"
+
+      email:
+        label: "Email"
+        placeholder: "tu@email.com"
+
+      password:
+        label: "Contraseña"
+        placeholder: "Crea una contraseña"
+
+      password_confirmation:
+        label: "Repite tu contraseña"
+        placeholder: "Repite tu contraseña"
+
+      submit: "Crear cuenta"
+
+      or: "o"
+
+      google: "Continuar con Google"
+      apple: "Continuar con Apple"
+      coming_soon: "Próximamente"
+
+      already_have_account: "¿Ya tienes una cuenta?"
+      sign_in: "Iniciar sesión"
+
+      back_to_vanquote: "← Volver a VanQuote"
+
   time:
     formats:
       short: "%d/%m/%Y %H:%M"

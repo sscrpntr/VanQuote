@@ -6,17 +6,17 @@
 
     <div class="auth-card">
       <div class="auth-header">
-        <h1>Crea tu cuenta</h1>
+        <h1><%= t("registrations.new.title") %></h1>
 
         <p>
-          Guarda tus presupuestos y gestiona tus solicitudes de transporte.
+          <%= t("registrations.new.subtitle") %>
         </p>
       </div>
 
       <% if @user.errors.any? %>
         <div class="auth-alert">
           <p>
-            No hemos podido crear tu cuenta:
+            <%= t("registrations.new.errors.title") %>
           </p>
 
           <ul>
@@ -44,69 +44,71 @@
             class: "auth-form" do |form| %>
 
         <div class="auth-field">
-          <%= form.label :email_address, "Email" %>
+          <%= form.label :email_address, t("registrations.new.email.label") %>
 
           <%= form.email_field :email_address,
                 required: true,
                 autofocus: true,
                 autocomplete: "email",
-                placeholder: "tu@email.com" %>
+                placeholder: t("registrations.new.email.placeholder") %>
         </div>
 
         <div class="auth-field">
-          <%= form.label :password, "Contraseña" %>
+          <%= form.label :password, t("registrations.new.password.label") %>
 
           <%= form.password_field :password,
                 required: true,
                 autocomplete: "new-password",
-                placeholder: "Crea una contraseña",
+                placeholder: t("registrations.new.password.placeholder"),
                 maxlength: 72 %>
         </div>
 
         <div class="auth-field">
-          <%= form.label :password_confirmation, "Repite tu contraseña" %>
+          <%= form.label :password_confirmation,
+                t("registrations.new.password_confirmation.label") %>
 
           <%= form.password_field :password_confirmation,
                 required: true,
                 autocomplete: "new-password",
-                placeholder: "Repite tu contraseña",
+                placeholder: t("registrations.new.password_confirmation.placeholder"),
                 maxlength: 72 %>
         </div>
 
-        <%= form.submit "Crear cuenta", class: "auth-submit" %>
+        <%= form.submit t("registrations.new.submit"),
+              class: "auth-submit" %>
       <% end %>
 
       <div class="auth-divider">
-        <span>o</span>
+        <span><%= t("registrations.new.or") %></span>
       </div>
 
       <div class="auth-social-preview">
         <button type="button" class="auth-social-button" disabled>
           <span class="auth-social-icon">G</span>
-          <span>Continuar con Google</span>
+          <span><%= t("registrations.new.google") %></span>
         </button>
 
         <button type="button" class="auth-social-button" disabled>
           <span class="auth-social-icon">●</span>
-          <span>Continuar con Apple</span>
+          <span><%= t("registrations.new.apple") %></span>
         </button>
 
         <p>
-          Próximamente
+          <%= t("registrations.new.coming_soon") %>
         </p>
       </div>
 
       <div class="auth-footer">
-        <span>¿Ya tienes una cuenta?</span>
+        <span><%= t("registrations.new.already_have_account") %></span>
 
-        <%= link_to "Iniciar sesión",
+        <%= link_to t("registrations.new.sign_in"),
               new_session_path,
               class: "auth-register-link" %>
       </div>
     </div>
 
     <p class="auth-back-link">
-      <%= link_to "← Volver a VanQuote", root_path %>
+      <%= link_to t("registrations.new.back_to_vanquote"), root_path %>
     </p>
   </div>
 </div>

@@ -71,3 +71,57 @@ en:
       create_account: "Create account"
 
       back_to_vanquote: "← Back to VanQuote"
+
+  registrations:
+    new:
+      title: "Create your account"
+      subtitle: "Save your quotes and manage your transport requests."
+
+      errors:
+        title: "We couldn't create your account:"
+
+      email:
+        label: "Email"
+        placeholder: "you@email.com"
+
+      password:
+        label: "Password"
+        placeholder: "Create a password"
+
+      password_confirmation:
+        label: "Repeat your password"
+        placeholder: "Repeat your password"
+
+      submit: "Create account"
+
+      or: "or"
+
+      google: "Continue with Google"
+      apple: "Continue with Apple"
+      coming_soon: "Coming soon"
+
+      already_have_account: "Already have an account?"
+      sign_in: "Sign in"
+
+      back_to_vanquote: "← Back to VanQuote"
+
+  time:
+    formats:
+      short: "%d/%m/%Y %H:%M"
+
+  errors:
+    messages:
+      blank: "can't be blank"
+      invalid: "is invalid"
+      confirmation: "doesn't match %{attribute}"
+      taken: "has already been taken"
+      inclusion: "is not included in the list"
+
+  activerecord:
+    errors:
+      messages:
+        blank: "can't be blank"
+        invalid: "is invalid"
+        confirmation: "doesn't match %{attribute}"
+        taken: "has already been taken"
+        inclusion: "is not included in the list"

@@ -71,3 +71,57 @@ ca:
       create_account: "Crear compte"
 
       back_to_vanquote: "← Tornar a VanQuote"
+
+  registrations:
+    new:
+      title: "Crea el teu compte"
+      subtitle: "Desa els teus pressupostos i gestiona les teves sol·licituds de transport."
+
+      errors:
+        title: "No hem pogut crear el teu compte:"
+
+      email:
+        label: "Email"
+        placeholder: "el.teu@email.com"
+
+      password:
+        label: "Contrasenya"
+        placeholder: "Crea una contrasenya"
+
+      password_confirmation:
+        label: "Repeteix la teva contrasenya"
+        placeholder: "Repeteix la teva contrasenya"
+
+      submit: "Crear compte"
+
+      or: "o"
+
+      google: "Continua amb Google"
+      apple: "Continua amb Apple"
+      coming_soon: "Properament"
+
+      already_have_account: "Ja tens un compte?"
+      sign_in: "Inicia sessió"
+
+      back_to_vanquote: "← Tornar a VanQuote"
+
+  time:
+    formats:
+      short: "%d/%m/%Y %H:%M"
+
+  errors:
+    messages:
+      blank: "can't be blank"
+      invalid: "is invalid"
+      confirmation: "doesn't match %{attribute}"
+      taken: "has already been taken"
+      inclusion: "is not included in the list"
+
+  activerecord:
+    errors:
+      messages:
+        blank: "can't be blank"
+        invalid: "is invalid"
+        confirmation: "doesn't match %{attribute}"
+        taken: "has already been taken"
+        inclusion: "is not included in the list"
