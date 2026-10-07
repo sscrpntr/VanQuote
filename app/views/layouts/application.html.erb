@@ -24,10 +24,19 @@
   </head>
 
   <body>
-    <header>
-      <nav aria-label="Language selector">
+    <header class="site-header">
+      <% if Current.user %>
+        <nav class="site-navigation" aria-label="<%= t('navigation.account') %>">
+          <%= link_to "VanQuote", root_path, class: "site-brand" %>
+          <%= link_to t("navigation.my_quotes"), quotes_path, class: "site-navigation-link" %>
+          <%= link_to t("navigation.new_quote"), root_path, class: "site-navigation-link" %>
+        </nav>
+      <% end %>
+
+      <nav class="language-selector" aria-label="Language selector">
         <% available_locales.each_with_index do |locale, index| %>
           <% unless index.zero? %><span class="language-separator" aria-hidden="true">|</span><% end %>
+          <% language_label = { "ca" => "CAT", "es" => "ESP", "en" => "ENG" }.fetch(locale) %>
           <%= form_with url: locale_path,
                         method: :post,
                         local: true,
@@ -35,17 +44,11 @@
             <%= hidden_field_tag :locale, locale %>
             <%= hidden_field_tag :return_to, request.path %>
 
-            <%= submit_tag locale.upcase,
+            <%= submit_tag language_label,
                            class: "language-selector-button #{'active' if current_locale == locale}" %>
           <% end %>
         <% end %>
       </nav>
-      <% if Current.user %>
-        <nav aria-label="<%= t('navigation.account') %>">
-          <%= link_to t("navigation.my_quotes"), quotes_path, class: "action-link" %>
-          <%= link_to t("navigation.new_quote"), root_path, class: "action-link" %>
-        </nav>
-      <% end %>
     </header>
 
     <main>

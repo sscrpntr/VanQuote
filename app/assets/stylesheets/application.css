@@ -21,6 +21,49 @@ body {
   color: #172033;
 }
 
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 28px 36px;
+}
+
+.site-navigation {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px;
+  min-width: 0;
+}
+
+.site-brand {
+  color: #172033;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.site-navigation-link {
+  color: #344054;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.site-navigation-link:hover,
+.site-brand:hover {
+  color: #667085;
+}
+
+.site-brand:focus-visible,
+.site-navigation-link:focus-visible {
+  outline: 3px solid #5274b8;
+  outline-offset: 4px;
+}
+
 button,
 input {
   font: inherit;
@@ -583,6 +626,11 @@ gmp-place-autocomplete {
   display: inline;
 }
 
+.language-selector {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
 .language-separator {
   margin: 0 0.5em;
 }
@@ -593,9 +641,10 @@ gmp-place-autocomplete {
   background: transparent;
   color: #667085;
   font: inherit;
-  font-size: 13px;
+  font-size: 26px;
   font-weight: 600;
   cursor: pointer;
+  transition: color 0.25s ease;
 }
 
 .language-selector-button:hover,
@@ -611,6 +660,30 @@ gmp-place-autocomplete {
 }
 
 @media (max-width: 640px) {
+  .site-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px 20px;
+  }
+
+  .site-navigation {
+    gap: 12px 20px;
+  }
+
+  .site-brand {
+    width: 100%;
+    font-size: 28px;
+  }
+
+  .language-selector {
+    align-self: flex-end;
+  }
+
+  .language-selector-button {
+    font-size: 23px;
+  }
+
   .auth-page {
     padding: 32px 16px;
   }
