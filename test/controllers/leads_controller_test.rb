@@ -39,6 +39,60 @@ class LeadsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "€556.25"
   end
 
+  test "does not show leads from another user's quotes" do
+    quote = quotes(:one)
+    quote.update!(user: User.create!(email_address: "other@example.com", password: "password123"))
+
+    Lead.create!(
+      quote: quote,
+      email: "other-customer@example.com",
+      consent_given: true,
+      consent_at: Time.current,
+      status: "NEW"
+    )
+
+    sign_in
+
+    get leads_path
+
+    assert_response :success
+    assert_not_includes response.body, "other-customer@example.com"
+  end
+
+  test "admin sees leads from all users' quotes" do
+    admin = User.create!(
+      email_address: "admin@example.com",
+      password: "password123",
+      admin: true
+    )
+    quote = quotes(:one)
+    quote.update!(user: @user)
+
+    Lead.create!(
+      quote: quote,
+      email: "customer@example.com",
+      consent_given: true,
+      consent_at: Time.current,
+      status: "NEW"
+    )
+
+    post session_path, params: {
+      email_address: admin.email_address,
+      password: "password123"
+    }
+
+    get leads_path
+
+    assert_response :success
+    assert_includes response.body, "customer@example.com"
+  end
+
+  test "redirects unauthenticated users to login" do
+    get leads_path
+
+    assert_redirected_to new_session_path
+  end
+
   test "shows an empty message when there are no leads" do
     sign_in
 

@@ -1,6 +1,7 @@
 class LeadsController < ApplicationController
   def index
-    @leads = Lead.includes(:quote).order(created_at: :desc)
+    leads = Current.user.admin? ? Lead.all : Lead.joins(:quote).where(quotes: { user_id: Current.user.id })
+    @leads = leads.includes(:quote).order(created_at: :desc)
   end
 
   def edit
