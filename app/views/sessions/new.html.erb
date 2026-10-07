@@ -43,7 +43,7 @@
 
             <%= link_to t("sessions.new.forgot_password"),
                   new_password_path,
-                  class: "auth-forgot-link" %>
+                  class: "action-link auth-forgot-link" %>
           </div>
 
           <%= form.password_field :password,
@@ -53,7 +53,7 @@
                 maxlength: 72 %>
         </div>
 
-        <%= form.submit t("sessions.new.submit"), class: "auth-submit" %>
+        <%= form.submit t("sessions.new.submit"), class: "button-primary auth-submit" %>
       <% end %>
 
       <div class="auth-divider">
@@ -84,12 +84,12 @@
                 quote_token: session[:quote_token_after_authenticating],
                 contact_preference: session[:contact_preference_after_authenticating]
               ),
-              class: "auth-register-link" %>
+              class: "action-link auth-register-link" %>
       </div>
     </div>
 
     <p class="auth-back-link">
-      <%= link_to t("sessions.new.back_to_vanquote"), root_path %>
+      <%= link_to t("sessions.new.back_to_vanquote"), root_path, class: "action-link" %>
     </p>
   </div>
 </div>

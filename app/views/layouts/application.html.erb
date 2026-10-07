@@ -26,7 +26,8 @@
   <body>
     <header>
       <nav aria-label="Language selector">
-        <% available_locales.each do |locale| %>
+        <% available_locales.each_with_index do |locale, index| %>
+          <% unless index.zero? %><span class="language-separator" aria-hidden="true">|</span><% end %>
           <%= form_with url: locale_path,
                         method: :post,
                         local: true,

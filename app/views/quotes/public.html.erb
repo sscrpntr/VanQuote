@@ -57,7 +57,7 @@
                   ),
                   contact_preference: "EMAIL_QUOTE"
                 ),
-                class: "contact-button" %>
+                class: "button-secondary contact-button" %>
 
           <%= link_to t("quotes.public.contact.phone"),
                 new_session_path(
@@ -67,7 +67,7 @@
                   ),
                   contact_preference: "PHONE"
                 ),
-                class: "contact-button" %>
+                class: "button-secondary contact-button" %>
 
           <%= link_to t("quotes.public.contact.email_contact"),
                 new_session_path(
@@ -77,13 +77,13 @@
                   ),
                   contact_preference: "EMAIL_CONTACT"
                 ),
-                class: "contact-button" %>
+                class: "button-secondary contact-button" %>
         </div>
       </div>
 
       <%= link_to t("quotes.public.new_quote"),
             root_path,
-            class: "secondary-link new-quote-link" %>
+            class: "action-link new-quote-link" %>
     </div>
   </div>
 </div>

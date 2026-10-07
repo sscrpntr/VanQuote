@@ -75,7 +75,7 @@
         </div>
 
         <%= form.submit t("registrations.new.submit"),
-              class: "auth-submit" %>
+              class: "button-primary auth-submit" %>
       <% end %>
 
       <div class="auth-divider">
@@ -103,12 +103,12 @@
 
         <%= link_to t("registrations.new.sign_in"),
               new_session_path,
-              class: "auth-register-link" %>
+              class: "action-link auth-register-link" %>
       </div>
     </div>
 
     <p class="auth-back-link">
-      <%= link_to t("registrations.new.back_to_vanquote"), root_path %>
+      <%= link_to t("registrations.new.back_to_vanquote"), root_path, class: "action-link" %>
     </p>
   </div>
 </div>

@@ -73,7 +73,7 @@
                     value: "EMAIL_QUOTE" %>
 
               <%= form.submit t("quotes.show.contact.email_quote"),
-                    class: "contact-button" %>
+                    class: "button-secondary contact-button" %>
             <% end %>
 
             <%= form_with model: @quote.lead,
@@ -94,7 +94,7 @@
                     class: "form-input" %>
 
               <%= form.submit t("quotes.show.contact.phone.submit"),
-                    class: "contact-button" %>
+                    class: "button-secondary contact-button" %>
             <% end %>
 
             <%= form_with model: @quote.lead,
@@ -106,19 +106,19 @@
                     value: "EMAIL_CONTACT" %>
 
               <%= form.submit t("quotes.show.contact.email_contact"),
-                    class: "contact-button" %>
+                    class: "button-secondary contact-button" %>
             <% end %>
           </div>
 
           <%= link_to t("quotes.show.contact.change_method"),
                 edit_lead_path(@quote.lead),
-                class: "secondary-link" %>
+                class: "action-link" %>
         </div>
       <% end %>
 
       <%= link_to t("quotes.show.new_quote"),
             root_path,
-            class: "secondary-link new-quote-link" %>
+            class: "action-link new-quote-link" %>
     </div>
   </div>
 </div>

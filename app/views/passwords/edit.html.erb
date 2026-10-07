@@ -52,17 +52,18 @@
         </div>
 
         <%= form.submit t("passwords.edit.submit"),
-              class: "auth-submit" %>
+              class: "button-primary auth-submit" %>
       <% end %>
 
       <p class="auth-back-link">
         <%= link_to t("passwords.edit.back_to_sign_in"),
-              new_session_path %>
+              new_session_path,
+              class: "action-link" %>
       </p>
     </div>
 
     <p class="auth-back-link">
-      <%= link_to t("passwords.edit.back_to_vanquote"), root_path %>
+      <%= link_to t("passwords.edit.back_to_vanquote"), root_path, class: "action-link" %>
     </p>
   </div>
 </div>

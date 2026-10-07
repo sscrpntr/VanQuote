@@ -141,7 +141,10 @@ gmp-place-autocomplete {
   line-height: 1.5;
 }
 
-.form-submit {
+.button-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   min-height: 50px;
   padding: 0 20px;
@@ -151,18 +154,28 @@ gmp-place-autocomplete {
   color: #ffffff;
   font-size: 16px;
   font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
   cursor: pointer;
   transition:
     background-color 0.15s ease,
     transform 0.15s ease;
 }
 
-.form-submit:hover {
+.button-primary:hover {
   background: #273449;
 }
 
-.form-submit:active {
+.button-primary:active {
   transform: translateY(1px);
+}
+
+.button-primary:focus-visible,
+.button-secondary:focus-visible,
+.action-link:focus-visible,
+.language-selector-button:focus-visible {
+  outline: 3px solid #5274b8;
+  outline-offset: 3px;
 }
 
 .quote-result-card {
@@ -264,28 +277,40 @@ gmp-place-autocomplete {
   gap: 10px;
 }
 
-.contact-button {
+.button-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   min-height: 48px;
   padding: 0 18px;
-  border: 1px solid #172033;
+  border: 1px solid #d0d5dd;
   border-radius: 10px;
-  background: #172033;
-  color: #ffffff;
+  background: #ffffff;
+  color: #172033;
   font-size: 15px;
   font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
   cursor: pointer;
   transition:
     background-color 0.15s ease,
+    border-color 0.15s ease,
     transform 0.15s ease;
 }
 
-.contact-button:hover {
-  background: #273449;
+.button-secondary:hover {
+  border-color: #98a2b3;
+  background: #f8fafc;
 }
 
-.contact-button:active {
+.button-secondary:active {
   transform: translateY(1px);
+}
+
+.contact-button {
+  width: 100%;
 }
 
 .confirmation-message {
@@ -298,7 +323,7 @@ gmp-place-autocomplete {
   line-height: 1.5;
 }
 
-.secondary-link {
+.action-link {
   display: inline-block;
   color: #667085;
   font-size: 14px;
@@ -307,7 +332,7 @@ gmp-place-autocomplete {
   text-decoration: none;
 }
 
-.secondary-link:hover {
+.action-link:hover {
   color: #172033;
   text-decoration: underline;
 }
@@ -453,6 +478,10 @@ gmp-place-autocomplete {
   box-shadow: 0 0 0 3px rgba(52, 64, 84, 0.1);
 }
 
+.auth-forgot-link {
+  font-size: 13px;
+}
+
 .auth-field-header {
   display: flex;
   align-items: center;
@@ -460,40 +489,8 @@ gmp-place-autocomplete {
   gap: 12px;
 }
 
-.auth-forgot-link {
-  color: #667085;
-  font-size: 13px;
-  text-decoration: none;
-}
-
-.auth-forgot-link:hover {
-  color: #172033;
-  text-decoration: underline;
-}
-
 .auth-submit {
-  width: 100%;
-  min-height: 50px;
   margin-top: 4px;
-  padding: 0 20px;
-  border: 0;
-  border-radius: 10px;
-  background: #172033;
-  color: #ffffff;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  transition:
-    background-color 0.15s ease,
-    transform 0.15s ease;
-}
-
-.auth-submit:hover {
-  background: #273449;
-}
-
-.auth-submit:active {
-  transform: translateY(1px);
 }
 
 .auth-divider {
@@ -571,11 +568,10 @@ gmp-place-autocomplete {
 .auth-register-link {
   color: #172033;
   font-weight: 700;
-  text-decoration: none;
 }
 
-.auth-register-link:hover {
-  text-decoration: underline;
+.auth-back-link .action-link {
+  font-size: 14px;
 }
 
 .auth-back-link {
@@ -583,16 +579,35 @@ gmp-place-autocomplete {
   text-align: center;
 }
 
-.auth-back-link a {
-  color: #667085;
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
+.language-selector-form {
+  display: inline;
 }
 
-.auth-back-link a:hover {
+.language-separator {
+  margin: 0 0.5em;
+}
+
+.language-selector-button {
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: #667085;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.language-selector-button:hover,
+.language-selector-button.active {
+  color: #172033;
+}
+
+.language-selector-button:focus-visible {
+  outline: none;
   color: #172033;
   text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 @media (max-width: 640px) {
