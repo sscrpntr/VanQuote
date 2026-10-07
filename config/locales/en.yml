@@ -11,7 +11,7 @@ en:
     title: "Transport quote"
 
     new:
-      subtitle: "Calculate the price of your transport"
+      subtitle: "Calculate the price of transporting your dream"
 
       origin:
         label: "Origin"
@@ -30,7 +30,7 @@ en:
       submit: "Calculate quote"
 
     public:
-      subtitle: "Estimated transport quote"
+      subtitle: "Estimated quote for your transport"
       origin: "Origin"
       destination: "Destination"
       price_label: "Transport price"
@@ -39,8 +39,8 @@ en:
       contact:
         title: "How would you like to continue?"
         description: "Choose how you would like to receive the quote or get in touch with us."
-        email_quote: "Send quote by email"
-        phone: "I want to receive a phone call"
+        email_quote: "Email me the quote"
+        phone: "I want to receive a call"
         email_contact: "I want to be contacted by email"
 
       new_quote: "New quote"
@@ -103,6 +103,35 @@ en:
       already_have_account: "Already have an account?"
       sign_in: "Sign in"
 
+      back_to_vanquote: "← Back to VanQuote"
+
+  passwords:
+    new:
+      title: "Forgot your password?"
+      subtitle: "Enter your email and we'll send you instructions to reset your password."
+
+      email:
+        label: "Email"
+        placeholder: "you@email.com"
+
+      submit: "Email reset instructions"
+      back_to_sign_in: "← Back to sign in"
+      back_to_vanquote: "← Back to VanQuote"
+
+    edit:
+      title: "Update your password"
+      subtitle: "Enter your new password and confirm the change."
+
+      password:
+        label: "New password"
+        placeholder: "Enter your new password"
+
+      password_confirmation:
+        label: "Repeat your password"
+        placeholder: "Repeat your new password"
+
+      submit: "Save password"
+      back_to_sign_in: "← Back to sign in"
       back_to_vanquote: "← Back to VanQuote"
 
   time:

@@ -105,6 +105,35 @@ es:
 
       back_to_vanquote: "← Volver a VanQuote"
 
+  passwords:
+    new:
+      title: "¿Has olvidado tu contraseña?"
+      subtitle: "Introduce tu email y te enviaremos las instrucciones para restablecerla."
+
+      email:
+        label: "Email"
+        placeholder: "tu@email.com"
+
+      submit: "Enviar instrucciones"
+      back_to_sign_in: "← Volver a iniciar sesión"
+      back_to_vanquote: "← Volver a VanQuote"
+
+    edit:
+      title: "Actualiza tu contraseña"
+      subtitle: "Introduce tu nueva contraseña y confirma el cambio."
+
+      password:
+        label: "Nueva contraseña"
+        placeholder: "Introduce tu nueva contraseña"
+
+      password_confirmation:
+        label: "Repite tu contraseña"
+        placeholder: "Repite tu nueva contraseña"
+
+      submit: "Guardar contraseña"
+      back_to_sign_in: "← Volver a iniciar sesión"
+      back_to_vanquote: "← Volver a VanQuote"
+
   time:
     formats:
       short: "%d/%m/%Y %H:%M"

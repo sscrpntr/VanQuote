@@ -23,7 +23,7 @@ ca:
 
       email:
         label: "Email"
-        placeholder: "el.teu@email.com"
+        placeholder: "tu@email.com"
 
       consent: "Accepto rebre aquest pressupost i ser contactat per email."
 
@@ -52,20 +52,20 @@ ca:
 
       email:
         label: "Email"
-        placeholder: "el.teu@email.com"
+        placeholder: "tu@email.com"
 
       password:
         label: "Contrasenya"
         placeholder: "La teva contrasenya"
 
-      forgot_password: "Has oblidat la teva contrasenya?"
-      submit: "Inicia sessió"
+      forgot_password: "Has oblidat la contrasenya?"
+      submit: "Iniciar sessió"
 
       or: "o"
 
       google: "Continua amb Google"
       apple: "Continua amb Apple"
-      coming_soon: "Properament"
+      coming_soon: "Pròximament"
 
       no_account: "No tens un compte?"
       create_account: "Crear compte"
@@ -82,7 +82,7 @@ ca:
 
       email:
         label: "Email"
-        placeholder: "el.teu@email.com"
+        placeholder: "tu@email.com"
 
       password:
         label: "Contrasenya"
@@ -98,11 +98,40 @@ ca:
 
       google: "Continua amb Google"
       apple: "Continua amb Apple"
-      coming_soon: "Properament"
+      coming_soon: "Pròximament"
 
       already_have_account: "Ja tens un compte?"
-      sign_in: "Inicia sessió"
+      sign_in: "Iniciar sessió"
 
+      back_to_vanquote: "← Tornar a VanQuote"
+
+  passwords:
+    new:
+      title: "Has oblidat la contrasenya?"
+      subtitle: "Introdueix el teu email i t'enviarem les instruccions per restablir-la."
+
+      email:
+        label: "Email"
+        placeholder: "tu@email.com"
+
+      submit: "Enviar instruccions"
+      back_to_sign_in: "← Tornar a iniciar sessió"
+      back_to_vanquote: "← Tornar a VanQuote"
+
+    edit:
+      title: "Actualitza la teva contrasenya"
+      subtitle: "Introdueix la teva nova contrasenya i confirma el canvi."
+
+      password:
+        label: "Nova contrasenya"
+        placeholder: "Introdueix la teva nova contrasenya"
+
+      password_confirmation:
+        label: "Repeteix la teva contrasenya"
+        placeholder: "Repeteix la teva nova contrasenya"
+
+      submit: "Desar contrasenya"
+      back_to_sign_in: "← Tornar a iniciar sessió"
       back_to_vanquote: "← Tornar a VanQuote"
 
   time:
