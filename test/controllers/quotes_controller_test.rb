@@ -63,6 +63,66 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_nil quote.user_id
   end
 
+  test "associates a quote created by an authenticated user with that user" do
+    authenticate_as(@user)
+    assert_response :redirect
+
+    assert_difference("Quote.count", 1) do
+      post quotes_path, params: valid_quote_params
+    end
+
+    assert_equal @user.id, Quote.last.user_id
+  end
+
+  test "attaches an anonymous quote to the user after authentication with its token" do
+    post quotes_path, params: valid_quote_params
+    quote = Quote.last
+    token = URI.decode_www_form(URI(response.location).query).to_h.fetch("token")
+
+    get new_session_path, params: { quote_token: token }
+    post session_path, params: {
+      email_address: @user.email_address,
+      password: "password123"
+    }
+
+    assert_equal @user.id, quote.reload.user_id
+  end
+
+  test "does not reassign a quote that belongs to another user" do
+    owner = User.create!(email_address: "owner@example.com", password: "password123")
+    quote = Quote.create!(
+      user: owner,
+      origin: "Barcelona",
+      destination: "Madrid",
+      distance_km: 620,
+      estimated_duration_minutes: 360,
+      fuel_cost: 74.4,
+      toll_cost: 0,
+      vehicle_cost: 62,
+      driver_cost: 150,
+      loading_cost: 20,
+      waiting_cost: 0,
+      other_cost: 10,
+      margin: 25,
+      total_cost: 336.4,
+      recommended_price: 420.5
+    )
+    quote.create_lead!(
+      email: "customer@example.com",
+      consent_given: true,
+      consent_at: Time.current,
+      status: "NEW"
+    )
+
+    get new_session_path, params: { quote_token: public_token_for(quote) }
+    post session_path, params: {
+      email_address: @user.email_address,
+      password: "password123"
+    }
+
+    assert_equal owner.id, quote.reload.user_id
+  end
+
   test "creates a lead when creating a quote" do
     assert_difference("Lead.count", 1) do
       post quotes_path, params: {
@@ -278,5 +338,26 @@ assert_response :success
     lead = Lead.last
 
     assert_equal "customer@example.com", lead.email
+  end
+
+  private
+
+  def authenticate_as(user)
+    post session_path, params: {
+      email_address: user.email_address,
+      password: "password123"
+    }
+  end
+
+  def valid_quote_params
+    {
+      quote: { origin: "Barcelona", destination: "Madrid" },
+      email: "customer@example.com",
+      consent_given: "1"
+    }
+  end
+
+  def public_token_for(quote)
+    quote.signed_id(purpose: :public_view, expires_in: 24.hours)
   end
 end

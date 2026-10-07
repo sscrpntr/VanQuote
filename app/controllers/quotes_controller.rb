@@ -8,7 +8,9 @@ class QuotesController < ApplicationController
   end
 
   def create
+    authenticated?
     @quote = Quote.new(quote_params)
+    @quote.user = Current.user if Current.user
 
     begin
       route = routes_service_class.new(
