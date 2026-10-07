@@ -63,6 +63,44 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_nil quote.user_id
   end
 
+  test "authenticated user sees only their quotes with a link to each detail" do
+    own_quote = create_quote_for(@user, origin: "Barcelona", destination: "Madrid")
+    other_user = User.create!(email_address: "other@example.com", password: "password123")
+    create_quote_for(other_user, origin: "Paris", destination: "Lyon")
+
+    authenticate_as(@user)
+    get quotes_path
+
+    assert_response :success
+    assert_includes response.body, "Barcelona"
+    assert_includes response.body, quote_path(own_quote)
+    assert_not_includes response.body, "Paris"
+  end
+
+  test "shows an empty state when the user has no quotes" do
+    authenticate_as(@user)
+
+    get quotes_path
+
+    assert_response :success
+    assert_includes response.body, I18n.t("quotes.index.empty")
+  end
+
+  test "redirects unauthenticated users from quotes to login" do
+    get quotes_path
+
+    assert_redirected_to new_session_path
+  end
+
+  test "admin can access quotes index" do
+    admin = User.create!(email_address: "admin@example.com", password: "password123", admin: true)
+    authenticate_as(admin)
+
+    get quotes_path
+
+    assert_response :success
+  end
+
   test "associates a quote created by an authenticated user with that user" do
     authenticate_as(@user)
     assert_response :redirect
@@ -355,6 +393,26 @@ assert_response :success
       email: "customer@example.com",
       consent_given: "1"
     }
+  end
+
+  def create_quote_for(user, origin:, destination:)
+    Quote.create!(
+      user: user,
+      origin: origin,
+      destination: destination,
+      distance_km: 620,
+      estimated_duration_minutes: 360,
+      fuel_cost: 74.4,
+      toll_cost: 0,
+      vehicle_cost: 62,
+      driver_cost: 150,
+      loading_cost: 20,
+      waiting_cost: 0,
+      other_cost: 10,
+      margin: 25,
+      total_cost: 316.4,
+      recommended_price: 395.5
+    )
   end
 
   def public_token_for(quote)

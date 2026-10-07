@@ -7,7 +7,7 @@ Rails.application.routes.draw do
 
   post "locale", to: "locales#update"
 
-  resources :quotes, only: [ :create, :show ] do
+  resources :quotes, only: [ :index, :create, :show ] do
     get :public, on: :collection
   end
 

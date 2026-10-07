@@ -6,9 +6,22 @@ ca:
 
   navigation:
     home: "Inici"
+    account: "Navegació del compte"
+    my_quotes: "Els meus pressupostos"
+    new_quote: "Nova cotització"
 
   quotes:
     title: "Pressupost de transport"
+    date_format: "%d/%m/%Y"
+
+    index:
+      title: "Els meus pressupostos"
+      empty: "Encara no tens cap pressupost."
+      origin: "Origen"
+      destination: "Destinació"
+      date: "Data"
+      recommended_price: "Preu recomanat"
+      details: "Veure detall"
 
     new:
       subtitle: "Calcula quin preu té el transport dels teus somnis"

@@ -6,9 +6,22 @@ en:
 
   navigation:
     home: "Home"
+    account: "Account navigation"
+    my_quotes: "My quotes"
+    new_quote: "New quote"
 
   quotes:
     title: "Transport quote"
+    date_format: "%b %-d, %Y"
+
+    index:
+      title: "My quotes"
+      empty: "You don't have any quotes yet."
+      origin: "Origin"
+      destination: "Destination"
+      date: "Date"
+      recommended_price: "Recommended price"
+      details: "View details"
 
     new:
       subtitle: "Calculate the price of transporting your dream"

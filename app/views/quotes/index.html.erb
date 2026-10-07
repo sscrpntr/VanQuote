@@ -1,0 +1,37 @@
+<div class="quote-page">
+  <div class="quote-container">
+    <header class="quote-header">
+      <h1 class="quote-logo"><%= t("quotes.index.title") %></h1>
+    </header>
+
+    <div class="quote-card quote-result-card">
+      <% if @quotes.empty? %>
+        <p><%= t("quotes.index.empty") %></p>
+      <% else %>
+        <% @quotes.each do |quote| %>
+          <section class="route-summary">
+            <div class="route-point">
+              <span class="route-label"><%= t("quotes.index.origin") %></span>
+              <span class="route-address"><%= quote.origin %></span>
+            </div>
+            <div class="route-point">
+              <span class="route-label"><%= t("quotes.index.destination") %></span>
+              <span class="route-address"><%= quote.destination %></span>
+            </div>
+            <div class="route-point">
+              <span class="route-label"><%= t("quotes.index.date") %></span>
+              <span class="route-address"><%= l(quote.created_at.to_date, format: t("quotes.date_format")) %></span>
+            </div>
+            <div class="route-point">
+              <span class="route-label"><%= t("quotes.index.recommended_price") %></span>
+              <span class="route-address"><%= number_to_currency(quote.recommended_price, unit: "€", format: "%n %u") %></span>
+            </div>
+            <%= link_to t("quotes.index.details"), quote_path(quote), class: "button-secondary" %>
+          </section>
+        <% end %>
+      <% end %>
+
+      <%= link_to t("navigation.new_quote"), root_path, class: "button-primary" %>
+    </div>
+  </div>
+</div>

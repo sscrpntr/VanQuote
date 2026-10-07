@@ -3,6 +3,10 @@ class QuotesController < ApplicationController
 
   allow_unauthenticated_access only: %i[new create public]
 
+  def index
+    @quotes = Current.user.quotes.order(created_at: :desc)
+  end
+
   def new
     @quote = Quote.new
   end

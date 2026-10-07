@@ -6,9 +6,22 @@ es:
 
   navigation:
     home: "Inicio"
+    account: "Navegación de la cuenta"
+    my_quotes: "Mis presupuestos"
+    new_quote: "Nueva cotización"
 
   quotes:
     title: "Presupuesto de transporte"
+    date_format: "%d/%m/%Y"
+
+    index:
+      title: "Mis presupuestos"
+      empty: "Todavía no tienes presupuestos."
+      origin: "Origen"
+      destination: "Destino"
+      date: "Fecha"
+      recommended_price: "Precio recomendado"
+      details: "Ver detalle"
 
     new:
       subtitle: "Calcula qué precio tiene el transporte de tus sueños"

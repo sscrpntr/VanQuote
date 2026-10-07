@@ -40,6 +40,12 @@
           <% end %>
         <% end %>
       </nav>
+      <% if Current.user %>
+        <nav aria-label="<%= t('navigation.account') %>">
+          <%= link_to t("navigation.my_quotes"), quotes_path, class: "action-link" %>
+          <%= link_to t("navigation.new_quote"), root_path, class: "action-link" %>
+        </nav>
+      <% end %>
     </header>
 
     <main>
