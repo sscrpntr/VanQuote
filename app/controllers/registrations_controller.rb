@@ -11,7 +11,7 @@ class RegistrationsController < ApplicationController
 
     if @user.save
       start_new_session_for(@user)
-      redirect_to after_authentication_url
+      redirect_to after_authentication_url(default_url: root_url)
     else
       render :new, status: :unprocessable_entity
     end

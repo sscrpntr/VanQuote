@@ -25,7 +25,24 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :redirect
-    assert_equal root_path, URI.parse(response.location).path
+    assert_equal quotes_path, URI.parse(response.location).path
+  end
+
+  test "login from the landing page still opens the session form and then quotes" do
+    get root_path
+
+    assert_response :success
+    assert_select "a[href=?]", new_session_path, text: "Iniciar sesión"
+
+    get new_session_path
+    assert_response :success
+
+    post session_path, params: {
+      email_address: "user@example.com",
+      password: "password123"
+    }
+
+    assert_redirected_to quotes_path
   end
 
   test "rejects invalid credentials" do
@@ -41,9 +58,10 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "preserves return location after authentication" do
-    get quote_path(create_quote_for(@user))
+    quote = create_quote_for(@user)
+    get quote_path(quote)
 
-    assert_response :redirect
+    assert_redirected_to new_session_path
     assert_equal new_session_path, URI.parse(response.location).path
 
     post session_path, params: {
@@ -52,6 +70,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     }
 
     assert_response :redirect
+    assert_redirected_to quote_path(quote)
   end
 
   test "attaches the public quote to the user after authentication" do

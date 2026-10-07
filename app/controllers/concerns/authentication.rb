@@ -35,11 +35,14 @@ module Authentication
       redirect_to new_session_path
     end
 
-    def after_authentication_url
+    def after_authentication_url(default_url:)
+      return_to = session.delete(:return_to_after_authenticating)
+      safe_return_to = url_from(return_to) if return_to.present?
       result = attach_public_quote_to_current_user
+      return safe_return_to if safe_return_to
 
       unless result
-        return session.delete(:return_to_after_authenticating) || root_url
+        return default_url
       end
 
       quote = result[:quote]
