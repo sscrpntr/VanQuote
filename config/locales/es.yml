@@ -36,6 +36,12 @@ es:
         placeholder: "tu@email.com"
       consent: "Acepto recibir este presupuesto y ser contactado por email."
       submit: "Calcular presupuesto"
+      account_access:
+        title: "Acceso a la cuenta"
+        sign_in_prompt: "¿Ya tienes una cuenta?"
+        sign_in: "Iniciar sesión"
+        register_prompt: "¿Todavía no tienes una cuenta?"
+        register: "Crear una cuenta"
 
     public:
       subtitle: "Presupuesto estimado de tu transporte"

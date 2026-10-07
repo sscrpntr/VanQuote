@@ -42,6 +42,13 @@ ca:
 
       submit: "Calcular pressupost"
 
+      account_access:
+        title: "Accés al compte"
+        sign_in_prompt: "Ja tens un compte?"
+        sign_in: "Inicia sessió"
+        register_prompt: "Encara no tens un compte?"
+        register: "Crea un compte"
+
     public:
       subtitle: "Pressupost estimat del teu transport"
       origin: "Origen"

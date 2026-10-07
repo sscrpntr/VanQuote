@@ -1,4 +1,5 @@
 class LocalesController < ApplicationController
+  allow_unauthenticated_access
   skip_before_action :set_locale
 
   def update

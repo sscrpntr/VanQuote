@@ -29,6 +29,69 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     QuotesController.routes_service_class = @original_routes_service_class
   end
 
+  test "home shows account links outside the quote form" do
+    get root_path
+
+    assert_response :success
+    assert_select "a[href=?]", new_session_path, text: "Iniciar sesión"
+    assert_select "a[href=?]", new_registration_path, text: "Crear una cuenta"
+    assert_select ".quote-card form" do
+      assert_select "a[href=?]", new_session_path, count: 0
+      assert_select "a[href=?]", new_registration_path, count: 0
+    end
+  end
+
+  test "home account links use the selected locale" do
+    {
+      "ca" => {
+        sign_in_prompt: "Ja tens un compte?",
+        sign_in: "Inicia sessió",
+        register_prompt: "Encara no tens un compte?",
+        register: "Crea un compte"
+      },
+      "es" => {
+        sign_in_prompt: "¿Ya tienes una cuenta?",
+        sign_in: "Iniciar sesión",
+        register_prompt: "¿Todavía no tienes una cuenta?",
+        register: "Crear una cuenta"
+      },
+      "en" => {
+        sign_in_prompt: "Already have an account?",
+        sign_in: "Sign in",
+        register_prompt: "Don't have an account yet?",
+        register: "Create an account"
+      }
+    }.each do |locale, translations|
+      post locale_path, params: { locale: locale, return_to: root_path }
+      assert_redirected_to root_path
+
+      get root_path
+
+      assert_response :success
+      assert_select "header.site-header nav.language-selector", count: 1 do
+        assert_select "input.language-selector-button", count: 3
+      end
+      assert_select ".quote-account-option p", text: translations[:sign_in_prompt]
+      assert_select ".quote-account-option a[href=?]", new_session_path, text: translations[:sign_in]
+      assert_select ".quote-account-option p", text: translations[:register_prompt]
+      assert_select ".quote-account-option a[href=?]", new_registration_path, text: translations[:register]
+    end
+  end
+
+  test "authenticated user can visit home and create a quote" do
+    authenticate_as(@user)
+
+    get root_path
+    assert_response :success
+    assert_select "form.quote-form"
+
+    assert_difference("Quote.count", 1) do
+      post quotes_path, params: valid_quote_params
+    end
+
+    assert_equal @user.id, Quote.last.user_id
+  end
+
   test "creates a quote" do
     assert_difference("Quote.count", 1) do
       post quotes_path, params: {

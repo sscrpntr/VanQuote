@@ -42,6 +42,13 @@ en:
 
       submit: "Calculate quote"
 
+      account_access:
+        title: "Account access"
+        sign_in_prompt: "Already have an account?"
+        sign_in: "Sign in"
+        register_prompt: "Don't have an account yet?"
+        register: "Create an account"
+
     public:
       subtitle: "Estimated quote for your transport"
       origin: "Origin"

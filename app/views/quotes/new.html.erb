@@ -69,5 +69,17 @@
               class: "button-primary" %>
       <% end %>
     </div>
+
+    <section class="quote-account-access" aria-label="<%= t('quotes.new.account_access.title') %>">
+      <div class="quote-account-option">
+        <p><%= t("quotes.new.account_access.sign_in_prompt") %></p>
+        <%= link_to t("quotes.new.account_access.sign_in"), new_session_path, class: "button-secondary" %>
+      </div>
+
+      <div class="quote-account-option">
+        <p><%= t("quotes.new.account_access.register_prompt") %></p>
+        <%= link_to t("quotes.new.account_access.register"), new_registration_path, class: "button-secondary" %>
+      </div>
+    </section>
   </div>
 </div>

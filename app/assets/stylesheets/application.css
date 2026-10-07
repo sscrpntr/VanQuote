@@ -106,6 +106,19 @@ input {
   box-shadow: 0 8px 30px rgba(16, 24, 40, 0.06);
 }
 
+.quote-account-access {
+  display: grid;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.quote-account-option p {
+  margin: 0 0 8px;
+  color: #667085;
+  font-size: 14px;
+  text-align: center;
+}
+
 .quote-form {
   display: flex;
   flex-direction: column;
@@ -628,6 +641,7 @@ gmp-place-autocomplete {
 
 .language-selector {
   flex: 0 0 auto;
+  margin-left: auto;
   white-space: nowrap;
 }
 
