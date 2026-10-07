@@ -102,7 +102,10 @@
         <span><%= t("registrations.new.already_have_account") %></span>
 
         <%= link_to t("registrations.new.sign_in"),
-              new_session_path,
+              new_session_path(
+                quote_token: session[:quote_token_after_authenticating],
+                contact_preference: session[:contact_preference_after_authenticating]
+              ),
               class: "action-link auth-register-link" %>
       </div>
     </div>

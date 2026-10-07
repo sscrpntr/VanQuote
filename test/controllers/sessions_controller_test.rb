@@ -98,6 +98,33 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal public_quotes_path, URI.parse(response.location).path
   end
 
+  test "EMAIL_QUOTE login authenticates the user and retains the selected quote context" do
+    quote = create_public_quote
+
+    get new_session_path, params: {
+      quote_token: public_token_for(quote),
+      contact_preference: "EMAIL_QUOTE"
+    }
+
+    assert_response :success
+
+    assert_difference "Session.count", 1 do
+      post session_path, params: {
+        email_address: @user.email_address,
+        password: "password123"
+      }
+    end
+
+    assert_response :redirect
+    assert_equal @user.id, Session.order(:created_at).last.user_id
+    assert_equal @user.id, quote.reload.user_id
+    assert_equal "EMAIL_QUOTE", quote.lead.reload.contact_preference
+    assert_equal public_quotes_path, URI.parse(response.location).path
+
+    get quote_path(quote)
+    assert_response :success
+  end
+
   test "EMAIL_CONTACT preference is stored after authentication" do
     quote = create_public_quote
 
@@ -146,6 +173,8 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "invalid public token does not attach a quote" do
+    quote = create_public_quote
+
     get new_session_path, params: {
       quote_token: "invalid-token",
       contact_preference: "EMAIL_QUOTE"
@@ -157,6 +186,100 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     }
 
     assert_response :redirect
+    assert_not_equal public_quotes_path, URI.parse(response.location).path
+    assert_nil quote.reload.user_id
+    assert_nil quote.lead.reload.contact_preference
+  end
+
+  test "expired public token does not attach or expose its quote" do
+    quote = create_public_quote
+    token = quote.signed_id(purpose: :public_view, expires_in: -1.second)
+
+    get new_session_path, params: {
+      quote_token: token,
+      contact_preference: "EMAIL_QUOTE"
+    }
+    post session_path, params: {
+      email_address: @user.email_address,
+      password: "password123"
+    }
+
+    assert_response :redirect
+    assert_not_equal public_quotes_path, URI.parse(response.location).path
+    assert_nil quote.reload.user_id
+    assert_nil quote.lead.reload.contact_preference
+  end
+
+  test "invalid login keeps the quote context available for another attempt" do
+    quote = create_public_quote
+    token = public_token_for(quote)
+
+    get new_session_path, params: {
+      quote_token: token,
+      contact_preference: "EMAIL_QUOTE"
+    }
+    post session_path, params: {
+      email_address: @user.email_address,
+      password: "wrong-password"
+    }
+
+    assert_redirected_to new_session_path
+    get new_session_path
+
+    assert_select "a[href*='quote_token=#{token}']"
+    assert_select "a[href*='contact_preference=EMAIL_QUOTE']"
+
+    post session_path, params: {
+      email_address: @user.email_address,
+      password: "password123"
+    }
+
+    assert_response :redirect
+    assert_equal public_quotes_path, URI.parse(response.location).path
+    assert_equal @user.id, quote.reload.user_id
+    assert_equal "EMAIL_QUOTE", quote.lead.reload.contact_preference
+  end
+
+  test "an authenticated user is not asked to sign in again for an EMAIL_QUOTE flow" do
+    quote = create_public_quote
+    authenticate_as(@user)
+    existing_session = Session.find_by!(user_id: @user.id)
+
+    get new_session_path, params: {
+      quote_token: public_token_for(quote),
+      contact_preference: "EMAIL_QUOTE"
+    }
+
+    assert_response :redirect
+    assert_equal public_quotes_path, URI.parse(response.location).path
+    assert_equal existing_session.id, Session.find_by!(user_id: @user.id).id
+    assert_equal @user.id, quote.reload.user_id
+    assert_equal "EMAIL_QUOTE", quote.lead.reload.contact_preference
+
+    follow_redirect!
+    assert_response :success
+    assert_select ".quote-card.quote-result-card"
+    assert_select ".route-address", "Barcelona"
+    assert_select ".route-address", "Madrid"
+    assert_select "form.auth-form", false
+  end
+
+  test "EMAIL_QUOTE authentication cannot redirect to an external return target" do
+    quote = create_public_quote
+
+    get new_session_path, params: {
+      quote_token: public_token_for(quote),
+      contact_preference: "EMAIL_QUOTE",
+      return_to_after_authenticating: "https://evil.example.com"
+    }
+    post session_path, params: {
+      email_address: @user.email_address,
+      password: "password123"
+    }
+
+    assert_response :redirect
+    assert_equal request.host, URI.parse(response.location).host
+    assert_equal public_quotes_path, URI.parse(response.location).path
   end
 
   test "cannot modify another user's quote with a public token" do
@@ -226,5 +349,12 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
 
   def create_public_quote
     create_quote_for(nil)
+  end
+
+  def authenticate_as(user)
+    post session_path, params: {
+      email_address: user.email_address,
+      password: "password123"
+    }
   end
 end
