@@ -1,47 +1,50 @@
 <main class="admin-page">
-  <h1>VanQuote · Administración</h1>
+  <h1><%= t("admin.title") %></h1>
 
-  <section class="admin-metrics" aria-label="Resumen">
+  <section class="admin-metrics" aria-label="<%= t('admin.summary') %>">
     <article class="admin-metric">
-      <h2>Total de leads</h2>
+      <h2><%= t("admin.total_leads") %></h2>
       <p><%= @total_leads %></p>
     </article>
     <article class="admin-metric">
-      <h2>Total de peticiones</h2>
+      <h2><%= t("admin.total_requests") %></h2>
       <p><%= @total_requests %></p>
     </article>
   </section>
 
   <section class="admin-leads">
-    <h2>Leads con consentimiento</h2>
+    <h2><%= t("admin.consented_leads") %></h2>
     <% if @consented_leads.empty? %>
-      <p>No hay leads con consentimiento.</p>
+      <p><%= t("admin.empty") %></p>
     <% else %>
       <div class="admin-table-wrapper">
         <table>
           <thead>
             <tr>
-              <th>Fecha</th>
-              <th>Email</th>
-              <th>Teléfono</th>
-              <th>Preferencia de contacto</th>
-              <th>Origen</th>
-              <th>Destino</th>
-              <th>Precio recomendado</th>
-              <th>Estado</th>
+              <th><%= t("admin.columns.date") %></th>
+              <th><%= t("admin.columns.customer") %></th>
+              <th><%= t("admin.columns.email") %></th>
+              <th><%= t("admin.columns.phone") %></th>
+              <th><%= t("admin.columns.contact_preference") %></th>
+              <th><%= t("admin.columns.origin") %></th>
+              <th><%= t("admin.columns.destination") %></th>
+              <th><%= t("admin.columns.recommended_price") %></th>
+              <th><%= t("admin.columns.status") %></th>
             </tr>
           </thead>
           <tbody>
             <% @consented_leads.each do |lead| %>
               <tr>
                 <td><%= l(lead.created_at, format: :short) %></td>
+                <% customer = [lead.quote.user&.first_name, lead.quote.user&.last_name].filter_map(&:presence).join(" ") %>
+                <td><%= customer.presence || t("admin.unknown_customer") %></td>
                 <td><%= lead.email %></td>
-                <td><%= lead.phone.presence || "—" %></td>
-                <td><%= lead.contact_preference.presence || "—" %></td>
+                <td><%= lead.phone.presence || t("admin.not_available") %></td>
+                <td><%= lead.contact_preference.present? ? t("admin.contact_preferences.#{lead.contact_preference.downcase}", default: lead.contact_preference) : t("admin.not_available") %></td>
                 <td><%= lead.quote.origin %></td>
                 <td><%= lead.quote.destination %></td>
                 <td><%= number_to_currency(lead.quote.recommended_price, unit: "€") %></td>
-                <td><%= lead.status %></td>
+                <td><%= t("admin.statuses.#{lead.status.downcase}", default: lead.status) %></td>
               </tr>
             <% end %>
           </tbody>

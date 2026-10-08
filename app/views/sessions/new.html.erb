@@ -60,21 +60,7 @@
         <span><%= t("sessions.new.or") %></span>
       </div>
 
-      <div class="auth-social-preview">
-        <button type="button" class="auth-social-button" disabled>
-          <span class="auth-social-icon">G</span>
-          <span><%= t("sessions.new.google") %></span>
-        </button>
-
-        <button type="button" class="auth-social-button" disabled>
-          <span class="auth-social-icon">●</span>
-          <span><%= t("sessions.new.apple") %></span>
-        </button>
-
-        <p>
-          <%= t("sessions.new.coming_soon") %>
-        </p>
-      </div>
+      <%= render "shared/social_authentication", translation_scope: "sessions.new" %>
 
       <div class="auth-footer">
         <span><%= t("sessions.new.no_account") %></span>

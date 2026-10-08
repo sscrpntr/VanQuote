@@ -4,12 +4,101 @@ en:
     spanish: "ESP"
     english: "ENG"
 
+  seo:
+    landing:
+      title: "VanQuote — Calculate your transport quote"
+      description: "Find out how much it costs to transport your things, quickly and easily."
+      image_alt: "VanQuote, quick and simple transport quotes"
+
   navigation:
     home: "Home"
     account: "Account navigation"
     my_quotes: "My quotes"
     new_quote: "New quote"
     profile: "My profile"
+    logout: "Sign out"
+
+  dashboard:
+    greeting: "Hello %{name}, what would you like to do today?"
+    fallback_name: "there"
+    my_quotes: "Go to my quotes"
+    new_quote: "New quote"
+    profile: "Go to my profile"
+    logout: "Sign out"
+
+  landing:
+    headline: "How much does it cost to move your dreams?"
+    subtitle: "Calculate your quote in just a few seconds."
+    form_title: "Your quote"
+    assurance: "No commitment · Fast · Transparent"
+    benefits:
+      fast: "Fast"
+      route: "Based on your route"
+      tailored: "Tailored to your needs"
+    how:
+      title: "How does it work?"
+      step_one: "Enter your route"
+      step_two: "Tell us what you need"
+      step_three: "Get your quote"
+    use_cases:
+      title: "What do you need VanQuote for?"
+      moving: "Moving"
+      furniture: "Furniture / purchases"
+      transport: "Transport"
+    pricing:
+      title: "How do we calculate your price?"
+      factors: "Distance · Time · Volume · Vehicle · Costs"
+    cta:
+      title: "Need to transport something?"
+      subtitle: "Calculate your quote now"
+      button: "Calculate my quote"
+
+  admin:
+    title: "VanQuote · Administration"
+    summary: "Summary"
+    total_leads: "Total leads"
+    total_requests: "Total requests"
+    consented_leads: "Leads with consent"
+    empty: "There are no leads with consent."
+    unknown_customer: "Unregistered customer"
+    not_available: "—"
+    columns:
+      date: "Date"
+      customer: "Customer"
+      email: "Email"
+      phone: "Phone"
+      contact_preference: "Contact preference"
+      origin: "Origin"
+      destination: "Destination"
+      recommended_price: "Recommended price"
+      status: "Status"
+    statuses:
+      new: "New"
+      contacted: "Contacted"
+      quoted: "Quoted"
+      accepted: "Accepted"
+      rejected: "Rejected"
+      completed: "Completed"
+    contact_preferences:
+      email_quote: "Email quote"
+      phone: "Phone call"
+      email_contact: "Email contact"
+
+  profile:
+    title: "My profile"
+    description: "Manage your personal and contact details."
+    updated: "Profile updated successfully."
+    update_failed: "The profile could not be updated."
+    save: "Save changes"
+    my_quotes: "My quotes"
+    view_quotes: "View my quotes"
+    administration: "Administration"
+    admin_link: "Back office"
+    fields:
+      first_name: "First name"
+      last_name: "Last name"
+      email: "Email"
+      phone: "Phone"
 
   quotes:
     title: "Transport quote"
@@ -23,6 +112,7 @@ en:
       date: "Date"
       recommended_price: "Recommended price"
       details: "View details"
+      card_label: "Quote"
 
     new:
       subtitle: "Calculate the price of transporting your dream"
@@ -97,6 +187,13 @@ en:
 
       new_quote: "New quote"
 
+    contact_confirmation:
+      title: "Request received!"
+      message: "We will contact you by email with the quote you received."
+      flash: "Request received. VanQuote will contact you by email."
+      new_quote: "Start another quote"
+      my_quotes: "View my quotes"
+
     errors:
       route_calculation_failed: "We couldn't calculate the route. Please try again."
 
@@ -120,12 +217,15 @@ en:
 
       google: "Continue with Google"
       apple: "Continue with Apple"
-      coming_soon: "Coming soon"
 
       no_account: "Don't have an account?"
       create_account: "Create account"
 
       back_to_vanquote: "← Back to VanQuote"
+
+    alerts:
+      try_again_later: "Please try again later."
+      invalid_credentials: "Try a different email or password."
 
   registrations:
     new:
@@ -134,6 +234,14 @@ en:
 
       errors:
         title: "We couldn't create your account:"
+
+      first_name:
+        label: "First name"
+        placeholder: "Your first name"
+
+      last_name:
+        label: "Last name"
+        placeholder: "Your last name"
 
       email:
         label: "Email"
@@ -153,12 +261,39 @@ en:
 
       google: "Continue with Google"
       apple: "Continue with Apple"
-      coming_soon: "Coming soon"
 
       already_have_account: "Already have an account?"
       sign_in: "Sign in"
 
       back_to_vanquote: "← Back to VanQuote"
+
+  oauth:
+    providers:
+      google_oauth2: "Google"
+      apple: "Apple"
+    default_name: "User"
+    default_last_name: "VanQuote"
+    errors:
+      invalid_provider: "The sign-in provider is invalid."
+      not_configured: "Sign-in with %{provider} needs external configuration."
+      authentication_failed: "Sign-in could not be completed. Try email and password."
+      account_creation_failed: "The account could not be created with this provider."
+
+  activerecord:
+    attributes:
+      user:
+        first_name: "First name"
+        last_name: "Last name"
+        email_address: "Email"
+        password: "Password"
+        password_confirmation: "Repeat password"
+    errors:
+      messages:
+        blank: "can't be blank"
+        invalid: "is invalid"
+        taken: "has already been taken"
+        too_short: "is too short (minimum %{count} characters)"
+        confirmation: "doesn't match confirmation"
 
   passwords:
     new:
@@ -215,6 +350,7 @@ en:
 
       contact_preference:
         label: "Contact method"
+        phone_value: "Phone call"
 
         options:
           email_quote: "Email me the quote"

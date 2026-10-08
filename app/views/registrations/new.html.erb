@@ -67,18 +67,8 @@
 
           <%= form.email_field :email_address,
                 required: true,
-                autofocus: true,
                 autocomplete: "email",
                 placeholder: t("registrations.new.email.placeholder") %>
-        </div>
-
-        <div class="auth-field">
-          <%= form.label :phone, t("registrations.new.phone.label") %>
-
-          <%= form.telephone_field :phone,
-                required: true,
-                autocomplete: "tel",
-                placeholder: t("registrations.new.phone.placeholder") %>
         </div>
 
         <div class="auth-field">
@@ -110,21 +100,7 @@
         <span><%= t("registrations.new.or") %></span>
       </div>
 
-      <div class="auth-social-preview">
-        <button type="button" class="auth-social-button" disabled>
-          <span class="auth-social-icon">G</span>
-          <span><%= t("registrations.new.google") %></span>
-        </button>
-
-        <button type="button" class="auth-social-button" disabled>
-          <span class="auth-social-icon">●</span>
-          <span><%= t("registrations.new.apple") %></span>
-        </button>
-
-        <p>
-          <%= t("registrations.new.coming_soon") %>
-        </p>
-      </div>
+      <%= render "shared/social_authentication", translation_scope: "registrations.new" %>
 
       <div class="auth-footer">
         <span><%= t("registrations.new.already_have_account") %></span>

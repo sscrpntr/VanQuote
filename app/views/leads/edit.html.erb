@@ -25,29 +25,36 @@
             class: "auth-form" do |form| %>
 
         <div class="auth-field">
-          <%= form.label :contact_preference,
-                t("leads.edit.contact_preference.label") %>
+          <% if @phone_preference_locked %>
+            <span class="form-label"><%= t("leads.edit.contact_preference.label") %></span>
+            <p class="contact-preference-value" role="status">
+              <%= t("leads.edit.contact_preference.phone_value") %>
+            </p>
+          <% else %>
+            <%= form.label :contact_preference,
+                  t("leads.edit.contact_preference.label") %>
 
-          <%= form.select :contact_preference,
-                options_for_select(
-                  [
+            <%= form.select :contact_preference,
+                  options_for_select(
                     [
-                      t("leads.edit.contact_preference.options.email_quote"),
-                      "EMAIL_QUOTE"
+                      [
+                        t("leads.edit.contact_preference.options.email_quote"),
+                        "EMAIL_QUOTE"
+                      ],
+                      [
+                        t("leads.edit.contact_preference.options.phone"),
+                        "PHONE"
+                      ],
+                      [
+                        t("leads.edit.contact_preference.options.email_contact"),
+                        "EMAIL_CONTACT"
+                      ]
                     ],
-                    [
-                      t("leads.edit.contact_preference.options.phone"),
-                      "PHONE"
-                    ],
-                    [
-                      t("leads.edit.contact_preference.options.email_contact"),
-                      "EMAIL_CONTACT"
-                    ]
-                  ],
-                  @lead.contact_preference
-                ),
-                {},
-                required: true %>
+                    @lead.contact_preference
+                  ),
+                  {},
+                  required: true %>
+          <% end %>
         </div>
 
         <div class="auth-field">
@@ -57,6 +64,7 @@
           <%= form.telephone_field :phone,
                 autofocus: true,
                 autocomplete: "tel",
+                required: true,
                 placeholder: "+41 79 123 45 67" %>
 
           <small>

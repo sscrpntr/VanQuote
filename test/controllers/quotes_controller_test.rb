@@ -34,6 +34,7 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     get "/"
 
     assert_response :success
+    assert_select "a.site-brand[href=?] img.site-brand-logo[alt='VanQuote']", root_path
     assert_select "a[href=?]", new_session_path, text: "Iniciar sesión"
     assert_select "a[href=?]", new_registration_path, text: "Crear una cuenta"
     assert_select ".quote-card form" do
@@ -42,25 +43,88 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "public landing renders production Open Graph and Twitter preview metadata" do
+    get root_path
+
+    assert_response :success
+    assert_select 'meta[name="description"][content="Calcula cuánto cuesta transportar tus cosas de forma rápida y sencilla."]'
+    assert_select 'meta[property="og:title"][content="VanQuote — Calcula tu presupuesto de transporte"]'
+    assert_select 'meta[property="og:description"][content="Calcula cuánto cuesta transportar tus cosas de forma rápida y sencilla."]'
+    assert_select 'meta[property="og:type"][content="website"]'
+    assert_select 'meta[property="og:url"][content="https://van-quote.vercel.app/"]'
+    assert_select 'meta[property="og:image"][content="https://van-quote.vercel.app/vanquote-social.png"]'
+    assert_select 'meta[property="og:image:width"][content="1200"]'
+    assert_select 'meta[property="og:image:height"][content="630"]'
+    assert_select 'meta[name="twitter:card"][content="summary_large_image"]'
+    assert_select 'meta[name="twitter:title"][content="VanQuote — Calcula tu presupuesto de transporte"]'
+    assert_select 'meta[name="twitter:description"][content="Calcula cuánto cuesta transportar tus cosas de forma rápida y sencilla."]'
+    assert_select 'meta[name="twitter:image"][content="https://van-quote.vercel.app/vanquote-social.png"]'
+    assert_not_includes response.body, "localhost"
+  end
+
+  test "social preview image is served as a public asset" do
+    get "/vanquote-social.png"
+
+    assert_response :success
+    assert_equal "image/png", response.media_type
+  end
+
+  test "brand logo and van icon are served as public SVG assets" do
+    get "/vanquote-logo.svg"
+
+    assert_response :success
+    assert_equal "image/svg+xml", response.media_type
+    assert_includes response.body, "VanQuote"
+
+    get "/icon.svg"
+
+    assert_response :success
+    assert_equal "image/svg+xml", response.media_type
+    assert_includes response.body, "#3478D4"
+
+    get "/icon.png"
+
+    assert_response :success
+    assert_equal "image/png", response.media_type
+  end
+
   test "home account links use the selected locale" do
     {
       "ca" => {
         sign_in_prompt: "Ja tens un compte?",
         sign_in: "Inicia sessió",
         register_prompt: "Encara no tens un compte?",
-        register: "Crea un compte"
+        register: "Crea un compte",
+        landing_headline: "Quant costa transportar els teus somnis?",
+        how_title: "Com funciona?",
+        uses_title: "Per a què necessites VanQuote?",
+        pricing_title: "Com calculem el teu preu?",
+        cta_title: "Necessites transportar alguna cosa?",
+        cta: "Calcula el meu pressupost"
       },
       "es" => {
         sign_in_prompt: "¿Ya tienes una cuenta?",
         sign_in: "Iniciar sesión",
         register_prompt: "¿Todavía no tienes una cuenta?",
-        register: "Crear una cuenta"
+        register: "Crear una cuenta",
+        landing_headline: "¿Cuánto cuesta transportar tus sueños?",
+        how_title: "¿Cómo funciona?",
+        uses_title: "¿Para qué necesitas VanQuote?",
+        pricing_title: "¿Cómo calculamos tu precio?",
+        cta_title: "¿Necesitas transportar algo?",
+        cta: "Calcular mi presupuesto"
       },
       "en" => {
         sign_in_prompt: "Already have an account?",
         sign_in: "Sign in",
         register_prompt: "Don't have an account yet?",
-        register: "Create an account"
+        register: "Create an account",
+        landing_headline: "How much does it cost to move your dreams?",
+        how_title: "How does it work?",
+        uses_title: "What do you need VanQuote for?",
+        pricing_title: "How do we calculate your price?",
+        cta_title: "Need to transport something?",
+        cta: "Calculate my quote"
       }
     }.each do |locale, translations|
       post locale_path, params: { locale: locale, return_to: root_path }
@@ -69,6 +133,7 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
       get "/"
 
       assert_response :success
+      assert_select "header.site-header a.site-brand[href=?] img[alt='VanQuote']", root_path
       assert_select "header.site-header nav.language-selector", count: 1 do
         assert_select "input.language-selector-button", count: 3
       end
@@ -76,6 +141,14 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
       assert_select ".quote-account-option a[href=?]", new_session_path, text: translations[:sign_in]
       assert_select ".quote-account-option p", text: translations[:register_prompt]
       assert_select ".quote-account-option a[href=?]", new_registration_path, text: translations[:register]
+      assert_select ".landing-copy h1", text: translations[:landing_headline]
+      assert_select ".landing-eyebrow", count: 0
+      assert_not_includes response.body, "PRESUPUESTO DE TRANSPORTE"
+      assert_select "#landing-how-title", text: translations[:how_title]
+      assert_select "#landing-use-cases-title", text: translations[:uses_title]
+      assert_select "#landing-pricing-title", text: translations[:pricing_title]
+      assert_select "#landing-cta-title", text: translations[:cta_title]
+      assert_select ".landing-cta-button[href=?]", new_quote_path, text: translations[:cta]
     end
   end
 
@@ -91,6 +164,41 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_equal @user.id, Quote.last.user_id
+  end
+
+  test "authenticated user retains their session and navigation on the new quote page" do
+    authenticate_as(@user)
+
+    get new_quote_path
+
+    assert_response :success
+    assert_select "header.site-header nav.site-navigation" do
+      assert_select "a[href=?]", quotes_path
+      assert_select "a[href=?]", new_quote_path, text: "Nueva cotización"
+      assert_select "a[href=?]", profile_path
+    end
+    assert_select "form.quote-form"
+  end
+
+  test "anonymous user can access the public new quote page" do
+    get new_quote_path
+
+    assert_response :success
+    assert_select ".landing-hero-inner"
+    assert_select ".landing-benefits li", count: 3
+    assert_select ".landing-benefits li:nth-child(1) span", text: "⚡"
+    assert_select ".landing-benefits li:nth-child(2) span", text: "📍"
+    assert_select ".landing-benefits li:nth-child(3) span", text: "🚐"
+    assert_select ".landing-form-card h2", text: "Tu presupuesto"
+    assert_select "#quote-form form.quote-form"
+    assert_select "#quote-form input[name='quote[origin]']"
+    assert_select "#quote-form input[name='quote[destination]']"
+    assert_select "#quote-form input[name='email']"
+    assert_select "#quote-form input[name='phone']", count: 0
+    assert_select ".landing-steps li", count: 3
+    assert_select ".landing-category-list li", count: 3
+    assert_select "form.quote-form"
+    assert_select "header.site-header nav.site-navigation", count: 0
   end
 
   test "creates a quote" do
@@ -111,6 +219,7 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
           margin: 25
         },
         email: "customer@example.com",
+        phone: "+34600000099",
         consent_given: "1"
       }
     end
@@ -125,6 +234,7 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 620.to_d, quote.distance_km
     assert_equal 360.to_d, quote.estimated_duration_minutes
     assert_nil quote.user_id
+    assert_nil quote.lead.phone
   end
 
   test "authenticated user sees only their quotes with a link to each detail" do
@@ -140,6 +250,23 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Barcelona"
     assert_includes response.body, quote_path(own_quote)
     assert_not_includes response.body, "Paris"
+  end
+
+  test "quotes index renders a permanent grid with one card per quote" do
+    quotes = 5.times.map { |index| create_quote_for(@user, origin: "Origin #{index}", destination: "Destination #{index}") }
+    authenticate_as(@user)
+
+    get quotes_path
+
+    assert_response :success
+    assert_select ".quotes-grid"
+    assert_select ".quote-index-card", count: 5
+    assert_select ".quotes-new-link-row > a.quotes-new-link[href=?]", new_quote_path
+    quotes.each do |quote|
+      assert_select ".quote-index-card a[href=?]", quote_path(quote), count: 1
+    end
+    assert_not_includes response.body, "carousel"
+    assert_not_includes response.body, "slider"
   end
 
   test "shows an empty state when the user has no quotes" do
@@ -249,6 +376,7 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_not_nil lead.consent_at
     assert_equal "NEW", lead.status
     assert_equal Quote.last.id, lead.quote_id
+    assert_nil lead.phone
   end
 
   test "authenticated user does not see email or phone fields on the quote form" do
@@ -263,13 +391,13 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_select "form.quote-form input[name='phone']", count: 0
   end
 
-  test "anonymous user sees email and phone fields on the quote form" do
+  test "anonymous user sees email but not phone on the quote form" do
     get "/"
 
     assert_response :success
     assert_select "form.quote-form", count: 1
     assert_select "form.quote-form input[name='email']", count: 1
-    assert_select "form.quote-form input[name='phone']", count: 1
+    assert_select "form.quote-form input[name='phone']", count: 0
   end
 
   test "authenticated user does not need to submit email or phone when creating a quote" do
@@ -515,7 +643,6 @@ assert_response :success
       email_address: user.email_address,
       password: "password123"
     }
-
   end
 
   def valid_quote_params

@@ -2,6 +2,21 @@
 require "test_helper"
 
 class UserTest < ActiveSupport::TestCase
+  test "phone is optional for users" do
+    user = User.new(
+      first_name: "Test",
+      last_name: "User",
+      email_address: "no-phone@example.com",
+      password: "password123",
+      phone: nil
+    )
+
+    assert user.valid?, user.errors.full_messages.to_sentence
+    assert_nil user.phone
+    assert user.save
+    assert_nil user.reload.phone
+  end
+
   test "normalizes email address" do
     user = User.new(
       first_name: "Test",

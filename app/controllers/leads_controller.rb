@@ -6,18 +6,32 @@ class LeadsController < ApplicationController
 
   def edit
     @lead = current_user_lead
+    @phone_preference_locked = phone_preference_locked?
   end
 
   def update
     @lead = current_user_lead
+    phone_preference_locked = phone_preference_locked?
+    @phone_preference_locked = phone_preference_locked
 
-    @lead.update!(
-      contact_preference: contact_preference_param,
+    @lead.assign_attributes(
+      contact_preference: phone_preference_locked ? "PHONE" : contact_preference_param,
       phone: phone_param
     )
+    phone_selected = @lead.contact_preference == "PHONE"
 
-    redirect_to quote_path(@lead.quote),
-                notice: confirmation_message(@lead.contact_preference)
+    if @lead.valid?
+      ActiveRecord::Base.transaction do
+        Current.user.update!(phone: @lead.phone) if phone_selected
+        @lead.save!
+      end
+      session.delete(:phone_contact_lead_id) if phone_preference_locked
+
+      redirect_to quote_path(@lead.quote),
+                  notice: confirmation_message(@lead.contact_preference)
+    else
+      render :edit, status: :unprocessable_entity
+    end
   end
 
   private
@@ -48,9 +62,16 @@ class LeadsController < ApplicationController
   end
 
   def lead_params
-    params.require(:lead).permit(
-      :contact_preference,
-      :phone
+    permitted_attributes = [ :phone ]
+    permitted_attributes.unshift(:contact_preference) unless phone_preference_locked?
+
+    params.require(:lead).permit(*permitted_attributes)
+  end
+
+  def phone_preference_locked?
+    @lead && (
+      @lead.contact_preference == "PHONE" ||
+        session[:phone_contact_lead_id].to_s == @lead.id.to_s
     )
   end
 

@@ -1,99 +1,145 @@
-<div class="quote-page">
-  <div class="quote-container">
-    <header class="quote-header">
-      <h1 class="quote-logo">VanQuote</h1>
+<div class="landing-page">
+  <section class="landing-hero" aria-labelledby="landing-title">
+    <div class="landing-hero-inner">
+      <div class="landing-copy">
+        <h1 id="landing-title"><%= t("landing.headline") %></h1>
+        <p class="landing-subtitle"><%= t("landing.subtitle") %></p>
 
-      <p class="quote-subtitle">
-        <%= t("quotes.new.subtitle") %>
-      </p>
-    </header>
+        <ul class="landing-benefits">
+          <li><span aria-hidden="true">⚡</span><%= t("landing.benefits.fast") %></li>
+          <li><span aria-hidden="true">📍</span><%= t("landing.benefits.route") %></li>
+          <li><span aria-hidden="true">🚐</span><%= t("landing.benefits.tailored") %></li>
+        </ul>
+      </div>
 
-    <div
-      class="quote-card"
-      data-controller="place-autocomplete"
-      data-place-autocomplete-api-key-value="<%= ENV["GOOGLE_MAPS_BROWSER_API_KEY"] %>"
-    >
-      <%= form_with model: @quote,
-            local: true,
-            class: "quote-form" do |form| %>
+      <div class="landing-form-column">
+        <div
+          id="quote-form"
+          class="quote-card landing-form-card"
+          data-controller="place-autocomplete"
+          data-place-autocomplete-api-key-value="<%= ENV["GOOGLE_MAPS_BROWSER_API_KEY"] %>"
+        >
+          <h2><%= t("landing.form_title") %></h2>
 
-        <div class="form-field">
-          <%= form.label :origin,
-                t("quotes.new.origin.label"),
-                class: "form-label" %>
+          <%= form_with model: @quote,
+                local: true,
+                class: "quote-form" do |form| %>
 
-          <%= form.text_field :origin,
-                placeholder: t("quotes.new.origin.placeholder"),
-                class: "form-input",
-                data: {
-                  place_autocomplete_target: "originInput"
-                } %>
+            <div class="form-field">
+              <%= form.label :origin,
+                    t("quotes.new.origin.label"),
+                    class: "form-label" %>
+
+              <%= form.text_field :origin,
+                    placeholder: t("quotes.new.origin.placeholder"),
+                    class: "form-input",
+                    data: {
+                      place_autocomplete_target: "originInput"
+                    } %>
+            </div>
+
+            <div class="form-field">
+              <%= form.label :destination,
+                    t("quotes.new.destination.label"),
+                    class: "form-label" %>
+
+              <%= form.text_field :destination,
+                    placeholder: t("quotes.new.destination.placeholder"),
+                    class: "form-input",
+                    data: {
+                      place_autocomplete_target: "destinationInput"
+                    } %>
+            </div>
+
+            <% unless Current.user %>
+              <div class="form-field">
+                <%= label_tag :email,
+                      t("quotes.new.email.label"),
+                      class: "form-label" %>
+
+                <%= email_field_tag :email,
+                      params[:email],
+                      required: true,
+                      placeholder: t("quotes.new.email.placeholder"),
+                      class: "form-input" %>
+              </div>
+            <% end %>
+
+            <div class="form-consent">
+              <%= check_box_tag :consent_given,
+                    "1",
+                    false,
+                    required: true %>
+
+              <%= label_tag :consent_given,
+                    t("quotes.new.consent") %>
+            </div>
+
+            <%= form.submit t("quotes.new.submit"),
+                  class: "button-primary landing-submit" %>
+          <% end %>
         </div>
 
-        <div class="form-field">
-          <%= form.label :destination,
-                t("quotes.new.destination.label"),
-                class: "form-label" %>
-
-          <%= form.text_field :destination,
-                placeholder: t("quotes.new.destination.placeholder"),
-                class: "form-input",
-                data: {
-                  place_autocomplete_target: "destinationInput"
-                } %>
-        </div>
-
-        <% unless Current.user %>
-          <div class="form-field">
-            <%= label_tag :email,
-                  t("quotes.new.email.label"),
-                  class: "form-label" %>
-
-            <%= email_field_tag :email,
-                  params[:email],
-                  required: true,
-                  placeholder: t("quotes.new.email.placeholder"),
-                  class: "form-input" %>
+        <section class="quote-account-access landing-account-access" aria-label="<%= t('quotes.new.account_access.title') %>">
+          <div class="quote-account-option">
+            <p><%= t("quotes.new.account_access.sign_in_prompt") %></p>
+            <%= link_to t("quotes.new.account_access.sign_in"), new_session_path, class: "button-secondary" %>
           </div>
 
-          <div class="form-field">
-            <%= label_tag :phone,
-                  t("quotes.new.phone.label"),
-                  class: "form-label" %>
-
-            <%= telephone_field_tag :phone,
-                  params[:phone],
-                  required: true,
-                  placeholder: t("quotes.new.phone.placeholder"),
-                  class: "form-input" %>
+          <div class="quote-account-option">
+            <p><%= t("quotes.new.account_access.register_prompt") %></p>
+            <%= link_to t("quotes.new.account_access.register"), new_registration_path, class: "button-secondary" %>
           </div>
-        <% end %>
+        </section>
+      </div>
 
-        <div class="form-consent">
-          <%= check_box_tag :consent_given,
-                "1",
-                false,
-                required: true %>
-
-          <%= label_tag :consent_given,
-                t("quotes.new.consent") %>
-        </div>
-
-        <%= form.submit t("quotes.new.submit"),
-              class: "button-primary" %>
-      <% end %>
+      <p class="landing-assurance"><%= t("landing.assurance") %></p>
     </div>
+  </section>
 
-    <section class="quote-account-access" aria-label="<%= t('quotes.new.account_access.title') %>">
-      <div class="quote-account-option">
-        <p><%= t("quotes.new.account_access.sign_in_prompt") %></p>
-        <%= link_to t("quotes.new.account_access.sign_in"), new_session_path, class: "button-secondary" %>
-      </div>
+  <section class="landing-content-section landing-how" aria-labelledby="landing-how-title">
+    <div class="landing-section-inner">
+      <h2 id="landing-how-title"><%= t("landing.how.title") %></h2>
+      <ol class="landing-steps">
+        <li>
+          <span class="landing-step-number">01</span>
+          <p><%= t("landing.how.step_one") %></p>
+        </li>
+        <li>
+          <span class="landing-step-number">02</span>
+          <p><%= t("landing.how.step_two") %></p>
+        </li>
+        <li>
+          <span class="landing-step-number">03</span>
+          <p><%= t("landing.how.step_three") %></p>
+        </li>
+      </ol>
+    </div>
+  </section>
 
-      <div class="quote-account-option">
-        <p><%= t("quotes.new.account_access.register_prompt") %></p>
-        <%= link_to t("quotes.new.account_access.register"), new_registration_path, class: "button-secondary" %>
-      </div>
-    </section>
-  </div>
+  <section class="landing-content-section landing-use-cases" aria-labelledby="landing-use-cases-title">
+    <div class="landing-section-inner">
+      <h2 id="landing-use-cases-title"><%= t("landing.use_cases.title") %></h2>
+      <ul class="landing-category-list">
+        <li><%= t("landing.use_cases.moving") %></li>
+        <li><%= t("landing.use_cases.furniture") %></li>
+        <li><%= t("landing.use_cases.transport") %></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="landing-content-section landing-pricing" aria-labelledby="landing-pricing-title">
+    <div class="landing-section-inner">
+      <h2 id="landing-pricing-title"><%= t("landing.pricing.title") %></h2>
+      <p><%= t("landing.pricing.factors") %></p>
+    </div>
+  </section>
+
+  <section class="landing-final-cta" aria-labelledby="landing-cta-title">
+    <div class="landing-section-inner">
+      <h2 id="landing-cta-title"><%= t("landing.cta.title") %></h2>
+      <p><%= t("landing.cta.subtitle") %></p>
+      <%= link_to t("landing.cta.button"), new_quote_path, class: "button-primary landing-cta-button" %>
+    </div>
+  </section>
 </div>

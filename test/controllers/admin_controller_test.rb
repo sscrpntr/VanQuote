@@ -58,6 +58,39 @@ class AdminControllerTest < ActionDispatch::IntegrationTest
     assert_not_includes response.body, opted_out.email
   end
 
+  test "admin table shows the associated customer name and a fallback without a user" do
+    named_quote = create_quote_for(@user, origin: "Barcelona", destination: "Girona")
+    named_lead = create_lead("named@example.com")
+    named_lead.update!(quote: named_quote)
+
+    anonymous_quote = create_quote_for(nil, origin: "Vic", destination: "Reus")
+    anonymous_lead = create_lead("anonymous@example.com")
+    anonymous_lead.update!(quote: anonymous_quote)
+
+    sign_in(@admin)
+    get admin_path
+
+    assert_response :success
+    assert_select "th", text: "Cliente"
+    assert_select "td", text: "Test User"
+    assert_select "td", text: "Cliente no registrado"
+  end
+
+  test "admin interface follows the selected locale" do
+    create_lead("locale@example.com")
+    sign_in(@admin)
+
+    { "ca" => "Administració", "en" => "Administration" }.each do |locale, heading|
+      post locale_path, params: { locale: locale, return_to: admin_path }
+      assert_redirected_to admin_path
+      get admin_path
+      assert_response :success
+      assert_select "h1", text: "VanQuote · #{heading}"
+      assert_select "th", text: locale == "ca" ? "Client" : "Customer"
+      assert_select "th", text: locale == "ca" ? "Data" : "Date"
+    end
+  end
+
   private
 
   def sign_in(user)
@@ -71,6 +104,26 @@ class AdminControllerTest < ActionDispatch::IntegrationTest
       consent_given: true,
       consent_at: Time.current,
       status: "NEW"
+    )
+  end
+
+  def create_quote_for(user, origin:, destination:)
+    Quote.create!(
+      user: user,
+      origin: origin,
+      destination: destination,
+      distance_km: 620,
+      estimated_duration_minutes: 360,
+      fuel_cost: 74.4,
+      toll_cost: 0,
+      vehicle_cost: 62,
+      driver_cost: 150,
+      loading_cost: 20,
+      waiting_cost: 0,
+      other_cost: 10,
+      margin: 25,
+      total_cost: 316.4,
+      recommended_price: 395.5
     )
   end
 end

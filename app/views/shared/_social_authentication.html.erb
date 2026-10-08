@@ -1,0 +1,26 @@
+<div class="auth-social-actions">
+  <%= button_to oauth_initiation_path(provider: "google_oauth2"),
+        method: :post,
+        class: "auth-social-button auth-social-button-google",
+        form: { data: { turbo: false } },
+        aria: { label: t("#{translation_scope}.google") } do %>
+    <%= image_tag "/google-g-logo.png",
+          class: "auth-social-google-logo",
+          alt: "",
+          aria: { hidden: true },
+          width: 20,
+          height: 20 %>
+    <span><%= t("#{translation_scope}.google") %></span>
+  <% end %>
+
+  <% if Rails.application.config.x.oauth.apple_enabled %>
+    <%= button_to oauth_initiation_path(provider: "apple"),
+          method: :post,
+          class: "auth-social-button",
+          form: { data: { turbo: false } },
+          aria: { label: t("#{translation_scope}.apple") } do %>
+      <span class="auth-social-icon" aria-hidden="true">●</span>
+      <span><%= t("#{translation_scope}.apple") %></span>
+    <% end %>
+  <% end %>
+</div>

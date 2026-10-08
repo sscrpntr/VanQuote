@@ -4,12 +4,101 @@ ca:
     spanish: "ESP"
     english: "ENG"
 
+  seo:
+    landing:
+      title: "VanQuote — Calcula el teu pressupost de transport"
+      description: "Calcula quant costa transportar les teves coses de manera ràpida i senzilla."
+      image_alt: "VanQuote, pressupostos de transport ràpids i senzills"
+
   navigation:
     home: "Inici"
     account: "Navegació del compte"
     my_quotes: "Els meus pressupostos"
     new_quote: "Nova cotització"
     profile: "El meu perfil"
+    logout: "Desconnectar"
+
+  dashboard:
+    greeting: "Hola %{name}, què vols fer avui?"
+    fallback_name: "de nou"
+    my_quotes: "Anar als meus pressupostos"
+    new_quote: "Nou pressupost"
+    profile: "Anar al meu perfil"
+    logout: "Desconnectar"
+
+  landing:
+    headline: "Quant costa transportar els teus somnis?"
+    subtitle: "Calcula el teu pressupost en pocs segons."
+    form_title: "El teu pressupost"
+    assurance: "Sense compromís · Ràpid · Transparent"
+    benefits:
+      fast: "Ràpid"
+      route: "Segons el teu recorregut"
+      tailored: "Adaptat a les teves necessitats"
+    how:
+      title: "Com funciona?"
+      step_one: "Introdueix el teu recorregut"
+      step_two: "Explica'ns què necessites"
+      step_three: "Rep el teu pressupost"
+    use_cases:
+      title: "Per a què necessites VanQuote?"
+      moving: "Mudances"
+      furniture: "Mobles / compres"
+      transport: "Transports"
+    pricing:
+      title: "Com calculem el teu preu?"
+      factors: "Distància · Temps · Volum · Vehicle · Costos"
+    cta:
+      title: "Necessites transportar alguna cosa?"
+      subtitle: "Calcula el teu pressupost ara"
+      button: "Calcula el meu pressupost"
+
+  admin:
+    title: "VanQuote · Administració"
+    summary: "Resum"
+    total_leads: "Total de leads"
+    total_requests: "Total de sol·licituds"
+    consented_leads: "Leads amb consentiment"
+    empty: "No hi ha leads amb consentiment."
+    unknown_customer: "Client no registrat"
+    not_available: "—"
+    columns:
+      date: "Data"
+      customer: "Client"
+      email: "Email"
+      phone: "Telèfon"
+      contact_preference: "Preferència de contacte"
+      origin: "Origen"
+      destination: "Destinació"
+      recommended_price: "Preu recomanat"
+      status: "Estat"
+    statuses:
+      new: "Nou"
+      contacted: "Contactat"
+      quoted: "Pressupostat"
+      accepted: "Acceptat"
+      rejected: "Rebutjat"
+      completed: "Completat"
+    contact_preferences:
+      email_quote: "Enviar pressupost per email"
+      phone: "Trucada telefònica"
+      email_contact: "Contacte per email"
+
+  profile:
+    title: "El meu perfil"
+    description: "Gestiona les teves dades personals i de contacte."
+    updated: "El perfil s'ha actualitzat correctament."
+    update_failed: "No s'ha pogut actualitzar el perfil."
+    save: "Desa els canvis"
+    my_quotes: "Els meus pressupostos"
+    view_quotes: "Veure els meus pressupostos"
+    administration: "Administració"
+    admin_link: "Back-office"
+    fields:
+      first_name: "Nom"
+      last_name: "Cognoms"
+      email: "Email"
+      phone: "Telèfon"
 
   quotes:
     title: "Pressupost de transport"
@@ -23,6 +112,7 @@ ca:
       date: "Data"
       recommended_price: "Preu recomanat"
       details: "Veure detall"
+      card_label: "Pressupost"
 
     new:
       subtitle: "Calcula quin preu té el transport dels teus somnis"
@@ -97,6 +187,13 @@ ca:
 
       new_quote: "Nova cotització"
 
+    contact_confirmation:
+      title: "Sol·licitud rebuda!"
+      message: "Et contactarem per email amb el pressupost que has obtingut."
+      flash: "Sol·licitud rebuda. VanQuote et contactarà per email."
+      new_quote: "Començar una altra cotització"
+      my_quotes: "Veure els meus pressupostos"
+
     errors:
       route_calculation_failed: "No s'ha pogut calcular la ruta. Torna-ho a provar."
 
@@ -120,12 +217,15 @@ ca:
 
       google: "Continua amb Google"
       apple: "Continua amb Apple"
-      coming_soon: "Pròximament"
 
       no_account: "No tens un compte?"
       create_account: "Crear compte"
 
       back_to_vanquote: "← Tornar a VanQuote"
+
+    alerts:
+      try_again_later: "Torna-ho a provar més tard."
+      invalid_credentials: "Prova amb un altre email o contrasenya."
 
   registrations:
     new:
@@ -134,6 +234,14 @@ ca:
 
       errors:
         title: "No hem pogut crear el teu compte:"
+
+      first_name:
+        label: "Nom"
+        placeholder: "El teu nom"
+
+      last_name:
+        label: "Cognoms"
+        placeholder: "Els teus cognoms"
 
       email:
         label: "Email"
@@ -153,12 +261,39 @@ ca:
 
       google: "Continua amb Google"
       apple: "Continua amb Apple"
-      coming_soon: "Pròximament"
 
       already_have_account: "Ja tens un compte?"
       sign_in: "Iniciar sessió"
 
       back_to_vanquote: "← Tornar a VanQuote"
+
+  oauth:
+    providers:
+      google_oauth2: "Google"
+      apple: "Apple"
+    default_name: "Usuari"
+    default_last_name: "VanQuote"
+    errors:
+      invalid_provider: "El proveïdor d'accés no és vàlid."
+      not_configured: "L'accés amb %{provider} requereix configuració externa."
+      authentication_failed: "No s'ha pogut completar l'accés. Prova-ho amb email i contrasenya."
+      account_creation_failed: "No s'ha pogut crear el compte amb aquest proveïdor."
+
+  activerecord:
+    attributes:
+      user:
+        first_name: "Nom"
+        last_name: "Cognoms"
+        email_address: "Email"
+        password: "Contrasenya"
+        password_confirmation: "Repeteix la contrasenya"
+    errors:
+      messages:
+        blank: "no pot estar en blanc"
+        invalid: "no és vàlid"
+        taken: "ja està en ús"
+        too_short: "és massa curta (mínim %{count} caràcters)"
+        confirmation: "no coincideix amb la confirmació"
 
   passwords:
     new:
@@ -215,6 +350,7 @@ ca:
 
       contact_preference:
         label: "Mètode de contacte"
+        phone_value: "Trucada telefònica"
 
         options:
           email_quote: "Enviar pressupost per email"

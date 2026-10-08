@@ -1,11 +1,30 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "Van Quote" %></title>
+    <% public_landing_page = controller_name == "quotes" && action_name == "new" && !Current.user %>
+    <title><%= public_landing_page ? t("seo.landing.title") : (content_for(:title) || "VanQuote") %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Van Quote">
     <meta name="mobile-web-app-capable" content="yes">
+    <% if public_landing_page %>
+      <meta name="description" content="<%= t('seo.landing.description') %>">
+      <link rel="canonical" href="https://van-quote.vercel.app/">
+      <meta property="og:title" content="<%= t('seo.landing.title') %>">
+      <meta property="og:description" content="<%= t('seo.landing.description') %>">
+      <meta property="og:type" content="website">
+      <meta property="og:url" content="https://van-quote.vercel.app/">
+      <meta property="og:image" content="https://van-quote.vercel.app/vanquote-social.png">
+      <meta property="og:image:width" content="1200">
+      <meta property="og:image:height" content="630">
+      <meta property="og:image:type" content="image/png">
+      <meta property="og:image:alt" content="<%= t('seo.landing.image_alt') %>">
+      <meta name="twitter:card" content="summary_large_image">
+      <meta name="twitter:title" content="<%= t('seo.landing.title') %>">
+      <meta name="twitter:description" content="<%= t('seo.landing.description') %>">
+      <meta name="twitter:image" content="https://van-quote.vercel.app/vanquote-social.png">
+      <meta name="twitter:image:alt" content="<%= t('seo.landing.image_alt') %>">
+    <% end %>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
@@ -24,14 +43,21 @@
   </head>
 
   <body>
-    <header class="site-header">
-      <% if Current.user %>
+    <header class="site-header <%= 'landing-site-header' if public_landing_page %>">
+      <% if Current.user && controller_name != "dashboards" %>
         <nav class="site-navigation" aria-label="<%= t('navigation.account') %>">
-          <%= link_to "VanQuote", root_path, class: "site-brand" %>
+          <%= link_to root_path, class: "site-brand", aria: { label: "VanQuote" } do %>
+            <%= image_tag "/vanquote-logo.svg", alt: "VanQuote", class: "site-brand-logo", width: 200, height: 40 %>
+          <% end %>
           <%= link_to t("navigation.my_quotes"), quotes_path, class: "site-navigation-link" %>
-          <%= link_to t("navigation.new_quote"), root_path, class: "site-navigation-link" %>
+          <%= link_to t("navigation.new_quote"), new_quote_path, class: "site-navigation-link" %>
           <%= link_to t("navigation.profile"), profile_path, class: "site-navigation-link" %>
+          <%= button_to t("navigation.logout"), session_path, method: :delete, class: "site-navigation-link" %>
         </nav>
+      <% elsif public_landing_page %>
+        <%= link_to root_path, class: "site-brand", aria: { label: "VanQuote" } do %>
+          <%= image_tag "/vanquote-logo.svg", alt: "VanQuote", class: "site-brand-logo", width: 200, height: 40 %>
+        <% end %>
       <% end %>
 
       <nav class="language-selector" aria-label="Language selector">
@@ -43,7 +69,7 @@
                         local: true,
                         class: "language-selector-form" do %>
             <%= hidden_field_tag :locale, locale %>
-            <%= hidden_field_tag :return_to, request.path %>
+            <%= hidden_field_tag :return_to, request.fullpath %>
 
             <%= submit_tag language_label,
                            class: "language-selector-button #{'active' if current_locale == locale}" %>

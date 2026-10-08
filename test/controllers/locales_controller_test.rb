@@ -22,6 +22,36 @@ class LocalesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "ca", session[:locale]
   end
 
+  test "changing locale from a public quote preserves its signed token" do
+    quote = quotes(:one)
+    token = quote.signed_id(purpose: :public_view, expires_in: 24.hours)
+    public_path = public_quotes_path(token: token)
+
+    { "es" => %w[ca en], "ca" => %w[es], "en" => %w[es] }.each do |from, targets|
+      post locale_path, params: { locale: from, return_to: root_path }
+      get public_path
+
+      assert_response :success
+      assert_includes response.body, "556.25 €"
+
+      return_to = css_select("form.language-selector-form input[name='return_to']")
+        .first["value"]
+      assert_equal public_path, return_to
+
+      targets.each do |to|
+        post locale_path, params: { locale: to, return_to: return_to }
+
+        assert_redirected_to public_path
+        assert_equal token, Rack::Utils.parse_query(URI(response.location).query)["token"]
+
+        follow_redirect!
+        assert_response :success
+        assert_includes response.body, "556.25 €"
+        assert_equal quote, Quote.find_signed!(token, purpose: :public_view)
+      end
+    end
+  end
+
   test "external return_to is rejected" do
     post locale_path, params: { locale: "ca", return_to: "https://evil.example.com" }
 

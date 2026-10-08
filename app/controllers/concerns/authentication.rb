@@ -48,6 +48,11 @@ module Authentication
       quote = result[:quote]
       preference = result[:preference]
 
+      if preference.in?(%w[EMAIL_QUOTE EMAIL_CONTACT])
+        flash[:notice] = I18n.t("quotes.contact_confirmation.flash")
+        return contact_confirmation_path
+      end
+
       if preference == "PHONE"
         return edit_lead_path(quote.lead)
       end
@@ -82,10 +87,18 @@ module Authentication
 
       quote.update!(user: Current.user) if quote.user_id.blank?
 
-      if preference.in?(%w[EMAIL_QUOTE EMAIL_CONTACT]) && quote.lead
-        quote.lead.update!(
-          contact_preference: preference
-        )
+      if Lead::CONTACT_PREFERENCES.include?(preference) && quote.lead
+        if preference == "PHONE"
+          phone = quote.lead.phone.presence || Current.user.phone.presence
+
+          if phone
+            quote.lead.update!(contact_preference: preference, phone: phone)
+          else
+            session[:phone_contact_lead_id] = quote.lead.id
+          end
+        else
+          quote.lead.update!(contact_preference: preference)
+        end
       end
 
       {

@@ -1,19 +1,18 @@
 class QuotesController < ApplicationController
   class_attribute :routes_service_class, default: GoogleRoutesService
 
-  allow_unauthenticated_access only: %i[new create public]
+  allow_unauthenticated_access only: %i[new create public contact_confirmation]
+  before_action :resume_session, only: %i[new create public contact_confirmation]
 
   def index
     @quotes = Current.user.quotes.order(created_at: :desc)
   end
 
   def new
-    resume_session
     @quote = Quote.new
   end
 
   def create
-    authenticated?
     @quote = Quote.new(quote_params)
     @quote.user = Current.user if Current.user
 
@@ -86,6 +85,9 @@ class QuotesController < ApplicationController
     @calculator = QuoteCalculator.new(@quote)
   end
 
+  def contact_confirmation
+  end
+
   private
 
   def quote_input_valid?
@@ -109,8 +111,6 @@ class QuotesController < ApplicationController
   def lead_phone
     if Current.user
       Current.user.phone
-    else
-      params[:phone].to_s.strip
     end
   end
 

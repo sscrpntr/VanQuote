@@ -4,12 +4,101 @@ es:
     spanish: "ESP"
     english: "ENG"
 
+  seo:
+    landing:
+      title: "VanQuote — Calcula tu presupuesto de transporte"
+      description: "Calcula cuánto cuesta transportar tus cosas de forma rápida y sencilla."
+      image_alt: "VanQuote, presupuestos de transporte rápidos y sencillos"
+
   navigation:
     home: "Inicio"
     account: "Navegación de la cuenta"
     my_quotes: "Mis presupuestos"
     new_quote: "Nueva cotización"
     profile: "Mi perfil"
+    logout: "Cerrar sesión"
+
+  dashboard:
+    greeting: "Hola %{name}, ¿qué quieres hacer hoy?"
+    fallback_name: "de nuevo"
+    my_quotes: "Ir a mis presupuestos"
+    new_quote: "Nuevo presupuesto"
+    profile: "Ir a mi perfil"
+    logout: "Cerrar sesión"
+
+  landing:
+    headline: "¿Cuánto cuesta transportar tus sueños?"
+    subtitle: "Calcula tu presupuesto en pocos segundos."
+    form_title: "Tu presupuesto"
+    assurance: "Sin compromiso · Rápido · Transparente"
+    benefits:
+      fast: "Rápido"
+      route: "Según tu recorrido"
+      tailored: "Adaptado a tus necesidades"
+    how:
+      title: "¿Cómo funciona?"
+      step_one: "Introduce tu recorrido"
+      step_two: "Cuéntanos qué necesitas"
+      step_three: "Recibe tu presupuesto"
+    use_cases:
+      title: "¿Para qué necesitas VanQuote?"
+      moving: "Mudanzas"
+      furniture: "Muebles / compras"
+      transport: "Transportes"
+    pricing:
+      title: "¿Cómo calculamos tu precio?"
+      factors: "Distancia · Tiempo · Volumen · Vehículo · Costes"
+    cta:
+      title: "¿Necesitas transportar algo?"
+      subtitle: "Calcula tu presupuesto ahora"
+      button: "Calcular mi presupuesto"
+
+  admin:
+    title: "VanQuote · Administración"
+    summary: "Resumen"
+    total_leads: "Total de leads"
+    total_requests: "Total de peticiones"
+    consented_leads: "Leads con consentimiento"
+    empty: "No hay leads con consentimiento."
+    unknown_customer: "Cliente no registrado"
+    not_available: "—"
+    columns:
+      date: "Fecha"
+      customer: "Cliente"
+      email: "Email"
+      phone: "Teléfono"
+      contact_preference: "Preferencia de contacto"
+      origin: "Origen"
+      destination: "Destino"
+      recommended_price: "Precio recomendado"
+      status: "Estado"
+    statuses:
+      new: "Nuevo"
+      contacted: "Contactado"
+      quoted: "Presupuestado"
+      accepted: "Aceptado"
+      rejected: "Rechazado"
+      completed: "Completado"
+    contact_preferences:
+      email_quote: "Enviar presupuesto por email"
+      phone: "Llamada telefónica"
+      email_contact: "Contacto por email"
+
+  profile:
+    title: "Mi perfil"
+    description: "Gestiona tus datos personales y de contacto."
+    updated: "Perfil actualizado correctamente."
+    update_failed: "No se ha podido actualizar el perfil."
+    save: "Guardar cambios"
+    my_quotes: "Mis presupuestos"
+    view_quotes: "Ver mis presupuestos"
+    administration: "Administración"
+    admin_link: "Back-office"
+    fields:
+      first_name: "Nombre"
+      last_name: "Apellidos"
+      email: "Email"
+      phone: "Teléfono"
 
   quotes:
     title: "Presupuesto de transporte"
@@ -23,6 +112,7 @@ es:
       date: "Fecha"
       recommended_price: "Precio recomendado"
       details: "Ver detalle"
+      card_label: "Presupuesto"
 
     new:
       subtitle: "Calcula qué precio tiene el transporte de tus sueños"
@@ -86,6 +176,13 @@ es:
           submit: "Quiero recibir una llamada"
       new_quote: "Nueva cotización"
 
+    contact_confirmation:
+      title: "¡Solicitud recibida!"
+      message: "Te contactaremos por email con el presupuesto que has obtenido."
+      flash: "Solicitud recibida. VanQuote te contactará por email."
+      new_quote: "Empezar otra cotización"
+      my_quotes: "Ver mis presupuestos"
+
     errors:
       route_calculation_failed: "No se ha podido calcular la ruta. Inténtalo de nuevo."
 
@@ -104,7 +201,6 @@ es:
       or: "o"
       google: "Continuar con Google"
       apple: "Continuar con Apple"
-      coming_soon: "Próximamente"
       no_account: "¿No tienes una cuenta?"
       create_account: "Crear cuenta"
       back_to_vanquote: "← Volver a VanQuote"
@@ -119,6 +215,12 @@ es:
       subtitle: "Guarda tus presupuestos y gestiona tus solicitudes de transporte."
       errors:
         title: "No hemos podido crear tu cuenta:"
+      first_name:
+        label: "Nombre"
+        placeholder: "Tu nombre"
+      last_name:
+        label: "Apellidos"
+        placeholder: "Tus apellidos"
       email:
         label: "Email"
         placeholder: "tu@email.com"
@@ -132,10 +234,37 @@ es:
       or: "o"
       google: "Continuar con Google"
       apple: "Continuar con Apple"
-      coming_soon: "Próximamente"
       already_have_account: "¿Ya tienes una cuenta?"
       sign_in: "Iniciar sesión"
       back_to_vanquote: "← Volver a VanQuote"
+
+  oauth:
+    providers:
+      google_oauth2: "Google"
+      apple: "Apple"
+    default_name: "Usuario"
+    default_last_name: "VanQuote"
+    errors:
+      invalid_provider: "El proveedor de acceso no es válido."
+      not_configured: "El acceso con %{provider} requiere configuración externa."
+      authentication_failed: "No se ha podido completar el acceso. Prueba con email y contraseña."
+      account_creation_failed: "No se ha podido crear la cuenta con este proveedor."
+
+  activerecord:
+    attributes:
+      user:
+        first_name: "Nombre"
+        last_name: "Apellidos"
+        email_address: "Email"
+        password: "Contraseña"
+        password_confirmation: "Repite tu contraseña"
+    errors:
+      messages:
+        blank: "no puede estar en blanco"
+        invalid: "no es válido"
+        taken: "ya está en uso"
+        too_short: "es demasiado corta (mínimo %{count} caracteres)"
+        confirmation: "no coincide con la confirmación"
 
   passwords:
     new:
@@ -186,6 +315,7 @@ es:
       subtitle: "Elige cómo quieres que nos pongamos en contacto contigo."
       contact_preference:
         label: "Método de contacto"
+        phone_value: "Llamada telefónica"
         options:
           email_quote: "Enviar presupuesto por email"
           phone: "Quiero recibir una llamada"

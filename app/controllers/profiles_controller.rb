@@ -4,7 +4,7 @@ class ProfilesController < ApplicationController
 
   def update
     if Current.user.update(profile_params)
-      redirect_to profile_path, notice: "Perfil actualizado correctamente."
+      redirect_to profile_path, notice: I18n.t("profile.updated")
     else
       render :show, status: :unprocessable_entity
     end

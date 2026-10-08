@@ -1,0 +1,15 @@
+<div class="dashboard-page">
+  <section class="dashboard-card" aria-labelledby="dashboard-greeting">
+    <p class="dashboard-brand">VanQuote</p>
+    <h1 id="dashboard-greeting">
+      <%= t("dashboard.greeting", name: Current.user.first_name.presence || t("dashboard.fallback_name")) %>
+    </h1>
+
+    <div class="dashboard-actions">
+      <%= link_to t("dashboard.my_quotes"), quotes_path, class: "button-primary" %>
+      <%= link_to t("dashboard.new_quote"), new_quote_path, class: "button-primary" %>
+      <%= link_to t("dashboard.profile"), profile_path, class: "button-primary" %>
+      <%= button_to t("dashboard.logout"), session_path, method: :delete, class: "button-primary" %>
+    </div>
+  </section>
+</div>

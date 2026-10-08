@@ -21,7 +21,7 @@ class SessionsController < ApplicationController
   def create
     if user = User.authenticate_by(params.permit(:email_address, :password))
       start_new_session_for(user)
-      redirect_to after_authentication_url(default_url: quotes_url)
+      redirect_to after_authentication_url(default_url: dashboard_url)
     else
       redirect_to new_session_path,
                   alert: I18n.t("sessions.alerts.invalid_credentials")
@@ -30,7 +30,7 @@ class SessionsController < ApplicationController
 
   def destroy
     terminate_session
-    redirect_to new_session_path, status: :see_other
+    redirect_to root_path, status: :see_other
   end
 
   private

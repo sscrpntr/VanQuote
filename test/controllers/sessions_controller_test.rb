@@ -19,6 +19,39 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_select "form"
   end
 
+  test "login page offers Google OAuth and hides Apple when it is not configured" do
+    get new_session_path
+
+    assert_response :success
+    assert_select "form[action=?]", oauth_initiation_path(provider: "google_oauth2") do
+      assert_select "button.auth-social-button-google[aria-label='Continuar con Google']" do
+        assert_select "img.auth-social-google-logo[src=?][alt='']", "/google-g-logo.png"
+      end
+    end
+    assert_select "form[action=?]", oauth_initiation_path(provider: "apple"), count: 0
+    assert_not_includes response.body, "Continuar con Apple"
+    assert_not_includes response.body, "Próximamente"
+  end
+
+  test "login page hides Apple and keeps Google in every supported locale" do
+    translations = {
+      "es" => [ "Continuar con Google", "Continuar con Apple" ],
+      "ca" => [ "Continua amb Google", "Continua amb Apple" ],
+      "en" => [ "Continue with Google", "Continue with Apple" ]
+    }
+
+    translations.each do |locale, (google_label, apple_label)|
+      post locale_path, params: { locale: locale, return_to: new_session_path }
+      get new_session_path
+
+      assert_response :success
+      assert_select "button.auth-social-button-google[aria-label=?]", google_label
+      assert_select "form[action=?]", oauth_initiation_path(provider: "apple"), count: 0
+      assert_not_includes response.body, apple_label
+      assert_not_includes response.body, "translation_missing"
+    end
+  end
+
   test "creates a session with valid credentials" do
     assert_difference "Session.count", 1 do
       post session_path, params: {
@@ -28,10 +61,49 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :redirect
-    assert_equal quotes_path, URI.parse(response.location).path
+    assert_equal dashboard_path, URI.parse(response.location).path
   end
 
-  test "login from the landing page still opens the session form and then quotes" do
+  test "authenticated user sees the logout control next to the profile link" do
+    authenticate_as(@user)
+
+    get root_path
+
+    assert_response :success
+    assert_select "nav.site-navigation a[href=?]", profile_path, text: "Mi perfil"
+    assert_select "nav.site-navigation form[action=?]", session_path do
+      assert_select "input[name=_method][value=delete]"
+      assert_select "button[type=submit]", text: "Cerrar sesión"
+    end
+  end
+
+  test "logout destroys the session and redirects to the public landing page" do
+    authenticate_as(@user)
+    session_record = Session.find_by!(user: @user)
+    get dashboard_path
+    assert_response :success
+
+    assert_difference "Session.count", -1 do
+      delete session_path
+    end
+
+    assert_response :see_other
+    assert_redirected_to root_path
+    assert_not Session.exists?(session_record.id)
+
+    get dashboard_path
+    assert_redirected_to new_session_path
+  end
+
+  test "anonymous user does not see the logout control" do
+    get root_path
+
+    assert_response :success
+    assert_select "nav.site-navigation", count: 0
+    assert_select "form[action=?] input[type=submit][value='Cerrar sesión']", session_path, count: 0
+  end
+
+  test "login from the landing page opens the dashboard" do
     get root_path
 
     assert_response :success
@@ -45,7 +117,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
       password: "password123"
     }
 
-    assert_redirected_to quotes_path
+    assert_redirected_to dashboard_path
   end
 
   test "rejects invalid credentials" do
@@ -117,7 +189,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal @user.id, quote.user_id
     assert_equal "EMAIL_QUOTE", quote.lead.contact_preference
-    assert_equal public_quotes_path, URI.parse(response.location).path
+    assert_equal contact_confirmation_path, URI.parse(response.location).path
   end
 
   test "EMAIL_QUOTE login authenticates the user and retains the selected quote context" do
@@ -141,7 +213,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal @user.id, Session.order(:created_at).last.user_id
     assert_equal @user.id, quote.reload.user_id
     assert_equal "EMAIL_QUOTE", quote.lead.reload.contact_preference
-    assert_equal public_quotes_path, URI.parse(response.location).path
+    assert_equal contact_confirmation_path, URI.parse(response.location).path
 
     get quote_path(quote)
     assert_response :success
@@ -167,7 +239,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal @user.id, quote.user_id
     assert_equal "EMAIL_CONTACT", quote.lead.contact_preference
-    assert_equal public_quotes_path, URI.parse(response.location).path
+    assert_equal contact_confirmation_path, URI.parse(response.location).path
   end
 
   test "PHONE preference redirects to the phone form" do
@@ -189,9 +261,15 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     quote.lead.reload
 
     assert_equal @user.id, quote.user_id
-    assert_nil quote.lead.contact_preference
+    assert_equal "PHONE", quote.lead.contact_preference
+    assert_equal @user.phone, quote.lead.phone
     assert_equal edit_lead_path(quote.lead),
                 URI.parse(response.location).path
+
+    follow_redirect!
+    assert_response :success
+    assert_select "select[name='lead[contact_preference]']", count: 0
+    assert_select ".contact-preference-value", text: "Llamada telefónica"
   end
 
   test "invalid public token does not attach a quote" do
@@ -257,7 +335,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     }
 
     assert_response :redirect
-    assert_equal public_quotes_path, URI.parse(response.location).path
+    assert_equal contact_confirmation_path, URI.parse(response.location).path
     assert_equal @user.id, quote.reload.user_id
     assert_equal "EMAIL_QUOTE", quote.lead.reload.contact_preference
   end
@@ -273,17 +351,31 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     }
 
     assert_response :redirect
-    assert_equal public_quotes_path, URI.parse(response.location).path
+    assert_equal contact_confirmation_path, URI.parse(response.location).path
     assert_equal existing_session.id, Session.find_by!(user_id: @user.id).id
     assert_equal @user.id, quote.reload.user_id
     assert_equal "EMAIL_QUOTE", quote.lead.reload.contact_preference
 
     follow_redirect!
     assert_response :success
-    assert_select ".quote-card.quote-result-card"
-    assert_select ".route-address", "Barcelona"
-    assert_select ".route-address", "Madrid"
+    assert_select "#contact-confirmation-title", "¡Solicitud recibida!"
+    assert_select "[role=status]", text: /Solicitud recibida/
+    assert_select "nav.site-navigation a[href=?]", new_quote_path
+    assert_select "nav.site-navigation a[href=?]", quotes_path
+    assert_select "nav.site-navigation a[href=?]", profile_path
+    assert_select "nav.site-navigation form[action=?]", session_path
+    assert_select "a[href=?]", quotes_path, text: "Ver mis presupuestos"
     assert_select "form.auth-form", false
+  end
+
+  test "anonymous user can visit email contact confirmation without authenticated navigation" do
+    get contact_confirmation_path
+
+    assert_response :success
+    assert_select "#contact-confirmation-title", "¡Solicitud recibida!"
+    assert_select ".confirmation-message", "Te contactaremos por email con el presupuesto que has obtenido."
+    assert_select "a[href=?]", new_quote_path, text: "Empezar otra cotización"
+    assert_select "nav.site-navigation", count: 0
   end
 
   test "EMAIL_QUOTE authentication cannot redirect to an external return target" do
@@ -301,7 +393,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :redirect
     assert_equal request.host, URI.parse(response.location).host
-    assert_equal public_quotes_path, URI.parse(response.location).path
+    assert_equal contact_confirmation_path, URI.parse(response.location).path
   end
 
   test "cannot modify another user's quote with a public token" do

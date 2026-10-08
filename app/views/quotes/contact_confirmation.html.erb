@@ -1,0 +1,25 @@
+<div class="quote-page">
+  <div class="quote-container">
+    <header class="quote-header">
+      <h1 class="quote-logo">VanQuote</h1>
+    </header>
+
+    <section class="quote-card quote-result-card" aria-labelledby="contact-confirmation-title">
+      <% if flash[:notice] %>
+        <div class="auth-notice flash-notice" role="status" aria-live="polite" data-controller="flash">
+          <%= flash[:notice] %>
+        </div>
+      <% end %>
+
+      <h1 id="contact-confirmation-title"><%= t("quotes.contact_confirmation.title") %></h1>
+      <p class="confirmation-message"><%= t("quotes.contact_confirmation.message") %></p>
+
+      <div class="confirmation-actions">
+        <%= link_to t("quotes.contact_confirmation.new_quote"), new_quote_path, class: "button-primary" %>
+        <% if Current.user %>
+          <%= link_to t("quotes.contact_confirmation.my_quotes"), quotes_path, class: "button-secondary" %>
+        <% end %>
+      </div>
+    </section>
+  </div>
+</div>

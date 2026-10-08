@@ -1,7 +1,7 @@
 <section class="profile-page">
   <div class="profile-header">
-    <h1>Mi perfil</h1>
-    <p>Gestiona tus datos personales y de contacto.</p>
+    <h1><%= t("profile.title") %></h1>
+    <p><%= t("profile.description") %></p>
   </div>
 
   <% if flash[:notice] %>
@@ -10,7 +10,7 @@
 
   <% if Current.user.errors.any? %>
     <div class="confirmation-message" role="alert">
-      <p><strong>No se ha podido actualizar el perfil.</strong></p>
+      <p><strong><%= t("profile.update_failed") %></strong></p>
       <ul>
         <% Current.user.errors.full_messages.each do |message| %>
           <li><%= message %></li>
@@ -21,39 +21,39 @@
 
   <%= form_with model: Current.user, url: profile_path, method: :patch do |form| %>
     <div class="form-field">
-      <%= form.label :first_name, "Nombre", class: "form-label" %>
+      <%= form.label :first_name, t("profile.fields.first_name"), class: "form-label" %>
       <%= form.text_field :first_name, class: "form-input", autocomplete: "given-name" %>
     </div>
 
     <div class="form-field">
-      <%= form.label :last_name, "Apellidos", class: "form-label" %>
+      <%= form.label :last_name, t("profile.fields.last_name"), class: "form-label" %>
       <%= form.text_field :last_name, class: "form-input", autocomplete: "family-name" %>
     </div>
 
     <div class="form-field">
-      <%= form.label :email_address, "Email", class: "form-label" %>
+      <%= form.label :email_address, t("profile.fields.email"), class: "form-label" %>
       <%= form.email_field :email_address, class: "form-input", autocomplete: "email" %>
     </div>
 
     <div class="form-field">
-      <%= form.label :phone, "Teléfono", class: "form-label" %>
+      <%= form.label :phone, t("profile.fields.phone"), class: "form-label" %>
       <%= form.telephone_field :phone, class: "form-input", autocomplete: "tel" %>
     </div>
 
     <div class="form-actions">
-      <%= form.submit "Guardar cambios", class: "button-primary" %>
+      <%= form.submit t("profile.save"), class: "button-primary" %>
     </div>
   <% end %>
 
   <section aria-labelledby="profile-quotes-heading">
-    <h2 id="profile-quotes-heading">Mis presupuestos</h2>
-    <p><%= link_to "Ver mis presupuestos", quotes_path, class: "button-secondary" %></p>
+    <h2 id="profile-quotes-heading"><%= t("profile.my_quotes") %></h2>
+    <p><%= link_to t("profile.view_quotes"), quotes_path, class: "button-secondary" %></p>
   </section>
 
   <% if Current.user.admin? %>
     <section aria-labelledby="profile-admin-heading">
-      <h2 id="profile-admin-heading">Administración</h2>
-      <p><%= link_to "Back-office", admin_path, class: "button-secondary" %></p>
+      <h2 id="profile-admin-heading"><%= t("profile.administration") %></h2>
+      <p><%= link_to t("profile.admin_link"), admin_path, class: "button-secondary" %></p>
     </section>
   <% end %>
 </section>

@@ -53,7 +53,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     }
 
     assert_response :unprocessable_entity
-    assert_includes response.body, "No se ha podido actualizar el perfil"
+    assert_includes response.body, I18n.t("profile.update_failed")
   end
 
   test "unauthenticated user cannot update profile" do
