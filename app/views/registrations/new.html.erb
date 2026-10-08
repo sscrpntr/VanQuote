@@ -44,6 +44,25 @@
             class: "auth-form" do |form| %>
 
         <div class="auth-field">
+          <%= form.label :first_name, t("registrations.new.first_name.label") %>
+
+          <%= form.text_field :first_name,
+                required: true,
+                autofocus: true,
+                autocomplete: "given-name",
+                placeholder: t("registrations.new.first_name.placeholder") %>
+        </div>
+
+        <div class="auth-field">
+          <%= form.label :last_name, t("registrations.new.last_name.label") %>
+
+          <%= form.text_field :last_name,
+                required: true,
+                autocomplete: "family-name",
+                placeholder: t("registrations.new.last_name.placeholder") %>
+        </div>
+
+        <div class="auth-field">
           <%= form.label :email_address, t("registrations.new.email.label") %>
 
           <%= form.email_field :email_address,
@@ -51,6 +70,15 @@
                 autofocus: true,
                 autocomplete: "email",
                 placeholder: t("registrations.new.email.placeholder") %>
+        </div>
+
+        <div class="auth-field">
+          <%= form.label :phone, t("registrations.new.phone.label") %>
+
+          <%= form.telephone_field :phone,
+                required: true,
+                autocomplete: "tel",
+                placeholder: t("registrations.new.phone.placeholder") %>
         </div>
 
         <div class="auth-field">

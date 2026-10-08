@@ -13,6 +13,9 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_difference "User.count", 1 do
       post registration_path, params: {
         user: {
+          first_name: "Test",
+          last_name: "User",
+          phone: "+34600000000",
           email_address: "new-user@example.com",
           password: "password123",
           password_confirmation: "password123"
@@ -39,6 +42,9 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_difference "User.count", 1 do
       post registration_path, params: {
         user: {
+          first_name: "Quote",
+          last_name: "Customer",
+          phone: "+34600000001",
           email_address: "quote-customer@example.com",
           password: "password123",
           password_confirmation: "password123"
@@ -68,11 +74,13 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
       contact_preference: "EMAIL_QUOTE"
     }
     post registration_path, params: { user: {
+      first_name: "Test", last_name: "User", phone: "+34600000000",
       email_address: "", password: "password123", password_confirmation: "password123"
     } }
 
     assert_response :unprocessable_entity
     post registration_path, params: { user: {
+      first_name: "Retry", last_name: "User", phone: "+34600000002",
       email_address: "retry@example.com", password: "password123", password_confirmation: "password123"
     } }
 
@@ -86,6 +94,7 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     quote = create_public_quote
     get new_registration_path, params: { quote_token: "invalid-token", contact_preference: "EMAIL_QUOTE" }
     post registration_path, params: { user: {
+      first_name: "Invalid", last_name: "Token", phone: "+34600000003",
       email_address: "invalid-token-user@example.com", password: "password123", password_confirmation: "password123"
     } }
 
@@ -114,6 +123,9 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_no_difference "User.count" do
       post registration_path, params: {
         user: {
+          first_name: "Test",
+          last_name: "User",
+          phone: "+34600000005",
           email_address: "new-user@example.com",
           password: "password123",
           password_confirmation: "different-password"
@@ -127,6 +139,9 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
 
   test "does not create a user with an existing email" do
     User.create!(
+      first_name: "Existing",
+      last_name: "User",
+      phone: "+34600000006",
       email_address: "existing@example.com",
       password: "password123"
     )

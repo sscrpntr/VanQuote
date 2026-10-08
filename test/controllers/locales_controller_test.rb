@@ -11,7 +11,8 @@ class LocalesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "authenticated user can change locale" do
-    user = User.create!(email_address: "locale-user@example.com", password: "password123",
+    user = User.create!(first_name: "Locale", last_name: "User", phone: "+34600000004",
+      email_address: "locale-user@example.com", password: "password123",
                         password_confirmation: "password123")
     post session_path, params: { email_address: user.email_address, password: "password123" }
 

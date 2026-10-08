@@ -8,6 +8,7 @@ class QuotesController < ApplicationController
   end
 
   def new
+    resume_session
     @quote = Quote.new
   end
 
@@ -47,7 +48,8 @@ class QuotesController < ApplicationController
         @quote.save!
 
         @quote.create_lead!(
-          email: params[:email].to_s.strip,
+          email: lead_email,
+          phone: lead_phone,
           consent_given: true,
           consent_at: Time.current,
           status: "NEW"
@@ -87,13 +89,29 @@ class QuotesController < ApplicationController
   private
 
   def quote_input_valid?
-    email = params[:email].to_s.strip
+    email = lead_email
     consent_given = ActiveModel::Type::Boolean.new.cast(params[:consent_given])
 
     email.present? &&
       email.match?(URI::MailTo::EMAIL_REGEXP) &&
       consent_given &&
       @quote.valid?
+  end
+
+  def lead_email
+    if Current.user
+      Current.user.email_address
+    else
+      params[:email].to_s.strip
+    end
+  end
+
+  def lead_phone
+    if Current.user
+      Current.user.phone
+    else
+      params[:phone].to_s.strip
+    end
   end
 
   def apply_internal_defaults(quote)

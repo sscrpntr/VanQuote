@@ -3,6 +3,9 @@ require "test_helper"
 class SessionsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @user = User.create!(
+      first_name: "Test",
+      last_name: "User",
+      phone: "+34600000000",
       email_address: "user@example.com",
       password: "password123"
     )
@@ -303,6 +306,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
 
   test "cannot modify another user's quote with a public token" do
     owner = User.create!(
+      first_name: "Owner", last_name: "User", phone: "+34600000003",
       email_address: "owner@example.com",
       password: "password123"
     )

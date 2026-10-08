@@ -20,6 +20,7 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     QuotesController.routes_service_class = FakeRoutesService
 
     @user = User.create!(
+      first_name: "Test", last_name: "User", phone: "+34600000000",
       email_address: "user@example.com",
       password: "password123"
     )
@@ -30,7 +31,7 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "home shows account links outside the quote form" do
-    get root_path
+    get "/"
 
     assert_response :success
     assert_select "a[href=?]", new_session_path, text: "Iniciar sesión"
@@ -65,7 +66,7 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
       post locale_path, params: { locale: locale, return_to: root_path }
       assert_redirected_to root_path
 
-      get root_path
+      get "/"
 
       assert_response :success
       assert_select "header.site-header nav.language-selector", count: 1 do
@@ -81,7 +82,7 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
   test "authenticated user can visit home and create a quote" do
     authenticate_as(@user)
 
-    get root_path
+    get "/"
     assert_response :success
     assert_select "form.quote-form"
 
@@ -128,7 +129,8 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
 
   test "authenticated user sees only their quotes with a link to each detail" do
     own_quote = create_quote_for(@user, origin: "Barcelona", destination: "Madrid")
-    other_user = User.create!(email_address: "other@example.com", password: "password123")
+    other_user = User.create!(first_name: "Other", last_name: "User", phone: "+34600000002",
+      email_address: "other@example.com", password: "password123")
     create_quote_for(other_user, origin: "Paris", destination: "Lyon")
 
     authenticate_as(@user)
@@ -156,7 +158,8 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "admin can access quotes index" do
-    admin = User.create!(email_address: "admin@example.com", password: "password123", admin: true)
+    admin = User.create!(first_name: "Admin", last_name: "User", phone: "+34600000001",
+      email_address: "admin@example.com", password: "password123", admin: true)
     authenticate_as(admin)
 
     get quotes_path
@@ -190,7 +193,8 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "does not reassign a quote that belongs to another user" do
-    owner = User.create!(email_address: "owner@example.com", password: "password123")
+    owner = User.create!(first_name: "Owner", last_name: "User", phone: "+34600000003",
+      email_address: "owner@example.com", password: "password123")
     quote = Quote.create!(
       user: owner,
       origin: "Barcelona",
@@ -247,6 +251,77 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_equal Quote.last.id, lead.quote_id
   end
 
+  test "authenticated user does not see email or phone fields on the quote form" do
+    authenticate_as(@user)
+
+
+    get "/"
+
+    assert_response :success
+    assert_select "form.quote-form", count: 1
+    assert_select "form.quote-form input[name='email']", count: 0
+    assert_select "form.quote-form input[name='phone']", count: 0
+  end
+
+  test "anonymous user sees email and phone fields on the quote form" do
+    get "/"
+
+    assert_response :success
+    assert_select "form.quote-form", count: 1
+    assert_select "form.quote-form input[name='email']", count: 1
+    assert_select "form.quote-form input[name='phone']", count: 1
+  end
+
+  test "authenticated user does not need to submit email or phone when creating a quote" do
+    authenticate_as(@user)
+
+    assert_difference("Quote.count", 1) do
+      post quotes_path, params: {
+        quote: {
+          origin: "Barcelona",
+          destination: "Madrid",
+          distance_km: 999,
+          estimated_duration_minutes: 999
+        },
+        consent_given: "1"
+      }
+    end
+
+    assert_response :redirect
+
+    lead = Quote.last.lead
+
+    assert_equal @user.email_address, lead.email
+    assert_equal @user.phone, lead.phone
+  end
+
+  test "authenticated user cannot override their email or phone when creating a quote" do
+    authenticate_as(@user)
+
+    assert_difference("Quote.count", 1) do
+      post quotes_path, params: {
+        quote: {
+          origin: "Barcelona",
+          destination: "Madrid",
+          distance_km: 999,
+          estimated_duration_minutes: 999
+        },
+        email: "attacker@example.com",
+        phone: "+34999999999",
+        consent_given: "1"
+      }
+    end
+
+    assert_response :redirect
+
+    lead = Quote.last.lead
+
+    assert_equal @user.email_address, lead.email
+    assert_equal @user.phone, lead.phone
+    refute_equal "attacker@example.com", lead.email
+    refute_equal "+34999999999", lead.phone
+  end
+
   test "ignores internal costs submitted by the customer" do
     assert_difference("Quote.count", 1) do
       post quotes_path, params: {
@@ -296,11 +371,6 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
       "User-Agent" => "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
     }
 
-    puts "TEST REQUEST USER AGENT: #{request.user_agent.inspect}"
-    puts "TEST RESPONSE STATUS: #{response.status}"
-    puts "TEST RESPONSE CONTENT TYPE: #{response.media_type.inspect}"
-    puts "TEST RESPONSE BODY:"
-    puts response.body
 
 assert_response :success
 
@@ -318,9 +388,6 @@ assert_response :success
     }
 
     get quote_path(quote)
-    puts "TEST USER AGENT: #{request.user_agent.inspect}"
-    puts "TEST RESPONSE STATUS: #{response.status}"
-    puts "TEST RESPONSE LOCATION: #{response.location.inspect}"
     assert_response :success
     assert_includes response.body, "556.25 €"
   end
@@ -448,6 +515,7 @@ assert_response :success
       email_address: user.email_address,
       password: "password123"
     }
+
   end
 
   def valid_quote_params

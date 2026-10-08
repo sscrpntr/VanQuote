@@ -4,6 +4,9 @@ require "test_helper"
 class UserTest < ActiveSupport::TestCase
   test "normalizes email address" do
     user = User.new(
+      first_name: "Test",
+      last_name: "User",
+      phone: "+34600000000",
       email_address: "  TEST@Example.COM  ",
       password: "password123"
     )
@@ -13,7 +16,7 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "requires an email address" do
-    user = User.new(password: "password123")
+    user = User.new(first_name: "Test", last_name: "User", phone: "+34600000000", password: "password123")
 
     assert_not user.valid?
     assert_includes user.errors[:email_address], "can't be blank"
@@ -21,11 +24,17 @@ class UserTest < ActiveSupport::TestCase
 
   test "requires a unique email address" do
     User.create!(
+      first_name: "Test",
+      last_name: "User",
+      phone: "+34600000000",
       email_address: "test@example.com",
       password: "password123"
     )
 
     duplicate = User.new(
+      first_name: "Test",
+      last_name: "User",
+      phone: "+34600000000",
       email_address: "TEST@example.com",
       password: "password123"
     )
@@ -35,7 +44,7 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "requires a password when creating a user" do
-    user = User.new(email_address: "test@example.com")
+    user = User.new(first_name: "Test", last_name: "User", phone: "+34600000000", email_address: "test@example.com")
 
     assert_not user.valid?
     assert_includes user.errors[:password], "can't be blank"

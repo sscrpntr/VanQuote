@@ -5,7 +5,7 @@ Rails.application.routes.draw do
 
   root "quotes#new"
 
-  get "/profile", to: "profiles#show", as: :profile
+  resource :profile, only: [ :show, :update ], controller: "profiles"
 
   post "locale", to: "locales#update"
 

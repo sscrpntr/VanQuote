@@ -35,6 +35,17 @@ en:
         label: "Destination"
         placeholder: "Enter a destination address"
 
+      first_name:
+        label: "First name"
+        placeholder: "Your first name"
+
+      last_name:
+        label: "Last name"
+        placeholder: "Your last name"
+
+      phone:
+        label: "Phone"
+        placeholder: "+34 600 000 000"
       email:
         label: "Email"
         placeholder: "you@email.com"
