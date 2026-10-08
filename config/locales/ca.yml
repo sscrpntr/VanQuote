@@ -35,6 +35,17 @@ ca:
         label: "Destinació"
         placeholder: "Escriu una adreça de destinació"
 
+      first_name:
+        label: "Nom"
+        placeholder: "El teu nom"
+
+      last_name:
+        label: "Cognoms"
+        placeholder: "Els teus cognoms"
+
+      phone:
+        label: "Telèfon"
+        placeholder: "+34 600 000 000"
       email:
         label: "Email"
         placeholder: "tu@email.com"

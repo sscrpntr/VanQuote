@@ -3,6 +3,7 @@ require "test_helper"
 class LeadsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @user = User.create!(
+      first_name: "Test", last_name: "User", phone: "+34600000000",
       email_address: "user@example.com",
       password: "password123"
     )
@@ -41,7 +42,8 @@ class LeadsControllerTest < ActionDispatch::IntegrationTest
 
   test "does not show leads from another user's quotes" do
     quote = quotes(:one)
-    quote.update!(user: User.create!(email_address: "other@example.com", password: "password123"))
+    quote.update!(user: User.create!(first_name: "Other", last_name: "User", phone: "+34600000002",
+      email_address: "other@example.com", password: "password123"))
 
     Lead.create!(
       quote: quote,
@@ -61,6 +63,7 @@ class LeadsControllerTest < ActionDispatch::IntegrationTest
 
   test "admin sees leads from all users' quotes" do
     admin = User.create!(
+      first_name: "Admin", last_name: "User", phone: "+34600000001",
       email_address: "admin@example.com",
       password: "password123",
       admin: true

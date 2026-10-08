@@ -2,8 +2,10 @@ require "test_helper"
 
 class AdminControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @admin = User.create!(email_address: "admin@example.com", password: "password123", admin: true)
-    @user = User.create!(email_address: "user@example.com", password: "password123")
+    @admin = User.create!(first_name: "Admin", last_name: "User", phone: "+34600000001",
+      email_address: "admin@example.com", password: "password123", admin: true)
+    @user = User.create!(first_name: "Test", last_name: "User", phone: "+34600000000",
+      email_address: "user@example.com", password: "password123")
   end
 
   test "admin can access the dashboard" do

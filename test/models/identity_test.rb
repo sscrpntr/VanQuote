@@ -3,6 +3,9 @@ require "test_helper"
 class IdentityTest < ActiveSupport::TestCase
   test "accepts google as a provider" do
     user = User.create!(
+      first_name: "Test",
+      last_name: "Identity",
+      phone: "+34600000010",
       email_address: "google@example.com",
       password: "password123"
     )
@@ -18,6 +21,9 @@ class IdentityTest < ActiveSupport::TestCase
 
   test "accepts apple as a provider" do
     user = User.create!(
+      first_name: "Test",
+      last_name: "Identity",
+      phone: "+34600000010",
       email_address: "apple@example.com",
       password: "password123"
     )
@@ -33,6 +39,9 @@ class IdentityTest < ActiveSupport::TestCase
 
   test "rejects unsupported providers" do
     user = User.create!(
+      first_name: "Test",
+      last_name: "Identity",
+      phone: "+34600000010",
       email_address: "unsupported@example.com",
       password: "password123"
     )
@@ -49,11 +58,17 @@ class IdentityTest < ActiveSupport::TestCase
 
   test "does not allow the same uid for the same provider twice" do
     user = User.create!(
+      first_name: "Test",
+      last_name: "Identity",
+      phone: "+34600000010",
       email_address: "first@example.com",
       password: "password123"
     )
 
     other_user = User.create!(
+      first_name: "Test",
+      last_name: "Identity",
+      phone: "+34600000010",
       email_address: "second@example.com",
       password: "password123"
     )

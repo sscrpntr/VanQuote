@@ -43,17 +43,31 @@
                 } %>
         </div>
 
-        <div class="form-field">
-          <%= label_tag :email,
-                t("quotes.new.email.label"),
-                class: "form-label" %>
+        <% unless Current.user %>
+          <div class="form-field">
+            <%= label_tag :email,
+                  t("quotes.new.email.label"),
+                  class: "form-label" %>
 
-          <%= email_field_tag :email,
-                params[:email],
-                required: true,
-                placeholder: t("quotes.new.email.placeholder"),
-                class: "form-input" %>
-        </div>
+            <%= email_field_tag :email,
+                  params[:email],
+                  required: true,
+                  placeholder: t("quotes.new.email.placeholder"),
+                  class: "form-input" %>
+          </div>
+
+          <div class="form-field">
+            <%= label_tag :phone,
+                  t("quotes.new.phone.label"),
+                  class: "form-label" %>
+
+            <%= telephone_field_tag :phone,
+                  params[:phone],
+                  required: true,
+                  placeholder: t("quotes.new.phone.placeholder"),
+                  class: "form-input" %>
+          </div>
+        <% end %>
 
         <div class="form-consent">
           <%= check_box_tag :consent_given,

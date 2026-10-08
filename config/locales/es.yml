@@ -32,6 +32,17 @@ es:
       destination:
         label: "Destino"
         placeholder: "Escribe una dirección de destino"
+      first_name:
+        label: "Nombre"
+        placeholder: "Tu nombre"
+
+      last_name:
+        label: "Apellidos"
+        placeholder: "Tus apellidos"
+
+      phone:
+        label: "Teléfono"
+        placeholder: "+34 600 000 000"
       email:
         label: "Email"
         placeholder: "tu@email.com"
