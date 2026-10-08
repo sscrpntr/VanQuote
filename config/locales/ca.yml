@@ -9,6 +9,7 @@ ca:
     account: "Navegació del compte"
     my_quotes: "Els meus pressupostos"
     new_quote: "Nova cotització"
+    profile: "El meu perfil"
 
   quotes:
     title: "Pressupost de transport"

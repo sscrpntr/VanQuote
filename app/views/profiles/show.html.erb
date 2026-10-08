@@ -1,0 +1,15 @@
+<section class="profile-page">
+  <h1>Mi perfil</h1>
+
+  <section aria-labelledby="profile-quotes-heading">
+    <h2 id="profile-quotes-heading">Mis presupuestos</h2>
+    <p><%= link_to "Ver mis presupuestos", quotes_path %></p>
+  </section>
+
+  <% if Current.user.admin? %>
+    <section aria-labelledby="profile-admin-heading">
+      <h2 id="profile-admin-heading">Administración</h2>
+      <p><%= link_to "Back-office", admin_path %></p>
+    </section>
+  <% end %>
+</section>

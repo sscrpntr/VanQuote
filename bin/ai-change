@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+
+# Run Codex non-interactively from this repository with workspace-write access.
+# Arguments are joined without evaluating shell syntax or losing embedded special characters.
+
+set -u
+
+usage() {
+  printf 'Usage: %s "DESCRIPCIÓN DEL CAMBIO"\n' "${0##*/}" >&2
+  printf 'Run Codex CLI on the current Git repository with workspace-write access.\n' >&2
+}
+
+if [ "$#" -eq 1 ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
+  usage >&2
+  exit 0
+fi
+
+if [ "$#" -eq 0 ]; then
+  usage
+  exit 2
+fi
+
+# Keep the first argument intact and join any remaining arguments with spaces.
+prompt=$1
+shift
+for argument in "$@"; do
+  prompt="$prompt $argument"
+done
+if [ -z "${prompt//[[:space:]]/}" ]; then
+  usage
+  exit 2
+fi
+
+if ! command -v git >/dev/null 2>&1; then
+  printf 'Error: Git no está instalado o no está disponible en PATH.\n' >&2
+  exit 127
+fi
+
+repo_root=$(git rev-parse --show-toplevel 2>/dev/null) || {
+  printf 'Error: ejecuta este script desde un repositorio Git.\n' >&2
+  exit 2
+}
+
+if ! command -v codex >/dev/null 2>&1; then
+  printf 'Error: Codex CLI no está instalado o no está disponible en PATH.\n' >&2
+  exit 127
+fi
+
+printf 'Repositorio: %s\n' "$repo_root"
+printf '\nEstado actual de Git:\n'
+git_status=$(git -C "$repo_root" status --short --branch) || exit $?
+printf '%s\n' "$git_status"
+
+# Capture all pre-existing tracked and untracked paths for Codex to preserve.
+preexisting_status=$(git -C "$repo_root" status --porcelain=v1 --untracked-files=all) || exit $?
+
+# Keep the work anchored to the repository even if invoked from a nested directory.
+cd "$repo_root" || exit $?
+
+codex_prompt=$( {
+  cat <<'PROMPT'
+Inspecciona primero el repositorio y su estado. Modifica solo lo necesario para esta petición. Conserva todos los cambios preexistentes listados abajo; no los sobrescribas ni descartes.
+
+Protecciones obligatorias: no modifiques `.gitignore`, `.env`, `.env.local` ni ningún archivo de credenciales, secretos, claves privadas o certificados. No leas el contenido de `.env`, `.env.local` ni archivos de secretos. No hagas commit ni push; no ejecutes `git reset --hard` ni `git clean`; no descartes cambios preexistentes. Usa el sandbox `workspace-write`; si necesitas permisos adicionales o acceso fuera del workspace, solicita aprobación por el mecanismo de Codex.
+
+No ejecutes tests Rails ni ningún comando que necesite acceder a PostgreSQL local. En particular, no ejecutes `bin/rails test`, `rails test` ni `bundle exec rails test`. El wrapper ejecutará `bin/rails test`, `bundle exec rubocop` y `git diff --check` después de que Codex termine, desde el shell local fuera de este proceso. Puedes ejecutar comprobaciones que no necesiten PostgreSQL, como `bash -n`, `bundle exec rubocop` si funciona en el sandbox y `git diff --check`. Al finalizar muestra un resumen claro con archivos modificados, comprobaciones no relacionadas con PostgreSQL que ejecutaste y problemas pendientes.
+
+PROMPT
+  printf '\nEstado Git antes de iniciar:\n%s\n' "${preexisting_status:- (limpio)}"
+  printf '\nPetición del usuario:\n%s\n' "$prompt"
+} )
+
+# The prompt is one argument; approval prompts remain enabled for commands needing extra access.
+codex exec --sandbox workspace-write "${codex_prompt}"
+codex_status=$?
+
+if [ "$codex_status" -ne 0 ]; then
+  printf '\nCodex terminó con error (código %s).\n' "$codex_status" >&2
+fi
+
+# Run project checks locally after Codex exits so Rails can reach the local
+# PostgreSQL socket. Run every check and report each result, even on failure.
+printf '\nEjecutando comprobaciones locales fuera de Codex:\n'
+
+printf '\n$ bin/rails test\n'
+bin/rails test
+rails_status=$?
+printf 'Resultado de bin/rails test: %s\n' "$rails_status"
+
+printf '\n$ bundle exec rubocop\n'
+bundle exec rubocop
+rubocop_status=$?
+printf 'Resultado de bundle exec rubocop: %s\n' "$rubocop_status"
+
+printf '\n$ git diff --check\n'
+git diff --check
+diff_check_status=$?
+printf 'Resultado de git diff --check: %s\n' "$diff_check_status"
+
+if [ "$codex_status" -ne 0 ]; then
+  exit "$codex_status"
+fi
+if [ "$rails_status" -ne 0 ] || [ "$rubocop_status" -ne 0 ] || [ "$diff_check_status" -ne 0 ]; then
+  exit 1
+fi
+exit 0

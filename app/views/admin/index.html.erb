@@ -1,0 +1,52 @@
+<main class="admin-page">
+  <h1>VanQuote · Administración</h1>
+
+  <section class="admin-metrics" aria-label="Resumen">
+    <article class="admin-metric">
+      <h2>Total de leads</h2>
+      <p><%= @total_leads %></p>
+    </article>
+    <article class="admin-metric">
+      <h2>Total de peticiones</h2>
+      <p><%= @total_requests %></p>
+    </article>
+  </section>
+
+  <section class="admin-leads">
+    <h2>Leads con consentimiento</h2>
+    <% if @consented_leads.empty? %>
+      <p>No hay leads con consentimiento.</p>
+    <% else %>
+      <div class="admin-table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Email</th>
+              <th>Teléfono</th>
+              <th>Preferencia de contacto</th>
+              <th>Origen</th>
+              <th>Destino</th>
+              <th>Precio recomendado</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @consented_leads.each do |lead| %>
+              <tr>
+                <td><%= l(lead.created_at, format: :short) %></td>
+                <td><%= lead.email %></td>
+                <td><%= lead.phone.presence || "—" %></td>
+                <td><%= lead.contact_preference.presence || "—" %></td>
+                <td><%= lead.quote.origin %></td>
+                <td><%= lead.quote.destination %></td>
+                <td><%= number_to_currency(lead.quote.recommended_price, unit: "€") %></td>
+                <td><%= lead.status %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </section>
+</main>

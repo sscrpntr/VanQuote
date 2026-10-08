@@ -9,6 +9,7 @@ es:
     account: "Navegación de la cuenta"
     my_quotes: "Mis presupuestos"
     new_quote: "Nueva cotización"
+    profile: "Mi perfil"
 
   quotes:
     title: "Presupuesto de transporte"

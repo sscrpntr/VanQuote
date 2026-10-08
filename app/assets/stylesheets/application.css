@@ -74,6 +74,70 @@ input {
   padding: 48px 20px;
 }
 
+.admin-page {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 24px 36px 48px;
+}
+
+.admin-page h1 {
+  margin: 0 0 24px;
+}
+
+.admin-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-bottom: 36px;
+}
+
+.admin-metric,
+.admin-leads {
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #e4e7ec;
+  border-radius: 12px;
+}
+
+.admin-metric h2,
+.admin-leads h2 {
+  margin: 0 0 16px;
+  font-size: 18px;
+}
+
+.admin-metric p {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.admin-table-wrapper {
+  overflow-x: auto;
+}
+
+.admin-leads table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-leads th,
+.admin-leads td {
+  padding: 12px;
+  border-bottom: 1px solid #e4e7ec;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .admin-page {
+    padding: 24px 16px;
+  }
+
+  .admin-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
 .quote-container {
   width: 100%;
   max-width: 620px;

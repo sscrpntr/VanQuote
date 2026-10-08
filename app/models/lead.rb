@@ -16,6 +16,8 @@ class Lead < ApplicationRecord
     EMAIL_CONTACT
   ].freeze
 
+  scope :with_consent, -> { where(consent_given: true).where.not(consent_at: nil) }
+
   validates :email,
             presence: true,
             format: { with: URI::MailTo::EMAIL_REGEXP }

@@ -9,6 +9,7 @@ en:
     account: "Account navigation"
     my_quotes: "My quotes"
     new_quote: "New quote"
+    profile: "My profile"
 
   quotes:
     title: "Transport quote"
