@@ -4,6 +4,7 @@ class Quote < ApplicationRecord
 
   validates :origin, presence: true
   validates :destination, presence: true
+  validates :contact_email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
 
   validates :distance_km,
             numericality: { greater_than: 0 }

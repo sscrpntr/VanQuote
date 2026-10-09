@@ -13,7 +13,7 @@ class Identity < ApplicationRecord
 
   class AuthenticationError < StandardError; end
 
-  def self.authenticate!(auth)
+  def self.profile_from(auth)
     raise AuthenticationError, "missing provider response" unless auth.respond_to?(:[])
 
     provider = auth["provider"].to_s
@@ -22,22 +22,27 @@ class Identity < ApplicationRecord
     raise AuthenticationError, "unsupported provider" unless PROVIDERS.include?(provider)
     raise AuthenticationError, "missing provider uid" if uid.blank?
 
-    transaction do
-      identity = find_by(provider: provider, uid: uid)
-      return identity.user if identity
+    info = auth["info"] || {}
+    email = info["email"].to_s.strip.downcase
+    raise AuthenticationError, "missing email" if email.blank?
+    raise AuthenticationError, "unverified email" unless verified_email?(auth)
 
-      info = auth["info"] || {}
-      email = info["email"].to_s.strip.downcase
-      raise AuthenticationError, "missing email" if email.blank?
-      raise AuthenticationError, "unverified email" unless verified_email?(auth)
+    name = info["name"].to_s.strip.split(/\s+/, 2)
+    {
+      "provider" => provider,
+      "uid" => uid,
+      "email_address" => email,
+      "first_name" => info["first_name"].presence || name.first.presence || I18n.t("oauth.default_name"),
+      "last_name" => info["last_name"].presence || name.second.presence || I18n.t("oauth.default_last_name")
+    }
+  end
 
-      user = User.find_by(email_address: email)
-      user ||= create_user!(provider, info, email)
-      user.identities.create!(provider: provider, uid: uid)
-      user
-    end
-  rescue ActiveRecord::RecordNotUnique
-    find_by!(provider: provider, uid: uid).user
+  def self.authenticate!(auth)
+    profile = profile_from(auth)
+    identity = find_by(provider: profile.fetch("provider"), uid: profile.fetch("uid"))
+    raise AuthenticationError, "in-app registration required" unless identity
+
+    identity.user
   end
 
   def self.verified_email?(auth)

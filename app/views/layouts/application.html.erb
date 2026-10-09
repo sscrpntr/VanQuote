@@ -1,7 +1,10 @@
+<% landing_page = controller_name == "quotes" && action_name == "new" %>
+<% public_landing_page = landing_page && !Current.user %>
+<% page_classes = ["landing-page-layout"] if landing_page %>
+<% page_classes << "landing-authenticated" if landing_page && Current.user %>
 <!DOCTYPE html>
-<html>
+<html class="<%= page_classes&.join(' ') %>">
   <head>
-    <% public_landing_page = controller_name == "quotes" && action_name == "new" && !Current.user %>
     <title><%= public_landing_page ? t("seo.landing.title") : (content_for(:title) || "VanQuote") %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">

@@ -2,14 +2,20 @@
   <section class="dashboard-card" aria-labelledby="dashboard-greeting">
     <p class="dashboard-brand">VanQuote</p>
     <h1 id="dashboard-greeting">
-      <%= t("dashboard.greeting", name: Current.user.first_name.presence || t("dashboard.fallback_name")) %>
+      <%= t("dashboard.greeting") %>
     </h1>
 
     <div class="dashboard-actions">
-      <%= link_to t("dashboard.my_quotes"), quotes_path, class: "button-primary" %>
-      <%= link_to t("dashboard.new_quote"), new_quote_path, class: "button-primary" %>
-      <%= link_to t("dashboard.profile"), profile_path, class: "button-primary" %>
-      <%= button_to t("dashboard.logout"), session_path, method: :delete, class: "button-primary" %>
+      <%= link_to quotes_path, class: "dashboard-action" do %>
+        <span><%= t("dashboard.my_quotes") %></span>
+      <% end %>
+      <%= link_to new_quote_path, class: "dashboard-action" do %>
+        <span><%= t("dashboard.new_quote") %></span>
+      <% end %>
+      <%= link_to profile_path, class: "dashboard-action" do %>
+        <span><%= t("dashboard.profile") %></span>
+      <% end %>
     </div>
+    <%= button_to t("dashboard.logout"), session_path, method: :delete, class: "button-secondary dashboard-logout" %>
   </section>
 </div>

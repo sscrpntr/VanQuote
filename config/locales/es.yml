@@ -18,9 +18,54 @@ es:
     profile: "Mi perfil"
     logout: "Cerrar sesión"
 
+  operational_consent:
+    title: "Comunicaciones operativas por email"
+    accept: "Acepto recibir comunicaciones operativas por email."
+    submit: "Guardar consentimiento"
+    required: "Debes marcar la casilla para dar este consentimiento."
+    active: "Activo"
+    inactive: "No concedido o retirado"
+    withdraw: "Retirar consentimiento"
+    withdrawn: "Se ha retirado tu consentimiento para comunicaciones operativas por email."
+    give: "Dar consentimiento"
+    back_to_quote: "Volver a mi presupuesto"
+    back_to_profile: "Volver a mi perfil"
+
+  terms:
+    title: "Términos y condiciones"
+    introduction: "Estas condiciones describen el uso del servicio VanQuote. Léelas antes de crear una cuenta."
+    back: "Volver al registro"
+    sections:
+      service:
+        title: "1. Servicio"
+        body: "VanQuote permite introducir recorridos y obtener una estimación orientativa del precio de un transporte. El servicio no sustituye una oferta confirmada por el proveedor del transporte."
+      estimates:
+        title: "2. Estimaciones"
+        body: "Las estimaciones se calculan con la información disponible y los datos introducidos. El precio final puede variar según el volumen, acceso, disponibilidad, servicios adicionales y otros detalles que se confirmen posteriormente."
+      account:
+        title: "3. Cuenta"
+        body: "La persona usuaria debe facilitar datos correctos, mantener la confidencialidad de sus credenciales y comunicarnos cualquier uso no autorizado de su cuenta. Es responsable de la actividad realizada desde su sesión."
+      requests:
+        title: "4. Solicitudes"
+        body: "Crear un presupuesto no reserva un transporte ni obliga a contratarlo. Una solicitud de contacto solo se inicia cuando la persona elige expresamente una forma de contacto y completa los pasos que se le muestran."
+      communications:
+        title: "5. Comunicaciones"
+        body: "La aceptación de estas condiciones no equivale al consentimiento para comunicaciones por email. Ese consentimiento se solicita por separado, se limita a la gestión de presupuestos y solicitudes iniciadas por la persona, y puede retirarse desde el perfil. No autoriza newsletters ni publicidad."
+      privacy:
+        title: "6. Datos personales"
+        body: "Los datos se utilizan para prestar las funciones solicitadas, gestionar la cuenta y atender solicitudes. La información sobre el tratamiento, conservación y derechos debe consultarse en la información de privacidad aplicable al servicio."
+      availability:
+        title: "7. Disponibilidad y uso aceptable"
+        body: "El servicio se ofrece sujeto a disponibilidad. No debe utilizarse de forma ilícita, para introducir datos de terceros sin autorización ni para interferir en su funcionamiento."
+      changes:
+        title: "8. Cambios"
+        body: "Estas condiciones pueden actualizarse cuando cambie el servicio. La versión aceptada se registra al crear la cuenta; los cambios relevantes se comunicarán antes de que resulten aplicables cuando corresponda."
+      contact:
+        title: "9. Contacto"
+        body: "Para consultas sobre estas condiciones o sobre el servicio, utiliza los canales de contacto que VanQuote ponga a disposición dentro del propio servicio."
+
   dashboard:
-    greeting: "Hola %{name}, ¿qué quieres hacer hoy?"
-    fallback_name: "de nuevo"
+    greeting: "¿Qué te apetece hacer hoy?"
     my_quotes: "Ir a mis presupuestos"
     new_quote: "Nuevo presupuesto"
     profile: "Ir a mi perfil"
@@ -87,6 +132,7 @@ es:
   profile:
     title: "Mi perfil"
     description: "Gestiona tus datos personales y de contacto."
+    operational_consent_status: "Estado del consentimiento: %{status}."
     updated: "Perfil actualizado correctamente."
     update_failed: "No se ha podido actualizar el perfil."
     save: "Guardar cambios"
@@ -136,6 +182,8 @@ es:
       email:
         label: "Email"
         placeholder: "tu@email.com"
+        info_label: "Más información sobre el uso de tu email"
+        info: "Asociaremos tu email a este presupuesto y, si después solicitas seguimiento por email, a esa solicitud. El resultado se muestra en pantalla; no te suscribimos a newsletters ni enviamos publicidad comercial por este motivo."
       consent: "Acepto recibir este presupuesto y ser contactado por email."
       submit: "Calcular presupuesto"
       account_access:
@@ -231,6 +279,12 @@ es:
         label: "Repite tu contraseña"
         placeholder: "Repite tu contraseña"
       submit: "Crear cuenta"
+      terms_prefix: "Acepto "
+      terms_link: "términos y condiciones"
+      oauth_identity: "Continúa con la cuenta de Google verificada %{email}."
+      cancel_oauth: "Cancelar y volver"
+      terms_required: "Debes aceptar los términos y condiciones para crear una cuenta."
+      operational_consent_text: "Acepto recibir por email el resultado de mis presupuestos y mensajes necesarios para gestionar las solicitudes de transporte que inicie. Este permiso no incluye publicidad ni newsletters y puedo retirarlo desde mi perfil."
       or: "o"
       google: "Continuar con Google"
       apple: "Continuar con Apple"

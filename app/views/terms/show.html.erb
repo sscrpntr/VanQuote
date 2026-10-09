@@ -1,0 +1,13 @@
+<main class="terms-page">
+  <article class="terms-card">
+    <h1><%= t("terms.title") %></h1>
+    <p><%= t("terms.introduction") %></p>
+    <% %w[service estimates account requests communications privacy availability changes contact].each do |section| %>
+      <section>
+        <h2><%= t("terms.sections.#{section}.title") %></h2>
+        <p><%= t("terms.sections.#{section}.body") %></p>
+      </section>
+    <% end %>
+    <p><%= link_to t("terms.back"), new_registration_path %></p>
+  </article>
+</main>

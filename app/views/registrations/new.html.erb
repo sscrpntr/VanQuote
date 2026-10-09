@@ -5,6 +5,29 @@
     </div>
 
     <div class="auth-card">
+      <% if @user.errors.any? %>
+        <div class="auth-alert" role="alert">
+          <p><%= t("registrations.new.errors.title") %></p>
+          <ul><% @user.errors.full_messages.each do |message| %><li><%= message %></li><% end %></ul>
+        </div>
+      <% end %>
+
+      <% if flash[:alert] %><div class="auth-alert" role="alert"><%= flash[:alert] %></div><% end %>
+      <% if flash[:notice] %><div class="auth-notice" role="status"><%= flash[:notice] %></div><% end %>
+
+      <%= form_with model: @user, url: registration_path, class: "auth-form" do |form| %>
+        <div class="form-consent">
+          <%= check_box_tag "user[accept_terms]", "1", false, required: true %>
+          <%= label_tag "user_accept_terms" do %>
+            <%= t("registrations.new.terms_prefix") %><%= link_to t("registrations.new.terms_link"), terms_path, target: "_blank", rel: "noopener" %>
+          <% end %>
+        </div>
+
+        <div class="form-consent">
+          <%= check_box_tag "user[accept_operational_email]", "1", false %>
+          <%= label_tag "user_accept_operational_email", t("registrations.new.operational_consent_text") %>
+        </div>
+
       <div class="auth-header">
         <h1><%= t("registrations.new.title") %></h1>
 
@@ -12,37 +35,7 @@
           <%= t("registrations.new.subtitle") %>
         </p>
       </div>
-
-      <% if @user.errors.any? %>
-        <div class="auth-alert">
-          <p>
-            <%= t("registrations.new.errors.title") %>
-          </p>
-
-          <ul>
-            <% @user.errors.full_messages.each do |message| %>
-              <li><%= message %></li>
-            <% end %>
-          </ul>
-        </div>
-      <% end %>
-
-      <% if flash[:alert] %>
-        <div class="auth-alert">
-          <%= flash[:alert] %>
-        </div>
-      <% end %>
-
-      <% if flash[:notice] %>
-        <div class="auth-notice">
-          <%= flash[:notice] %>
-        </div>
-      <% end %>
-
-      <%= form_with model: @user,
-            url: registration_path,
-            class: "auth-form" do |form| %>
-
+        <% unless @oauth_pending %>
         <div class="auth-field">
           <%= form.label :first_name, t("registrations.new.first_name.label") %>
 
@@ -91,10 +84,17 @@
                 placeholder: t("registrations.new.password_confirmation.placeholder"),
                 maxlength: 72 %>
         </div>
+        <% else %>
+          <p><%= t("registrations.new.oauth_identity", email: @user.email_address) %></p>
+        <% end %>
 
         <%= form.submit t("registrations.new.submit"),
               class: "button-primary auth-submit" %>
       <% end %>
+
+      <% if @oauth_pending %>
+        <%= button_to t("registrations.new.cancel_oauth"), cancel_oauth_registration_path, method: :post, class: "action-link" %>
+      <% else %>
 
       <div class="auth-divider">
         <span><%= t("registrations.new.or") %></span>
@@ -112,10 +112,13 @@
               ),
               class: "action-link auth-register-link" %>
       </div>
+      <% end %>
     </div>
 
     <p class="auth-back-link">
-      <%= link_to t("registrations.new.back_to_vanquote"), root_path, class: "action-link" %>
+      <%= link_to t("registrations.new.back_to_vanquote"),
+            session[:quote_token_after_authenticating].present? ? public_quotes_path(token: session[:quote_token_after_authenticating]) : root_path,
+            class: "action-link" %>
     </p>
   </div>
 </div>

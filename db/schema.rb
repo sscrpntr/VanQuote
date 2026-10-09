@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_08_113000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_09_123000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -34,7 +34,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_113000) do
     t.datetime "updated_at", null: false
     t.string "contact_preference"
     t.string "phone"
+    t.string "consent_basis"
+    t.datetime "consent_withdrawn_at"
     t.index ["quote_id"], name: "index_leads_on_quote_id"
+  end
+
+  create_table "operational_email_consent_events", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "action", null: false
+    t.string "text_version"
+    t.string "purpose", null: false
+    t.text "consent_text"
+    t.datetime "occurred_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_operational_email_consent_events_on_user_id"
   end
 
   create_table "quotes", force: :cascade do |t|
@@ -55,6 +69,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_113000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id"
+    t.string "contact_email"
     t.index ["user_id"], name: "index_quotes_on_user_id"
   end
 
@@ -76,11 +91,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_113000) do
     t.string "first_name", default: "", null: false
     t.string "last_name", default: "", null: false
     t.string "phone"
+    t.boolean "operational_email_consent", default: false, null: false
+    t.datetime "operational_email_consent_at"
+    t.string "operational_email_consent_text_version"
+    t.string "operational_email_consent_purpose"
+    t.datetime "terms_accepted_at"
+    t.string "terms_version"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
   add_foreign_key "identities", "users"
   add_foreign_key "leads", "quotes"
+  add_foreign_key "operational_email_consent_events", "users"
   add_foreign_key "quotes", "users"
   add_foreign_key "sessions", "users"
 end

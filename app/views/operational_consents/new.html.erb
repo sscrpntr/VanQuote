@@ -1,0 +1,28 @@
+<div class="auth-page">
+  <section class="auth-container">
+    <div class="auth-card">
+      <h1><%= t("operational_consent.title") %></h1>
+      <p><%= t("registrations.new.operational_consent_text") %></p>
+
+      <% if flash[:alert] %>
+        <p class="auth-alert" role="alert"><%= flash[:alert] %></p>
+      <% end %>
+
+      <%= form_with url: operational_consent_path, method: :post, class: "auth-form" do %>
+        <div class="form-consent">
+          <%= check_box_tag :accept_operational_email, "1", false, required: true %>
+          <%= label_tag :accept_operational_email, t("operational_consent.accept") %>
+        </div>
+        <%= submit_tag t("operational_consent.submit"), class: "button-primary" %>
+      <% end %>
+
+      <% if session[:pending_operational_consent_quote_id] %>
+        <%= link_to t("operational_consent.back_to_quote"),
+              quote_path(session[:pending_operational_consent_quote_id]),
+              class: "action-link" %>
+      <% else %>
+        <%= link_to t("operational_consent.back_to_profile"), profile_path, class: "action-link" %>
+      <% end %>
+    </div>
+  </section>
+</div>

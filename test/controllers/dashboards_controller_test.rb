@@ -11,16 +11,22 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     )
   end
 
-  test "authenticated user sees personalized dashboard actions without account header navigation" do
+  test "authenticated user sees dashboard actions without account header navigation" do
     sign_in
 
     get dashboard_path
 
     assert_response :success
-    assert_select "h1", "Hola Sergi, ¿qué quieres hacer hoy?"
+    assert_select "h1", "¿Qué te apetece hacer hoy?"
     assert_select "a[href=?]", quotes_path, text: "Ir a mis presupuestos"
     assert_select "a[href=?]", new_quote_path, text: "Nuevo presupuesto"
     assert_select "a[href=?]", profile_path, text: "Ir a mi perfil"
+    assert_select ".dashboard-actions", count: 1 do
+      assert_select "a.dashboard-action", count: 3
+    end
+    assert_select ".dashboard-actions a[href=?]", quotes_path
+    assert_select ".dashboard-actions a[href=?]", new_quote_path
+    assert_select ".dashboard-actions a[href=?]", profile_path
     assert_select "form[action=?]", session_path do
       assert_select "input[name=_method][value=delete]"
       assert_select "button[type=submit]", text: "Cerrar sesión"
@@ -37,20 +43,10 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_session_path
   end
 
-  test "uses a translated fallback when first name is blank" do
-    @user.update_column(:first_name, "")
-    sign_in
-
-    get dashboard_path
-
-    assert_response :success
-    assert_select "h1", "Hola de nuevo, ¿qué quieres hacer hoy?"
-  end
-
   test "dashboard greeting and actions use the selected locale" do
     {
-      "ca" => [ "Hola Sergi, què vols fer avui?", "Anar als meus pressupostos", "Nou pressupost" ],
-      "en" => [ "Hello Sergi, what would you like to do today?", "Go to my quotes", "New quote" ]
+      "ca" => [ "Què et ve de gust fer avui?", "Anar als meus pressupostos", "Nou pressupost" ],
+      "en" => [ "What would you like to do today?", "Go to my quotes", "New quote" ]
     }.each do |locale, (greeting, quotes_label, new_quote_label)|
       sign_in
       post locale_path, params: { locale: locale, return_to: dashboard_path }

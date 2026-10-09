@@ -75,7 +75,9 @@
     </div>
 
     <p class="auth-back-link">
-      <%= link_to t("sessions.new.back_to_vanquote"), root_path, class: "action-link" %>
+      <%= link_to t("sessions.new.back_to_vanquote"),
+            session[:quote_token_after_authenticating].present? ? public_quotes_path(token: session[:quote_token_after_authenticating]) : root_path,
+            class: "action-link" %>
     </p>
   </div>
 </div>

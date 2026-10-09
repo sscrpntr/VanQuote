@@ -130,6 +130,11 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :redirect
     assert_equal new_session_path, URI.parse(response.location).path
+
+    follow_redirect!
+
+    assert_response :success
+    assert_select ".auth-alert", text: I18n.t("sessions.alerts.invalid_credentials")
   end
 
   test "preserves return location after authentication" do
@@ -167,6 +172,93 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     quote.reload
 
     assert_equal @user.id, quote.user_id
+  end
+
+  test "login preserves an unconsented quote until the user explicitly accepts operational email" do
+    quote = create_unconsented_quote(contact_email: @user.email_address)
+
+    get new_session_path, params: {
+      quote_token: public_token_for(quote),
+      contact_preference: "EMAIL_QUOTE"
+    }
+    post session_path, params: {
+      email_address: @user.email_address,
+      password: "password123"
+    }
+
+    assert_redirected_to new_operational_consent_path
+    assert_equal @user.id, quote.reload.user_id
+    assert_nil quote.lead
+    assert_not @user.reload.operational_email_consent_valid?
+
+    assert_difference "Lead.count", 1 do
+      post operational_consent_path, params: { accept_operational_email: "1" }
+    end
+
+    assert_redirected_to contact_confirmation_path
+    lead = quote.reload.lead
+    assert_equal "EMAIL_QUOTE", lead.contact_preference
+    assert_equal @user.email_address, lead.email
+    assert_equal @user.reload.operational_email_consent_at, lead.consent_at
+    assert_equal "account_operational_email", lead.consent_basis
+  end
+
+  test "login with a different email cannot claim an anonymous quote" do
+    quote = create_unconsented_quote(contact_email: "different-owner@example.com")
+    get new_session_path, params: { quote_token: public_token_for(quote) }
+
+    post session_path, params: {
+      email_address: @user.email_address,
+      password: "password123"
+    }
+
+    assert_redirected_to dashboard_path
+    assert_nil quote.reload.user_id
+    assert_nil quote.lead
+  end
+
+  test "rejecting operational consent does not create a lead or confirmation" do
+    quote = create_unconsented_quote(contact_email: @user.email_address)
+    get new_session_path, params: {
+      quote_token: public_token_for(quote),
+      contact_preference: "EMAIL_CONTACT"
+    }
+    post session_path, params: {
+      email_address: @user.email_address,
+      password: "password123"
+    }
+
+    assert_redirected_to new_operational_consent_path
+    assert_no_difference "Lead.count" do
+      post operational_consent_path, params: { accept_operational_email: "0" }
+    end
+
+    assert_response :unprocessable_entity
+    assert_nil quote.reload.lead
+    assert_not @user.reload.operational_email_consent_valid?
+  end
+
+  test "preserves valid consent for the same public quote when attaching it to the user" do
+    quote = create_public_quote
+    lead = quote.lead
+    consent_at = lead.consent_at
+
+    get new_session_path, params: {
+      quote_token: public_token_for(quote)
+    }
+
+    assert_no_difference("Lead.count") do
+      post session_path, params: {
+        email_address: @user.email_address,
+        password: "password123"
+      }
+    end
+
+    assert_response :redirect
+    assert_equal @user.id, quote.reload.user_id
+    assert_equal true, lead.reload.consent_given
+    assert_equal consent_at, lead.consent_at
+    assert_nil lead.contact_preference
   end
 
   test "EMAIL_QUOTE preference is stored after authentication" do
@@ -371,11 +463,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
   test "anonymous user can visit email contact confirmation without authenticated navigation" do
     get contact_confirmation_path
 
-    assert_response :success
-    assert_select "#contact-confirmation-title", "¡Solicitud recibida!"
-    assert_select ".confirmation-message", "Te contactaremos por email con el presupuesto que has obtenido."
-    assert_select "a[href=?]", new_quote_path, text: "Empezar otra cotización"
-    assert_select "nav.site-navigation", count: 0
+    assert_redirected_to root_path
   end
 
   test "EMAIL_QUOTE authentication cannot redirect to an external return target" do
@@ -430,6 +518,16 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     quote.signed_id(
       purpose: :public_view,
       expires_in: 24.hours
+    )
+  end
+
+  def create_unconsented_quote(contact_email:)
+    Quote.create!(
+      origin: "Barcelona", destination: "Madrid", contact_email: contact_email,
+      distance_km: 620, estimated_duration_minutes: 360, fuel_cost: 74.4,
+      toll_cost: 0, vehicle_cost: 62, driver_cost: 150, loading_cost: 20,
+      waiting_cost: 0, other_cost: 10, margin: 25, total_cost: 316.4,
+      recommended_price: 395.5
     )
   end
 

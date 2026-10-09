@@ -172,6 +172,7 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     get new_quote_path
 
     assert_response :success
+    assert_select "html.landing-page-layout.landing-authenticated"
     assert_select "header.site-header nav.site-navigation" do
       assert_select "a[href=?]", quotes_path
       assert_select "a[href=?]", new_quote_path, text: "Nueva cotización"
@@ -184,7 +185,10 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     get new_quote_path
 
     assert_response :success
+    assert_select "html.landing-page-layout"
+    assert_select "html.landing-authenticated", count: 0
     assert_select ".landing-hero-inner"
+    assert_select ".landing-page > section", count: 5
     assert_select ".landing-benefits li", count: 3
     assert_select ".landing-benefits li:nth-child(1) span", text: "⚡"
     assert_select ".landing-benefits li:nth-child(2) span", text: "📍"
@@ -195,6 +199,9 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_select "#quote-form input[name='quote[destination]']"
     assert_select "#quote-form input[name='email']"
     assert_select "#quote-form input[name='phone']", count: 0
+    assert_select "#quote-form input[name='consent_given']", count: 0
+    assert_select "#quote-form .landing-email-info summary[aria-label]"
+    assert_includes response.body, I18n.t("quotes.new.email.info")
     assert_select ".landing-steps li", count: 3
     assert_select ".landing-category-list li", count: 3
     assert_select "form.quote-form"
@@ -234,7 +241,8 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 620.to_d, quote.distance_km
     assert_equal 360.to_d, quote.estimated_duration_minutes
     assert_nil quote.user_id
-    assert_nil quote.lead.phone
+    assert_nil quote.lead
+    assert_equal "customer@example.com", quote.contact_email
   end
 
   test "authenticated user sees only their quotes with a link to each detail" do
@@ -306,7 +314,7 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "attaches an anonymous quote to the user after authentication with its token" do
-    post quotes_path, params: valid_quote_params
+    post quotes_path, params: valid_quote_params.merge(email: @user.email_address)
     quote = Quote.last
     token = URI.decode_www_form(URI(response.location).query).to_h.fetch("token")
 
@@ -355,8 +363,8 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_equal owner.id, quote.reload.user_id
   end
 
-  test "creates a lead when creating a quote" do
-    assert_difference("Lead.count", 1) do
+  test "anonymous quote calculation does not create a lead or consent" do
+    assert_no_difference("Lead.count") do
       post quotes_path, params: {
         quote: {
           origin: "Barcelona",
@@ -369,26 +377,21 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
       }
     end
 
-    lead = Lead.last
-
-    assert_equal "customer@example.com", lead.email
-    assert_equal true, lead.consent_given
-    assert_not_nil lead.consent_at
-    assert_equal "NEW", lead.status
-    assert_equal Quote.last.id, lead.quote_id
-    assert_nil lead.phone
+    quote = Quote.last
+    assert_nil quote.lead
+    assert_equal "customer@example.com", quote.contact_email
   end
 
-  test "authenticated user does not see email or phone fields on the quote form" do
+  test "authenticated user sees their email but no consent checkbox on the quote form" do
     authenticate_as(@user)
-
 
     get "/"
 
     assert_response :success
     assert_select "form.quote-form", count: 1
-    assert_select "form.quote-form input[name='email']", count: 0
+    assert_select "form.quote-form input[name='email'][readonly]", count: 1
     assert_select "form.quote-form input[name='phone']", count: 0
+    assert_select "form.quote-form input[name='consent_given']", count: 0
   end
 
   test "anonymous user sees email but not phone on the quote form" do
@@ -398,9 +401,13 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_select "form.quote-form", count: 1
     assert_select "form.quote-form input[name='email']", count: 1
     assert_select "form.quote-form input[name='phone']", count: 0
+    assert_select "form.quote-form input[name='consent_given']", count: 0
+    assert_select ".landing-email-info summary[aria-label]"
+    assert_select ".landing-email-info p", text: I18n.t("quotes.new.email.info")
   end
 
-  test "authenticated user does not need to submit email or phone when creating a quote" do
+  test "authenticated user can create a quote without creating a contact lead" do
+    @user.grant_operational_email_consent!(consent_text: "Test operational email consent")
     authenticate_as(@user)
 
     assert_difference("Quote.count", 1) do
@@ -410,20 +417,88 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
           destination: "Madrid",
           distance_km: 999,
           estimated_duration_minutes: 999
-        },
-        consent_given: "1"
+        }
       }
     end
 
     assert_response :redirect
 
-    lead = Quote.last.lead
+    quote = Quote.last
+    assert_equal @user.id, quote.user_id
+    assert_equal @user.email_address, quote.contact_email
+    assert_nil quote.lead
+  end
 
-    assert_equal @user.email_address, lead.email
-    assert_equal @user.phone, lead.phone
+  test "authenticated user without saved consent can calculate without creating a lead" do
+    authenticate_as(@user)
+
+    assert_difference("Quote.count", 1) do
+      assert_no_difference("Lead.count") do
+        post quotes_path, params: {
+          quote: {
+            origin: "Barcelona",
+            destination: "Madrid"
+          }
+        }
+      end
+    end
+
+    assert_response :redirect
+    assert_nil Quote.last.lead
+  end
+
+  test "withdrawing consent leaves calculations available and gates a later contact request" do
+    @user.grant_operational_email_consent!(consent_text: "Test operational email consent")
+    authenticate_as(@user)
+    delete operational_consent_path
+    post quotes_path, params: { quote: { origin: "Barcelona", destination: "Madrid" } }
+    quote = Quote.last
+    assert_equal @user.email_address, quote.contact_email
+    assert_nil quote.lead
+
+    token = quote.signed_id(purpose: :public_view, expires_in: 24.hours)
+    get new_session_path, params: { quote_token: token, contact_preference: "EMAIL_QUOTE" }
+
+    assert_redirected_to new_operational_consent_path
+    assert_nil quote.reload.lead
+    assert_not @user.reload.operational_email_consent_valid?
+
+    assert_difference "Lead.count", 1 do
+      post operational_consent_path, params: { accept_operational_email: "1" }
+    end
+    assert_redirected_to contact_confirmation_path
+    assert_equal "EMAIL_QUOTE", quote.reload.lead.contact_preference
+    assert @user.reload.operational_email_consent_valid?
+  end
+
+  test "consent on a previous lead does not become account consent" do
+    previous_quote = create_quote_for(@user, origin: "Barcelona", destination: "Madrid")
+    previous_quote.create_lead!(
+      email: @user.email_address,
+      consent_given: true,
+      consent_at: Time.current,
+      status: "NEW"
+    )
+    authenticate_as(@user)
+
+    assert_difference("Quote.count", 1) do
+      assert_no_difference("Lead.count") do
+        post quotes_path, params: {
+          quote: {
+            origin: "Valencia",
+            destination: "Zaragoza"
+          }
+        }
+      end
+    end
+
+    assert_response :redirect
+    assert_not @user.operational_email_consent_valid?
+    assert_nil Quote.last.lead
   end
 
   test "authenticated user cannot override their email or phone when creating a quote" do
+    @user.grant_operational_email_consent!(consent_text: "Test operational email consent")
     authenticate_as(@user)
 
     assert_difference("Quote.count", 1) do
@@ -435,19 +510,16 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
           estimated_duration_minutes: 999
         },
         email: "attacker@example.com",
-        phone: "+34999999999",
-        consent_given: "1"
+        phone: "+34999999999"
       }
     end
 
     assert_response :redirect
 
-    lead = Quote.last.lead
+    quote = Quote.last
 
-    assert_equal @user.email_address, lead.email
-    assert_equal @user.phone, lead.phone
-    refute_equal "attacker@example.com", lead.email
-    refute_equal "+34999999999", lead.phone
+    assert_equal @user.email_address, quote.contact_email
+    assert_nil quote.lead
   end
 
   test "ignores internal costs submitted by the customer" do
@@ -560,8 +632,8 @@ assert_response :success
     assert_includes response.body, "Cambiar método de contacto"
   end
 
-  test "does not create a lead without consent" do
-    assert_no_difference("Quote.count") do
+  test "calculates a quote without asking for contact consent" do
+    assert_difference("Quote.count", 1) do
       assert_no_difference("Lead.count") do
         post quotes_path, params: {
           quote: {
@@ -570,16 +642,16 @@ assert_response :success
             distance_km: 999,
             estimated_duration_minutes: 999
           },
-          email: "customer@example.com",
-          consent_given: "0"
+          email: "customer@example.com"
         }
       end
     end
 
-    assert_response :unprocessable_entity
+    assert_response :redirect
+    assert_nil Quote.last.lead
   end
 
-  test "does not create a lead with an invalid email" do
+  test "does not save a quote with an invalid email" do
     assert_no_difference("Quote.count") do
       assert_no_difference("Lead.count") do
         post quotes_path, params: {
@@ -617,8 +689,8 @@ assert_response :success
     assert_response :unprocessable_entity
   end
 
-  test "strips whitespace from lead email" do
-    assert_difference("Lead.count", 1) do
+  test "strips whitespace from quote contact email" do
+    assert_no_difference("Lead.count") do
       post quotes_path, params: {
         quote: {
           origin: "Barcelona",
@@ -631,9 +703,7 @@ assert_response :success
       }
     end
 
-    lead = Lead.last
-
-    assert_equal "customer@example.com", lead.email
+    assert_equal "customer@example.com", Quote.last.contact_email
   end
 
   private

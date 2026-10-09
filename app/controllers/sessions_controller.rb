@@ -12,8 +12,7 @@ class SessionsController < ApplicationController
   def new
     remember_public_quote_context
 
-    if authenticated? && params[:contact_preference] == "EMAIL_QUOTE" &&
-        params[:quote_token].present?
+    if authenticated? && params[:quote_token].present?
       redirect_to after_authentication_url(default_url: quotes_url)
     end
   end

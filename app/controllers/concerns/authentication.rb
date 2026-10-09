@@ -39,17 +39,17 @@ module Authentication
       return_to = session.delete(:return_to_after_authenticating)
       safe_return_to = url_from(return_to) if return_to.present?
       result = attach_public_quote_to_current_user
-      return safe_return_to if safe_return_to
-
-      unless result
-        return default_url
-      end
+      return safe_return_to if safe_return_to && !result
+      return default_url unless result
 
       quote = result[:quote]
       preference = result[:preference]
 
+      return new_operational_consent_path if result[:consent_required]
+
       if preference.in?(%w[EMAIL_QUOTE EMAIL_CONTACT])
         flash[:notice] = I18n.t("quotes.contact_confirmation.flash")
+        session[:contact_confirmation_quote_id] = quote.id
         return contact_confirmation_path
       end
 
@@ -66,8 +66,8 @@ module Authentication
     end
 
     def attach_public_quote_to_current_user
-      token = session.delete(:quote_token_after_authenticating)
-      preference = session.delete(:contact_preference_after_authenticating)
+      token = session[:quote_token_after_authenticating]
+      preference = session[:contact_preference_after_authenticating]
 
       return if token.blank? || Current.user.nil?
 
@@ -82,10 +82,39 @@ module Authentication
       )
 
       if quote.user_id.present? && quote.user_id != Current.user.id
+        session.delete(:quote_token_after_authenticating)
+        session.delete(:contact_preference_after_authenticating)
+        return nil
+      end
+
+      if quote.user_id.blank? && quote.contact_email.present? &&
+          !quote.contact_email.casecmp?(Current.user.email_address)
+        session.delete(:quote_token_after_authenticating)
+        session.delete(:contact_preference_after_authenticating)
         return nil
       end
 
       quote.update!(user: Current.user) if quote.user_id.blank?
+
+      if Lead::CONTACT_PREFERENCES.include?(preference) &&
+          !quote_contact_authorized?(quote, Current.user)
+        session[:pending_operational_consent_quote_id] = quote.id
+        session[:pending_operational_consent_preference] = preference
+        session.delete(:quote_token_after_authenticating)
+        session.delete(:contact_preference_after_authenticating)
+        return { quote: quote, preference: preference, consent_required: true }
+      end
+
+      if Lead::CONTACT_PREFERENCES.include?(preference) && quote.lead.blank?
+        quote.create_lead!(
+          email: quote.contact_email.presence || Current.user.email_address,
+          phone: Current.user.phone,
+          consent_given: true,
+          consent_at: Current.user.operational_email_consent_at,
+          consent_basis: "account_operational_email",
+          status: "NEW"
+        )
+      end
 
       if Lead::CONTACT_PREFERENCES.include?(preference) && quote.lead
         if preference == "PHONE"
@@ -101,13 +130,25 @@ module Authentication
         end
       end
 
+      session.delete(:quote_token_after_authenticating)
+      session.delete(:contact_preference_after_authenticating)
+
       {
         quote: quote,
         preference: preference
       }
     rescue ActiveSupport::MessageVerifier::InvalidSignature,
            ActiveRecord::RecordNotFound
+      session.delete(:quote_token_after_authenticating)
+      session.delete(:contact_preference_after_authenticating)
       nil
+    end
+
+    def quote_contact_authorized?(quote, user)
+      return user.operational_email_consent_valid? unless quote.lead
+      return true if quote.lead.consent_basis.blank? && quote.lead.consent_withdrawn_at.nil?
+
+      quote.lead.consent_withdrawn_at.nil? && user.operational_email_consent_valid?
     end
 
     def start_new_session_for(user)

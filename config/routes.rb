@@ -2,6 +2,9 @@ Rails.application.routes.draw do
   resource :session
   resources :passwords, param: :token
   resource :registration, only: [ :new, :create ]
+  post "/registration/cancel-oauth", to: "oauth#cancel", as: :cancel_oauth_registration
+  resource :operational_consent, only: [ :new, :create, :destroy ], controller: "operational_consents"
+  get "/terms", to: "terms#show", as: :terms
 
   post "/auth/:provider", to: "oauth#unavailable", as: :oauth_initiation,
        constraints: { provider: /google_oauth2|apple/ }

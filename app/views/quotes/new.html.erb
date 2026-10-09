@@ -51,28 +51,26 @@
                     } %>
             </div>
 
-            <% unless Current.user %>
-              <div class="form-field">
+            <div class="form-field landing-email-field">
+              <div class="landing-email-label-row">
                 <%= label_tag :email,
                       t("quotes.new.email.label"),
                       class: "form-label" %>
-
-                <%= email_field_tag :email,
-                      params[:email],
-                      required: true,
-                      placeholder: t("quotes.new.email.placeholder"),
-                      class: "form-input" %>
+                <details class="landing-email-info">
+                  <summary aria-label="<%= t('quotes.new.email.info_label') %>">
+                    <span aria-hidden="true">i</span>
+                  </summary>
+                  <p><%= t("quotes.new.email.info") %></p>
+                </details>
               </div>
-            <% end %>
 
-            <div class="form-consent">
-              <%= check_box_tag :consent_given,
-                    "1",
-                    false,
-                    required: true %>
-
-              <%= label_tag :consent_given,
-                    t("quotes.new.consent") %>
+              <%= email_field_tag :email,
+                    Current.user&.email_address || params[:email],
+                    required: true,
+                    readonly: Current.user.present?,
+                    autocomplete: "email",
+                    placeholder: t("quotes.new.email.placeholder"),
+                    class: "form-input" %>
             </div>
 
             <%= form.submit t("quotes.new.submit"),

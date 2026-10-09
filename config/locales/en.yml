@@ -18,9 +18,36 @@ en:
     profile: "My profile"
     logout: "Sign out"
 
+  operational_consent:
+    title: "Operational email communications"
+    accept: "I agree to receive operational communications by email."
+    submit: "Save consent"
+    required: "You must select the checkbox to give this consent."
+    active: "Active"
+    inactive: "Not given or withdrawn"
+    withdraw: "Withdraw consent"
+    withdrawn: "Your consent for operational email communications has been withdrawn."
+    give: "Give consent"
+    back_to_quote: "Return to my quote"
+    back_to_profile: "Return to my profile"
+
+  terms:
+    title: "Terms and conditions"
+    introduction: "These terms describe how to use the VanQuote service. Please read them before creating an account."
+    back: "Back to registration"
+    sections:
+      service: { title: "1. Service", body: "VanQuote lets users enter routes and receive an indicative transport price estimate. The service does not replace a confirmed offer from a transport provider." }
+      estimates: { title: "2. Estimates", body: "Estimates use the information available and the details entered. The final price may vary based on volume, access, availability, additional services and other details confirmed later." }
+      account: { title: "3. Account", body: "Users must provide accurate information, keep their credentials confidential and report unauthorized account use. Users are responsible for activity carried out through their session." }
+      requests: { title: "4. Requests", body: "Creating a quote does not book transport or require a purchase. A contact request starts only when the user explicitly chooses a contact method and completes the steps shown." }
+      communications: { title: "5. Communications", body: "Accepting these terms is not consent to email communications. That consent is requested separately, is limited to handling quotes and transport requests initiated by the user, and can be withdrawn from the profile. It does not authorize newsletters or advertising." }
+      privacy: { title: "6. Personal data", body: "Data is used to provide requested features, manage accounts and handle requests. Consult the privacy information applicable to the service for details about processing, retention and rights." }
+      availability: { title: "7. Availability and acceptable use", body: "The service is provided subject to availability. It must not be used unlawfully, to submit third-party data without authorization or to interfere with its operation." }
+      changes: { title: "8. Changes", body: "These terms may be updated when the service changes. The accepted version is recorded when an account is created; relevant changes will be communicated before they apply when appropriate." }
+      contact: { title: "9. Contact", body: "For questions about these terms or the service, use the contact channels VanQuote makes available within the service." }
+
   dashboard:
-    greeting: "Hello %{name}, what would you like to do today?"
-    fallback_name: "there"
+    greeting: "What would you like to do today?"
     my_quotes: "Go to my quotes"
     new_quote: "New quote"
     profile: "Go to my profile"
@@ -87,6 +114,7 @@ en:
   profile:
     title: "My profile"
     description: "Manage your personal and contact details."
+    operational_consent_status: "Consent status: %{status}."
     updated: "Profile updated successfully."
     update_failed: "The profile could not be updated."
     save: "Save changes"
@@ -139,6 +167,8 @@ en:
       email:
         label: "Email"
         placeholder: "you@email.com"
+        info_label: "More information about how your email is used"
+        info: "We associate your email with this quote and, if you later request email follow-up, with that request. The result is shown on screen; this does not subscribe you to newsletters or send commercial advertising."
 
       consent: "I agree to receive this quote and be contacted by email."
 
@@ -256,6 +286,12 @@ en:
         placeholder: "Repeat your password"
 
       submit: "Create account"
+      terms_prefix: "I accept the "
+      terms_link: "terms and conditions"
+      oauth_identity: "Continue with the verified Google account %{email}."
+      cancel_oauth: "Cancel and go back"
+      terms_required: "You must accept the terms and conditions to create an account."
+      operational_consent_text: "I agree to receive quote results by email and messages needed to manage transport requests I start. This permission does not include advertising or newsletters and I can withdraw it from my profile."
 
       or: "or"
 

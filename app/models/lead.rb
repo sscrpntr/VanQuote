@@ -16,7 +16,11 @@ class Lead < ApplicationRecord
     EMAIL_CONTACT
   ].freeze
 
-  scope :with_consent, -> { where(consent_given: true).where.not(consent_at: nil) }
+  scope :with_consent, -> {
+    where(consent_given: true, consent_withdrawn_at: nil).where.not(consent_at: nil)
+  }
+
+  CONSENT_BASES = %w[account_operational_email].freeze
 
   validates :email,
             presence: true,
@@ -33,6 +37,10 @@ class Lead < ApplicationRecord
 
   validates :contact_preference,
             inclusion: { in: CONTACT_PREFERENCES },
+            allow_nil: true
+
+  validates :consent_basis,
+            inclusion: { in: CONSENT_BASES },
             allow_nil: true
 
   validates :phone,

@@ -15,6 +15,7 @@ class QuotesController < ApplicationController
   def create
     @quote = Quote.new(quote_params)
     @quote.user = Current.user if Current.user
+    @quote.contact_email = lead_email
 
     begin
       route = routes_service_class.new(
@@ -43,17 +44,7 @@ class QuotesController < ApplicationController
       @quote.total_cost = calculator.total_cost
       @quote.recommended_price = calculator.recommended_price
 
-      Quote.transaction do
-        @quote.save!
-
-        @quote.create_lead!(
-          email: lead_email,
-          phone: lead_phone,
-          consent_given: true,
-          consent_at: Time.current,
-          status: "NEW"
-        )
-      end
+      @quote.save!
 
       redirect_to public_quotes_path(
         token: @quote.signed_id(
@@ -86,17 +77,21 @@ class QuotesController < ApplicationController
   end
 
   def contact_confirmation
+    quote_id = session.delete(:contact_confirmation_quote_id)
+    quote = Current.user&.quotes&.joins(:lead)&.find_by(id: quote_id)
+
+    return if quote&.lead&.contact_preference.present?
+
+    redirect_to(Current.user ? dashboard_path : root_path)
   end
 
   private
 
   def quote_input_valid?
     email = lead_email
-    consent_given = ActiveModel::Type::Boolean.new.cast(params[:consent_given])
 
     email.present? &&
       email.match?(URI::MailTo::EMAIL_REGEXP) &&
-      consent_given &&
       @quote.valid?
   end
 
@@ -105,12 +100,6 @@ class QuotesController < ApplicationController
       Current.user.email_address
     else
       params[:email].to_s.strip
-    end
-  end
-
-  def lead_phone
-    if Current.user
-      Current.user.phone
     end
   end
 

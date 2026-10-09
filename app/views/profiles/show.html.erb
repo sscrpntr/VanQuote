@@ -50,6 +50,16 @@
     <p><%= link_to t("profile.view_quotes"), quotes_path, class: "button-secondary" %></p>
   </section>
 
+  <section class="profile-consent" aria-labelledby="profile-consent-heading">
+    <h2 id="profile-consent-heading"><%= t("operational_consent.title") %></h2>
+    <p><%= t("profile.operational_consent_status", status: Current.user.operational_email_consent_valid? ? t("operational_consent.active") : t("operational_consent.inactive")) %></p>
+    <% if Current.user.operational_email_consent_valid? %>
+      <%= button_to t("operational_consent.withdraw"), operational_consent_path, method: :delete, class: "button-secondary" %>
+    <% else %>
+      <%= link_to t("operational_consent.give"), new_operational_consent_path, class: "button-secondary" %>
+    <% end %>
+  </section>
+
   <% if Current.user.admin? %>
     <section aria-labelledby="profile-admin-heading">
       <h2 id="profile-admin-heading"><%= t("profile.administration") %></h2>
