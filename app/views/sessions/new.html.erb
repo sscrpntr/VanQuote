@@ -25,7 +25,7 @@
         </div>
       <% end %>
 
-      <%= form_with url: session_path, class: "auth-form" do |form| %>
+      <%= form_with url: session_path, class: "auth-form", data: { locale_draft: "session" } do |form| %>
         <div class="auth-field">
           <%= form.label :email_address, t("sessions.new.email.label") %>
 
@@ -34,7 +34,7 @@
                 autofocus: true,
                 autocomplete: "username",
                 placeholder: t("sessions.new.email.placeholder"),
-                value: params[:email_address] %>
+                value: locale_form_value("session", "email_address", params[:email_address]) %>
         </div>
 
         <div class="auth-field">

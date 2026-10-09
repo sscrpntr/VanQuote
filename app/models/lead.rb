@@ -17,7 +17,8 @@ class Lead < ApplicationRecord
   ].freeze
 
   scope :with_consent, -> {
-    where(consent_given: true, consent_withdrawn_at: nil).where.not(consent_at: nil)
+    where(consent_given: true).where.not(consent_at: nil)
+      .where("leads.consent_withdrawn_at IS NULL OR leads.consent_at > leads.consent_withdrawn_at")
   }
 
   CONSENT_BASES = %w[account_operational_email].freeze
@@ -46,6 +47,10 @@ class Lead < ApplicationRecord
   validates :phone,
             presence: true,
             if: -> { contact_preference == "PHONE" }
+
+  def consent_withdrawn?
+    consent_withdrawn_at.present? && (consent_at.blank? || consent_withdrawn_at >= consent_at)
+  end
 
   def contact!
     update!(status: "CONTACTED")

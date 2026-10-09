@@ -17,6 +17,7 @@ class OauthController < ApplicationController
 
     if user&.terms_accepted?
       user.identities.find_or_create_by!(provider: profile.fetch("provider"), uid: profile.fetch("uid")) unless identity
+      session.delete(:pending_oauth_signup)
       start_new_session_for(user)
       redirect_to after_authentication_url(default_url: dashboard_url)
     else

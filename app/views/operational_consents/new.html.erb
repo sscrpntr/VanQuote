@@ -8,12 +8,12 @@
         <p class="auth-alert" role="alert"><%= flash[:alert] %></p>
       <% end %>
 
-      <%= form_with url: operational_consent_path, method: :post, class: "auth-form" do %>
+      <%= form_with url: operational_consent_path, method: :post, class: "auth-form", data: { locale_draft: "operational_consent" } do %>
         <div class="form-consent">
-          <%= check_box_tag :accept_operational_email, "1", false, required: true %>
+          <%= check_box_tag :accept_operational_email, "1", locale_form_checked?("operational_consent", "accept_operational_email", ActiveModel::Type::Boolean.new.cast(params[:accept_operational_email])), required: true %>
           <%= label_tag :accept_operational_email, t("operational_consent.accept") %>
         </div>
-        <%= submit_tag t("operational_consent.submit"), class: "button-primary" %>
+        <%= submit_tag t("operational_consent.accept_button"), class: "button-primary" %>
       <% end %>
 
       <% if session[:pending_operational_consent_quote_id] %>

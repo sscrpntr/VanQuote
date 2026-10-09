@@ -21,6 +21,7 @@ Rails.application.routes.draw do
   post "locale", to: "locales#update"
 
   get "/quotes/contact-confirmation", to: "quotes#contact_confirmation", as: :contact_confirmation
+  post "/quotes/public/contact", to: "quotes#request_contact", as: :request_quote_contact
 
   resources :quotes, only: [ :index, :new, :create, :show ] do
     get :public, on: :collection

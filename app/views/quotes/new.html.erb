@@ -24,7 +24,8 @@
 
           <%= form_with model: @quote,
                 local: true,
-                class: "quote-form" do |form| %>
+                class: "quote-form",
+                data: { locale_draft: "quote" } do |form| %>
 
             <div class="form-field">
               <%= form.label :origin,
@@ -32,6 +33,7 @@
                     class: "form-label" %>
 
               <%= form.text_field :origin,
+                    value: locale_form_value("quote", "quote[origin]", @quote.origin),
                     placeholder: t("quotes.new.origin.placeholder"),
                     class: "form-input",
                     data: {
@@ -45,6 +47,7 @@
                     class: "form-label" %>
 
               <%= form.text_field :destination,
+                    value: locale_form_value("quote", "quote[destination]", @quote.destination),
                     placeholder: t("quotes.new.destination.placeholder"),
                     class: "form-input",
                     data: {
@@ -52,27 +55,28 @@
                     } %>
             </div>
 
-            <div class="form-field landing-email-field">
-              <div class="landing-email-label-row">
-                <%= label_tag :email,
-                      t("quotes.new.email.label"),
-                      class: "form-label" %>
-                <details class="landing-email-info">
-                  <summary aria-label="<%= t('quotes.new.email.info_label') %>">
-                    <span aria-hidden="true">i</span>
-                  </summary>
-                  <p><%= t("quotes.new.email.info") %></p>
-                </details>
-              </div>
+            <% unless Current.user %>
+              <div class="form-field landing-email-field">
+                <div class="landing-email-label-row">
+                  <%= label_tag :email,
+                        t("quotes.new.email.label"),
+                        class: "form-label" %>
+                  <details class="landing-email-info">
+                    <summary aria-label="<%= t('quotes.new.email.info_label') %>">
+                      <span aria-hidden="true">i</span>
+                    </summary>
+                    <p><%= t("quotes.new.email.info") %></p>
+                  </details>
+                </div>
 
-              <%= email_field_tag :email,
-                    Current.user&.email_address || params[:email],
-                    required: true,
-                    readonly: Current.user.present?,
-                    autocomplete: "email",
-                    placeholder: t("quotes.new.email.placeholder"),
-                    class: "form-input" %>
-            </div>
+                <%= email_field_tag :email,
+                      locale_form_value("quote", "email", params[:email]),
+                      required: true,
+                      autocomplete: "email",
+                      placeholder: t("quotes.new.email.placeholder"),
+                      class: "form-input" %>
+              </div>
+            <% end %>
 
             <%= form.submit t("quotes.new.submit"),
                   class: "button-primary landing-submit" %>

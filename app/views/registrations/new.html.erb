@@ -15,18 +15,27 @@
       <% if flash[:alert] %><div class="auth-alert" role="alert"><%= flash[:alert] %></div><% end %>
       <% if flash[:notice] %><div class="auth-notice" role="status"><%= flash[:notice] %></div><% end %>
 
-      <%= form_with model: @user, url: registration_path, class: "auth-form" do |form| %>
-        <div class="form-consent">
-          <%= check_box_tag "user[accept_terms]", "1", false, required: true %>
-          <%= label_tag "user_accept_terms" do %>
-            <%= t("registrations.new.terms_prefix") %><%= link_to t("registrations.new.terms_link"), terms_path, target: "_blank", rel: "noopener" %>
-          <% end %>
-        </div>
+      <%= form_with model: @user, url: registration_path, class: "auth-form",
+            data: { locale_draft: "registration", controller: "registration-consent",
+                    registration_consent_require_communications_value: @operational_consent_required } do |form| %>
+        <% if @show_terms_checkbox %>
+          <div class="form-consent">
+            <%= check_box_tag "user[accept_terms]", "1", locale_form_checked?("registration", "user[accept_terms]", ActiveModel::Type::Boolean.new.cast(params.dig(:user, :accept_terms))), required: true,
+                  data: { registration_consent_target: "terms", action: "change->registration-consent#update" } %>
+            <%= label_tag "user_accept_terms" do %>
+              <%= t("registrations.new.terms_prefix") %><%= link_to t("registrations.new.terms_link"), terms_path, target: "_blank", rel: "noopener" %>
+            <% end %>
+          </div>
+        <% end %>
 
-        <div class="form-consent">
-          <%= check_box_tag "user[accept_operational_email]", "1", false %>
-          <%= label_tag "user_accept_operational_email", t("registrations.new.operational_consent_text") %>
-        </div>
+        <% if @show_operational_checkbox %>
+          <div class="form-consent">
+            <%= check_box_tag "user[accept_operational_email]", "1", locale_form_checked?("registration", "user[accept_operational_email]", ActiveModel::Type::Boolean.new.cast(params.dig(:user, :accept_operational_email))),
+                  required: @operational_consent_required,
+                  data: { registration_consent_target: "communications", action: "change->registration-consent#update" } %>
+            <%= label_tag "user_accept_operational_email", t("registrations.new.operational_consent_text") %>
+          </div>
+        <% end %>
 
       <div class="auth-header">
         <h1><%= t("registrations.new.title") %></h1>
@@ -40,6 +49,7 @@
           <%= form.label :first_name, t("registrations.new.first_name.label") %>
 
           <%= form.text_field :first_name,
+                value: locale_form_value("registration", "user[first_name]", @user.first_name),
                 required: true,
                 autofocus: true,
                 autocomplete: "given-name",
@@ -50,6 +60,7 @@
           <%= form.label :last_name, t("registrations.new.last_name.label") %>
 
           <%= form.text_field :last_name,
+                value: locale_form_value("registration", "user[last_name]", @user.last_name),
                 required: true,
                 autocomplete: "family-name",
                 placeholder: t("registrations.new.last_name.placeholder") %>
@@ -59,6 +70,7 @@
           <%= form.label :email_address, t("registrations.new.email.label") %>
 
           <%= form.email_field :email_address,
+                value: locale_form_value("registration", "user[email_address]", @user.email_address),
                 required: true,
                 autocomplete: "email",
                 placeholder: t("registrations.new.email.placeholder") %>
@@ -88,12 +100,15 @@
           <p><%= t("registrations.new.oauth_identity", email: @user.email_address) %></p>
         <% end %>
 
-        <%= form.submit t("registrations.new.submit"),
-              class: "button-primary auth-submit" %>
+        <%= form.submit @registration_submit_label,
+              class: "button-primary auth-submit",
+              disabled: true,
+              data: { registration_consent_target: "submit" } %>
       <% end %>
 
       <% if @oauth_pending %>
-        <%= button_to t("registrations.new.cancel_oauth"), cancel_oauth_registration_path, method: :post, class: "action-link" %>
+        <%= button_to t("registrations.new.cancel_oauth"), cancel_oauth_registration_path, method: :post,
+              class: "button-primary auth-submit oauth-cancel-button" %>
       <% else %>
 
       <div class="auth-divider">

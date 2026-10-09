@@ -47,7 +47,7 @@
   </head>
 
   <%# Layout classes live on <body>: Turbo Drive replaces it on every visit but never updates <html>'s class. %>
-  <body class="<%= page_classes&.join(' ') %>">
+  <body class="<%= page_classes&.join(' ') %>" data-controller="locale-form-drafts">
     <header class="site-header <%= 'landing-site-header' if public_landing_page %>"
             <%= tag.attributes data: { controller: ("sticky-header" if landing_page) } %>>
       <% if Current.user && controller_name != "dashboards" %>

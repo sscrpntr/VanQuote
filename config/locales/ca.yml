@@ -22,6 +22,7 @@ ca:
     title: "Comunicacions operatives per email"
     accept: "Accepto rebre comunicacions operatives per email."
     submit: "Desar el consentiment"
+    accept_button: "Acceptar"
     required: "Has de marcar la casella per donar aquest consentiment."
     active: "Actiu"
     inactive: "No concedit o retirat"
@@ -190,10 +191,14 @@ ca:
 
       contact:
         title: "Com vols continuar?"
-        description: "Tria com vols rebre el pressupost o posar-te en contacte amb nosaltres."
+        description: "Tria com vols que gestionem aquesta sol·licitud. Hauràs d'autoritzar les comunicacions operatives abans d'enviar-la."
         email_quote: "Enviar pressupost per email"
         phone: "Vull rebre una trucada"
         email_contact: "Vull rebre contacte per email"
+        account_mismatch: "Aquest pressupost està associat a un altre email o compte. Inicia sessió amb el compte que el va crear per sol·licitar contacte."
+        expired: "L'enllaç del pressupost ha caducat. Torna a obrir el pressupost original per continuar."
+        invalid_preference: "Selecciona una opció de contacte vàlida."
+        request_failed: "No s'ha pogut registrar la sol·licitud. Revisa el pressupost i torna-ho a provar."
 
       new_quote: "Nova cotització"
 
@@ -286,12 +291,14 @@ ca:
         placeholder: "Repeteix la teva contrasenya"
 
       submit: "Crear compte"
+      accept: "Acceptar"
       terms_prefix: "Accepto els "
       terms_link: "termes i condicions"
       oauth_identity: "Continua amb el compte de Google verificat %{email}."
       cancel_oauth: "Cancel·la i torna enrere"
       terms_required: "Has d'acceptar els termes i condicions per crear un compte."
       operational_consent_text: "Accepto rebre per email el resultat dels meus pressupostos i missatges necessaris per gestionar les sol·licituds de transport que iniciï. Aquest permís no inclou publicitat ni butlletins i el puc retirar des del perfil."
+      operational_consent_required: "Per crear un compte has d'acceptar les comunicacions operatives. Si no les vols acceptar, pots cancel·lar i continuar utilitzant el pressupost sense sol·licitar contacte."
 
       or: "o"
 

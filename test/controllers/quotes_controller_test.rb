@@ -384,16 +384,66 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "customer@example.com", quote.contact_email
   end
 
-  test "authenticated user sees their email but no consent checkbox on the quote form" do
+  test "authenticated user does not see an email field on the quote form" do
     authenticate_as(@user)
 
     get "/"
 
     assert_response :success
     assert_select "form.quote-form", count: 1
-    assert_select "form.quote-form input[name='email'][readonly]", count: 1
+    assert_select "form.quote-form input[name='email']", count: 0
+    assert_select "form.quote-form label[for='email']", count: 0
     assert_select "form.quote-form input[name='phone']", count: 0
     assert_select "form.quote-form input[name='consent_given']", count: 0
+  end
+
+  test "authenticated quote ignores an email submitted by a modified client" do
+    authenticate_as(@user)
+
+    assert_difference("Quote.count", 1) do
+      post quotes_path, params: valid_quote_params.merge(email: "attacker@example.com")
+    end
+
+    quote = Quote.order(:id).last
+    assert_equal @user.email_address, quote.contact_email
+    assert_equal @user.id, quote.user_id
+    assert_nil quote.lead
+  end
+
+  test "authenticated contact request checks consent before creating a lead" do
+    quote = create_anonymous_quote(contact_email: @user.email_address)
+    authenticate_as(@user)
+    token = public_token_for(quote)
+
+    assert_no_difference "Lead.count" do
+      post request_quote_contact_path, params: { token: token, contact_preference: "EMAIL_QUOTE" }
+    end
+
+    assert_redirected_to new_operational_consent_path
+    assert_equal @user.id, quote.reload.user_id
+    assert_nil quote.lead
+
+    assert_difference "Lead.count", 1 do
+      post operational_consent_path, params: { accept_operational_email: "1" }
+    end
+
+    assert_redirected_to contact_confirmation_path
+    assert_equal "EMAIL_QUOTE", quote.reload.lead.contact_preference
+    assert_equal @user.email_address, quote.lead.email
+  end
+
+  test "authenticated contact request rejects a quote associated with another email" do
+    quote = create_anonymous_quote(contact_email: "someone-else@example.com")
+    authenticate_as(@user)
+
+    assert_no_difference [ "Quote.count", "Lead.count" ] do
+      post request_quote_contact_path,
+        params: { token: public_token_for(quote), contact_preference: "EMAIL_CONTACT" }
+    end
+
+    assert_equal public_quotes_path, URI.parse(response.location).path
+    assert_nil quote.reload.user_id
+    assert_nil quote.lead
   end
 
   test "anonymous user sees email but not phone on the quote form" do
@@ -461,9 +511,14 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     token = quote.signed_id(purpose: :public_view, expires_in: 24.hours)
     get new_session_path, params: { quote_token: token, contact_preference: "EMAIL_QUOTE" }
 
-    assert_redirected_to new_operational_consent_path
+    assert_equal public_quotes_path, URI.parse(response.location).path
     assert_nil quote.reload.lead
     assert_not @user.reload.operational_email_consent_valid?
+    follow_redirect!
+    assert_response :success
+
+    post request_quote_contact_path, params: { token: public_token_for(quote), contact_preference: "EMAIL_QUOTE" }
+    assert_redirected_to new_operational_consent_path
 
     assert_difference "Lead.count", 1 do
       post operational_consent_path, params: { accept_operational_email: "1" }
@@ -497,6 +552,40 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_response :redirect
     assert_not @user.operational_email_consent_valid?
     assert_nil Quote.last.lead
+  end
+
+  test "new explicit consent reauthorizes a request without deleting its withdrawal history" do
+    @user.grant_operational_email_consent!(consent_text: "Initial explicit grant")
+    quote = create_quote_for(@user, origin: "Barcelona", destination: "Madrid")
+    authenticate_as(@user)
+    token = public_token_for(quote)
+
+    assert_difference "Lead.count", 1 do
+      post request_quote_contact_path, params: { token: token, contact_preference: "EMAIL_QUOTE" }
+    end
+    lead = quote.reload.lead
+    original_grant = lead.consent_at
+
+    delete operational_consent_path
+    withdrawal = lead.reload.consent_withdrawn_at
+    assert_not_nil withdrawal
+    assert_not Lead.with_consent.exists?(lead.id)
+
+    post request_quote_contact_path, params: { token: token, contact_preference: "EMAIL_CONTACT" }
+    assert_redirected_to new_operational_consent_path
+    assert_difference "OperationalEmailConsentEvent.count", 1 do
+      assert_no_difference "Lead.count" do
+        post operational_consent_path, params: { accept_operational_email: "1" }
+      end
+    end
+
+    lead.reload
+    assert lead.consent_at > original_grant
+    assert_equal withdrawal.to_i, lead.consent_withdrawn_at.to_i
+    assert_not lead.consent_withdrawn?
+    assert Lead.with_consent.exists?(lead.id)
+    assert_equal "EMAIL_CONTACT", lead.contact_preference
+    assert_equal %w[granted withdrawn granted], @user.operational_email_consent_events.order(:id).pluck(:action)
   end
 
   test "authenticated user cannot override their email or phone when creating a quote" do
@@ -745,6 +834,13 @@ assert_response :success
       total_cost: 316.4,
       recommended_price: 395.5
     )
+  end
+
+  def create_anonymous_quote(contact_email:)
+    Quote.create!(origin: "Barcelona", destination: "Madrid", contact_email: contact_email,
+      distance_km: 620, estimated_duration_minutes: 360, fuel_cost: 74.4, toll_cost: 0,
+      vehicle_cost: 62, driver_cost: 150, loading_cost: 20, waiting_cost: 0,
+      other_cost: 10, margin: 25, total_cost: 316.4, recommended_price: 395.5)
   end
 
   def public_token_for(quote)
