@@ -15,6 +15,7 @@
       <div class="landing-form-column">
         <div
           id="quote-form"
+          tabindex="-1"
           class="quote-card landing-form-card"
           data-controller="place-autocomplete"
           data-place-autocomplete-api-key-value="<%= ENV["GOOGLE_MAPS_BROWSER_API_KEY"] %>"
@@ -141,7 +142,9 @@
     <div class="landing-section-inner">
       <h2 id="landing-cta-title"><%= t("landing.cta.title") %></h2>
       <p><%= t("landing.cta.subtitle") %></p>
-      <%= link_to t("landing.cta.button"), new_quote_path, class: "button-primary landing-cta-button" %>
+      <%= link_to t("landing.cta.button"), "#quote-form",
+            class: "button-primary landing-cta-button",
+            data: { controller: "smooth-scroll", action: "smooth-scroll#scroll" } %>
     </div>
   </section>
 </div>

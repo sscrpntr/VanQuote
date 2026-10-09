@@ -1,9 +1,10 @@
-<% landing_page = controller_name == "quotes" && action_name == "new" %>
+<%# quotes#create re-renders the landing page when the quote is invalid. %>
+<% landing_page = controller_name == "quotes" && action_name.in?(%w[new create]) %>
 <% public_landing_page = landing_page && !Current.user %>
 <% page_classes = ["landing-page-layout"] if landing_page %>
 <% page_classes << "landing-authenticated" if landing_page && Current.user %>
 <!DOCTYPE html>
-<html class="<%= page_classes&.join(' ') %>">
+<html>
   <head>
     <title><%= public_landing_page ? t("seo.landing.title") : (content_for(:title) || "VanQuote") %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -45,13 +46,15 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body data-controller="locale-form-drafts">
-    <header class="site-header <%= 'landing-site-header' if public_landing_page %>">
+  <%# Layout classes live on <body>: Turbo Drive replaces it on every visit but never updates <html>'s class. %>
+  <body class="<%= page_classes&.join(' ') %>" data-controller="locale-form-drafts">
+    <header class="site-header <%= 'landing-site-header' if public_landing_page %>"
+            <%= tag.attributes data: { controller: ("sticky-header" if landing_page) } %>>
       <% if Current.user && controller_name != "dashboards" %>
+        <%= link_to root_path, class: "site-brand", aria: { label: "VanQuote" } do %>
+          <%= image_tag "/vanquote-logo.svg", alt: "VanQuote", class: "site-brand-logo", width: 200, height: 40 %>
+        <% end %>
         <nav class="site-navigation" aria-label="<%= t('navigation.account') %>">
-          <%= link_to root_path, class: "site-brand", aria: { label: "VanQuote" } do %>
-            <%= image_tag "/vanquote-logo.svg", alt: "VanQuote", class: "site-brand-logo", width: 200, height: 40 %>
-          <% end %>
           <%= link_to t("navigation.my_quotes"), quotes_path, class: "site-navigation-link" %>
           <%= link_to t("navigation.new_quote"), new_quote_path, class: "site-navigation-link" %>
           <%= link_to t("navigation.profile"), profile_path, class: "site-navigation-link" %>

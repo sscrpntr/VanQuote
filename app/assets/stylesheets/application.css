@@ -29,25 +29,32 @@ body {
   padding: 28px 36px;
 }
 
-html.landing-page-layout {
-  --landing-header-offset: 84px;
+/*
+ * Landing layout. The class sits on <body> because Turbo Drive swaps <body>
+ * on every visit but leaves <html> untouched; the scroll container is <html>,
+ * so it opts in with :has(). --landing-header-offset is kept in sync with the
+ * real header height by the sticky-header Stimulus controller; the values here
+ * only cover the first paint.
+ */
+html:has(> body.landing-page-layout) {
+  --landing-header-offset: 82px;
   scroll-snap-type: y mandatory;
   scroll-padding-block-start: var(--landing-header-offset);
   scroll-behavior: smooth;
 }
 
-html.landing-page-layout.landing-authenticated {
-  --landing-header-offset: 104px;
+html:has(> body.landing-page-layout.landing-authenticated) {
+  --landing-header-offset: 100px;
 }
 
-html.landing-page-layout .site-header {
+.landing-page-layout .site-header {
   position: sticky;
   z-index: 20;
   top: 0;
   background: #f5f7fa;
 }
 
-html.landing-page-layout:focus-within {
+html:has(> body.landing-page-layout):focus-within {
   scroll-snap-type: y proximity;
 }
 
@@ -175,12 +182,10 @@ input {
 
 /* Public quote landing */
 .landing-site-header {
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: 22px 36px;
+  padding: 22px max(36px, calc((100% - 1320px) / 2 + 36px));
 }
 
-html.landing-page-layout .landing-site-header {
+.landing-page-layout .landing-site-header {
   background: #f8fafc;
 }
 
@@ -286,6 +291,10 @@ html.landing-page-layout .landing-site-header {
   padding: 30px;
   border-color: #eaecf0;
   box-shadow: 0 16px 42px rgba(16, 24, 40, 0.08);
+}
+
+#quote-form:focus {
+  outline: none;
 }
 
 .landing-form-card h2 {
@@ -451,13 +460,13 @@ html.landing-page-layout .landing-site-header {
 }
 
 @media (max-width: 760px) {
-  html.landing-page-layout {
-    --landing-header-offset: 70px;
+  html:has(> body.landing-page-layout) {
+    --landing-header-offset: 66px;
     scroll-snap-type: y proximity;
   }
 
-  html.landing-page-layout.landing-authenticated {
-    --landing-header-offset: 96px;
+  html:has(> body.landing-page-layout.landing-authenticated) {
+    --landing-header-offset: 100px;
   }
 
   .landing-site-header {
@@ -1058,8 +1067,8 @@ gmp-place-autocomplete {
 }
 
 @media (max-width: 640px) {
-  html.landing-page-layout.landing-authenticated {
-    --landing-header-offset: 14rem;
+  html:has(> body.landing-page-layout.landing-authenticated) {
+    --landing-header-offset: 126px;
   }
 
   .quote-page {
@@ -1081,7 +1090,7 @@ gmp-place-autocomplete {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html.landing-page-layout {
+  html:has(> body.landing-page-layout) {
     scroll-snap-type: y proximity;
     scroll-behavior: auto;
   }
@@ -1643,27 +1652,27 @@ gmp-place-autocomplete {
 
 @media (max-width: 640px) {
   .site-header {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 16px;
-    padding: 24px 20px;
+    flex-wrap: wrap;
+    gap: 14px 16px;
+    padding: 16px 20px;
   }
 
   .site-navigation {
-    gap: 12px 20px;
+    order: 1;
+    flex-basis: 100%;
+    gap: 8px 20px;
   }
 
   .site-brand {
-    width: 100%;
-    font-size: 28px;
-  }
-
-  .language-selector {
-    align-self: flex-end;
+    width: min(38vw, 160px);
   }
 
   .language-selector-button {
     font-size: 23px;
+  }
+
+  .site-header:has(.site-brand) .language-selector-button {
+    font-size: 16px;
   }
 
   .auth-page {

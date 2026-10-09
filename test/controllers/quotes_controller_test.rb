@@ -148,7 +148,7 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
       assert_select "#landing-use-cases-title", text: translations[:uses_title]
       assert_select "#landing-pricing-title", text: translations[:pricing_title]
       assert_select "#landing-cta-title", text: translations[:cta_title]
-      assert_select ".landing-cta-button[href=?]", new_quote_path, text: translations[:cta]
+      assert_select ".landing-cta-button[href='#quote-form'][data-controller='smooth-scroll']", text: translations[:cta]
     end
   end
 
@@ -172,7 +172,7 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     get new_quote_path
 
     assert_response :success
-    assert_select "html.landing-page-layout.landing-authenticated"
+    assert_select "body.landing-page-layout.landing-authenticated"
     assert_select "header.site-header nav.site-navigation" do
       assert_select "a[href=?]", quotes_path
       assert_select "a[href=?]", new_quote_path, text: "Nueva cotización"
@@ -185,8 +185,10 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     get new_quote_path
 
     assert_response :success
-    assert_select "html.landing-page-layout"
-    assert_select "html.landing-authenticated", count: 0
+    assert_select "html[class]", count: 0
+    assert_select "body.landing-page-layout"
+    assert_select "body.landing-authenticated", count: 0
+    assert_select "header.site-header[data-controller='sticky-header']"
     assert_select ".landing-hero-inner"
     assert_select ".landing-page > section", count: 5
     assert_select ".landing-benefits li", count: 3
@@ -757,6 +759,8 @@ assert_response :success
     end
 
     assert_response :unprocessable_entity
+    assert_select "body.landing-page-layout"
+    assert_select "header.site-header[data-controller='sticky-header']"
   end
 
   test "does not create an invalid quote" do
