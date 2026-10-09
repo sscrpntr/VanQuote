@@ -1,0 +1,2 @@
+class PasswordResetRateLimit < ApplicationRecord
+end

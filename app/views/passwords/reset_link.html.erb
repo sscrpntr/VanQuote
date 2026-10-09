@@ -1,0 +1,33 @@
+<div class="auth-page">
+  <div class="auth-container">
+    <div class="auth-brand">
+      <%= link_to "VanQuote", root_path, class: "auth-logo" %>
+    </div>
+
+    <div class="auth-card" data-controller="password-reset-link">
+      <div class="auth-header">
+        <h1><%= t("passwords.reset_link.title") %></h1>
+        <p><%= t("passwords.reset_link.instructions") %></p>
+      </div>
+
+      <p data-password-reset-link-target="error" hidden role="alert">
+        <%= t("passwords.alerts.invalid_or_expired_link") %>
+      </p>
+
+      <%= form_with url: verify_password_reset_path,
+                    method: :post,
+                    data: { password_reset_link_target: "form" } do %>
+        <%= hidden_field_tag :token, "", data: { password_reset_link_target: "token" } %>
+        <noscript><p><%= t("passwords.reset_link.javascript_required") %></p></noscript>
+      <% end %>
+
+      <p class="auth-back-link">
+        <%= link_to t("passwords.new.back_to_sign_in"), new_session_path, class: "action-link" %>
+      </p>
+    </div>
+
+    <p class="auth-back-link">
+      <%= link_to t("passwords.new.back_to_vanquote"), root_path, class: "action-link" %>
+    </p>
+  </div>
+</div>

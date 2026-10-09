@@ -207,6 +207,7 @@ es:
         phone: "Quiero recibir una llamada"
         email_contact: "Quiero recibir contacto por email"
         account_mismatch: "Este presupuesto está asociado a otro email o cuenta. Inicia sesión con la cuenta que lo creó para solicitar contacto."
+        owner_updated: "Se ha actualizado el propietario de este presupuesto a la cuenta %{email}."
         expired: "El enlace del presupuesto ha caducado. Vuelve a abrir el presupuesto original para continuar."
         invalid_preference: "Selecciona una opción de contacto válida."
         request_failed: "No se pudo registrar la solicitud. Revisa el presupuesto e inténtalo de nuevo."
@@ -238,6 +239,13 @@ es:
 
     errors:
       route_calculation_failed: "No se ha podido calcular la ruta. Inténtalo de nuevo."
+      anonymous_limit: "Has alcanzado el límite de tres presupuestos anónimos. Inicia sesión o regístrate para continuar."
+      too_many_requests: "Demasiadas solicitudes. Espera un momento e inténtalo de nuevo."
+      email_delivery_failed: "No se pudo aceptar el envío del presupuesto por email. Puedes consultar el resultado en esta página."
+      email_failed: "La solicitud se guardó, pero no se pudo aceptar el envío de la notificación. Inténtalo de nuevo más tarde."
+      idempotency_key_invalid: "No se pudo procesar la solicitud. Actualiza la página e inténtalo de nuevo."
+      quote_request_conflict: "No se pudo procesar la solicitud. Actualiza la página e inténtalo de nuevo."
+      quote_request_in_progress: "Tu solicitud de presupuesto sigue procesándose. Inténtalo de nuevo en unos instantes."
 
   sessions:
     new:
@@ -259,6 +267,8 @@ es:
       back_to_vanquote: "← Volver a VanQuote"
 
     alerts:
+      email_not_verified: "Confirma tu dirección de email. Te hemos enviado un nuevo enlace de verificación."
+      verification_delivery_failed: "No se pudo aceptar el envío del enlace de verificación. Inténtalo de nuevo más tarde."
       try_again_later: "Inténtalo de nuevo más tarde."
       invalid_credentials: "Prueba con otro email o contraseña."
 
@@ -268,6 +278,8 @@ es:
       subtitle: "Guarda tus presupuestos y gestiona tus solicitudes de transporte."
       errors:
         title: "No hemos podido crear tu cuenta:"
+        save_failed: "No hemos podido guardar tu cuenta y las aceptaciones. Revisa el formulario e inténtalo de nuevo."
+        acceptance_storage_unavailable: "Ahora no podemos guardar tu aceptación. Conservamos tus selecciones; inténtalo más tarde o contacta con soporte."
       first_name:
         label: "Nombre"
         placeholder: "Tu nombre"
@@ -298,6 +310,9 @@ es:
       already_have_account: "¿Ya tienes una cuenta?"
       sign_in: "Iniciar sesión"
       back_to_vanquote: "← Volver a VanQuote"
+      verify_email: "Te hemos enviado un enlace para verificar tu email antes de iniciar sesión."
+      email_verified: "Email verificado. Ya puedes iniciar sesión."
+      email_verification_expired: "El enlace de verificación no es válido o ha caducado. Regístrate de nuevo para recibir otro."
 
   oauth:
     providers:
@@ -309,6 +324,7 @@ es:
       invalid_provider: "El proveedor de acceso no es válido."
       not_configured: "El acceso con %{provider} requiere configuración externa."
       authentication_failed: "No se ha podido completar el acceso. Prueba con email y contraseña."
+      sign_in_to_link: "Ya existe una cuenta con ese email. Inicia sesión con esa cuenta para vincular Google de forma segura."
       account_creation_failed: "No se ha podido crear la cuenta con este proveedor."
 
   activerecord:
@@ -338,6 +354,11 @@ es:
       back_to_sign_in: "← Volver a iniciar sesión"
       back_to_vanquote: "← Volver a VanQuote"
 
+    reset_link:
+      title: "Continuar con el cambio de contraseña"
+      instructions: "Estamos validando tu enlace seguro. La página continuará automáticamente."
+      javascript_required: "Necesitas JavaScript para validar este enlace seguro. Actívalo y vuelve a abrir el enlace del correo."
+
     edit:
       title: "Actualiza tu contraseña"
       subtitle: "Introduce tu nueva contraseña y confirma el cambio."
@@ -353,11 +374,12 @@ es:
 
     alerts:
       try_again_later: "Inténtalo de nuevo más tarde."
+      delivery_failed: "No se pudo aceptar el envío del correo de recuperación. Inténtalo de nuevo más tarde."
       passwords_did_not_match: "Las contraseñas no coinciden."
       invalid_or_expired_link: "El enlace para restablecer la contraseña no es válido o ha caducado."
 
     notices:
-      reset_instructions: "Hemos enviado las instrucciones para restablecer la contraseña si existe una cuenta con ese email."
+      reset_instructions: "Si existe una cuenta con ese email, utiliza el correo de recuperación para continuar."
       reset_success: "La contraseña se ha restablecido correctamente."
 
   leads:

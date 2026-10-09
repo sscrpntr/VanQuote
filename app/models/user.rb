@@ -1,6 +1,10 @@
 class User < ApplicationRecord
   has_secure_password
 
+  generates_token_for :password_reset, expires_in: 15.minutes do
+    [ password_salt&.last(10), password_reset_generation ]
+  end
+
   has_many :sessions, dependent: :destroy
   has_many :quotes, dependent: :nullify
   has_many :identities, dependent: :destroy
@@ -21,6 +25,27 @@ class User < ApplicationRecord
 
   def terms_accepted?
     terms_accepted_at.present? && terms_version == TERMS_VERSION
+  end
+
+  def email_verified?
+    email_verified_at.present?
+  end
+
+  def self.consume_password_reset_token(token)
+    user = find_by_password_reset_token(token)
+    return unless user
+
+    user.with_lock do
+      user.reload
+      next unless find_by_password_reset_token(token)&.id == user.id
+
+      user.update!(password_reset_generation: user.password_reset_generation + 1)
+      user
+    end
+  end
+
+  def verify_email!
+    update_column(:email_verified_at, Time.current) unless email_verified?
   end
 
   def operational_email_consent_valid?

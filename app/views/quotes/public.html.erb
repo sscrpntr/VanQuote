@@ -12,6 +12,9 @@
       <% if flash[:alert] %>
         <div class="auth-alert" role="alert"><%= flash[:alert] %></div>
       <% end %>
+      <% if flash[:notice] %>
+        <div class="auth-notice flash-notice" role="status" aria-live="polite"><%= flash[:notice] %></div>
+      <% end %>
 
       <div class="route-summary">
         <div class="route-point">

@@ -1,6 +1,17 @@
 require "test_helper"
 
 class QuotesControllerTest < ActionDispatch::IntegrationTest
+  class FailingDeliveryMethod
+    def initialize(*)
+    end
+
+    def deliver!(_mail)
+      raise IOError, "SMTP delivery rejected"
+    end
+  end
+
+  ActionMailer::Base.add_delivery_method :van_quote_failing_quote, FailingDeliveryMethod
+
   class FakeRoutesService
     def initialize(origin:, destination:)
       @origin = origin
@@ -15,6 +26,27 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  class CountingRoutesService
+    class << self
+      attr_accessor :calls
+    end
+
+    def initialize(origin:, destination:); end
+
+    def call
+      self.class.calls = self.class.calls.to_i + 1
+      { distance_km: 620, duration_minutes: 360 }
+    end
+  end
+
+  class FailingRoutesService
+    def initialize(origin:, destination:); end
+
+    def call
+      raise IOError, "route provider unavailable"
+    end
+  end
+
   setup do
     @original_routes_service_class = QuotesController.routes_service_class
     QuotesController.routes_service_class = FakeRoutesService
@@ -22,7 +54,8 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     @user = User.create!(
       first_name: "Test", last_name: "User", phone: "+34600000000",
       email_address: "user@example.com",
-      password: "password123"
+      password: "password123",
+      email_verified_at: Time.current
     )
   end
 
@@ -41,6 +74,216 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
       assert_select "a[href=?]", new_session_path, count: 0
       assert_select "a[href=?]", new_registration_path, count: 0
     end
+  end
+
+  test "anonymous users can create only three quotes and the fourth is rejected before route lookup" do
+    CountingRoutesService.calls = 0
+    QuotesController.routes_service_class = CountingRoutesService
+
+    3.times do
+      assert_difference "Quote.count", 1 do
+        post quotes_path, params: {
+          quote: { origin: "Barcelona", destination: "Madrid" }, email: "customer@example.com"
+        }
+      end
+      assert_response :redirect
+    end
+
+    assert_equal 3, CountingRoutesService.calls
+    alternate_browser = open_session
+    assert_no_difference [ "Quote.count", "Lead.count" ] do
+      alternate_browser.post quotes_path, params: {
+        quote: { origin: "Barcelona", destination: "Madrid" }, email: "customer@example.com",
+        idempotency_key: QuoteCreationRequest.generate_key
+      }
+    end
+    assert_equal 429, alternate_browser.response.status
+    assert_equal 3, CountingRoutesService.calls
+    assert_includes alternate_browser.response.body, I18n.t("quotes.errors.anonymous_limit")
+
+    authenticate_as(@user)
+    assert_difference "Quote.count", 1 do
+      post quotes_path, params: {
+        quote: { origin: "Barcelona", destination: "Madrid" }, email: "customer@example.com"
+      }
+    end
+  ensure
+    QuotesController.routes_service_class = @original_routes_service_class
+  end
+
+  test "quote request sends the estimate to its contact email" do
+    ActionMailer::Base.deliveries.clear
+
+    assert_difference "Quote.count", 1 do
+      post quotes_path, params: valid_quote_params
+    end
+
+    assert_response :redirect
+    quote = Quote.order(:id).last
+    assert_equal "customer@example.com", quote.contact_email
+    assert quote.result_email_sent_at
+    assert_equal 1, ActionMailer::Base.deliveries.size
+    assert_equal [ "customer@example.com" ], ActionMailer::Base.deliveries.last.to
+  end
+
+  test "failed quote email does not claim it was sent" do
+    original_method = QuoteMailer.delivery_method
+    QuoteMailer.delivery_method = :van_quote_failing_quote
+
+    assert_difference "Quote.count", 1 do
+      post quotes_path, params: valid_quote_params
+    end
+
+    quote = Quote.order(:id).last
+    assert_match %r{/quotes/public\?token=}, response.location
+    assert_equal I18n.t("quotes.errors.email_delivery_failed"), flash[:alert]
+    assert_nil flash[:notice]
+    assert_nil quote.result_email_sent_at
+  ensure
+    QuoteMailer.delivery_method = original_method
+  end
+
+  test "repeating a quote request with the same key reuses the quote and email" do
+    ActionMailer::Base.deliveries.clear
+    key = QuoteCreationRequest.generate_key
+
+    assert_difference "Quote.count", 1 do
+      post quotes_path, params: valid_quote_params.merge(idempotency_key: key)
+    end
+    assert_response :redirect
+    quote_id = Quote.order(:id).last.id
+    assert_equal 1, ActionMailer::Base.deliveries.size
+
+    assert_no_difference "Quote.count" do
+      post quotes_path, params: valid_quote_params.merge(idempotency_key: key)
+    end
+
+    assert_response :redirect
+    assert_equal quote_id, Quote.order(:id).last.id
+    assert_equal 1, ActionMailer::Base.deliveries.size
+  end
+
+  test "incompatible parameters cannot reuse a quote request key" do
+    CountingRoutesService.calls = 0
+    QuotesController.routes_service_class = CountingRoutesService
+    key = QuoteCreationRequest.generate_key
+    quote_count = Quote.count
+
+    assert_difference "Quote.count", 1 do
+      post quotes_path, params: valid_quote_params.merge(idempotency_key: key)
+    end
+    assert_response :redirect
+    assert_equal quote_count + 1, Quote.count
+
+    assert_no_difference "Quote.count" do
+      post quotes_path, params: valid_quote_params.deep_merge(quote: { destination: "Valencia" })
+        .merge(idempotency_key: key)
+    end
+
+    assert_response :conflict
+    assert_equal 1, CountingRoutesService.calls
+    assert_includes response.body, I18n.t("quotes.errors.quote_request_conflict")
+  ensure
+    QuotesController.routes_service_class = @original_routes_service_class
+  end
+
+  test "invalid idempotency keys are rejected before route lookup" do
+    CountingRoutesService.calls = 0
+    QuotesController.routes_service_class = CountingRoutesService
+
+    assert_no_difference "Quote.count" do
+      post quotes_path, params: valid_quote_params.merge(idempotency_key: "invalid")
+    end
+
+    assert_response :unprocessable_entity
+    assert_equal 0, CountingRoutesService.calls
+  ensure
+    QuotesController.routes_service_class = @original_routes_service_class
+  end
+
+  test "another anonymous session cannot use an idempotency key to access a quote" do
+    key = QuoteCreationRequest.generate_key
+    post quotes_path, params: valid_quote_params.merge(idempotency_key: key)
+    assert_response :redirect
+    quote = Quote.order(:id).last
+
+    alternate_browser = open_session
+    assert_no_difference "Quote.count" do
+      alternate_browser.post quotes_path, params: valid_quote_params.merge(idempotency_key: key)
+    end
+
+    assert_equal 409, alternate_browser.response.status
+    assert_not_includes alternate_browser.response.body, quote.id.to_s
+  end
+
+  test "a different authenticated user cannot use an idempotency key to access a quote" do
+    CountingRoutesService.calls = 0
+    QuotesController.routes_service_class = CountingRoutesService
+    key = QuoteCreationRequest.generate_key
+    authenticate_as(@user)
+    post quotes_path, params: valid_quote_params.merge(idempotency_key: key)
+    quote = Quote.order(:id).last
+
+    other_user = User.create!(
+      first_name: "Other",
+      last_name: "User",
+      email_address: "other-user@example.com",
+      password: "password123",
+      email_verified_at: Time.current
+    )
+    authenticate_as(other_user)
+    assert_no_difference "Quote.count" do
+      post quotes_path, params: valid_quote_params.merge(idempotency_key: key)
+    end
+
+    assert_response :conflict
+    assert_equal 1, CountingRoutesService.calls
+    assert_not_includes response.body, quote.id.to_s
+  ensure
+    QuotesController.routes_service_class = @original_routes_service_class
+  end
+
+  test "failed quote email can be retried on the same persisted quote" do
+    ActionMailer::Base.deliveries.clear
+    original_method = QuoteMailer.delivery_method
+    QuoteMailer.delivery_method = :van_quote_failing_quote
+    key = QuoteCreationRequest.generate_key
+
+    assert_difference "Quote.count", 1 do
+      post quotes_path, params: valid_quote_params.merge(idempotency_key: key)
+    end
+    quote = Quote.order(:id).last
+    assert_nil quote.result_email_sent_at
+
+    QuoteMailer.delivery_method = original_method
+    assert_no_difference "Quote.count" do
+      post quotes_path, params: valid_quote_params.merge(idempotency_key: key)
+    end
+
+    assert_response :redirect
+    assert_equal quote.id, Quote.order(:id).last.id
+    assert quote.reload.result_email_sent_at
+    assert_equal 1, ActionMailer::Base.deliveries.size
+  ensure
+    QuoteMailer.delivery_method = original_method
+  end
+
+  test "route failure leaves a retryable operation without creating a quote" do
+    QuotesController.routes_service_class = FailingRoutesService
+    key = QuoteCreationRequest.generate_key
+    assert_no_difference "Quote.count" do
+      post quotes_path, params: valid_quote_params.merge(idempotency_key: key)
+    end
+    assert_response :unprocessable_entity
+
+    QuotesController.routes_service_class = FakeRoutesService
+    assert_difference "Quote.count", 1 do
+      post quotes_path, params: valid_quote_params.merge(idempotency_key: key)
+    end
+    assert_response :redirect
+    assert_equal 1, QuoteCreationRequest.where(status: "completed").count
+  ensure
+    QuotesController.routes_service_class = @original_routes_service_class
   end
 
   test "public landing renders production Open Graph and Twitter preview metadata" do
@@ -294,7 +537,8 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
 
   test "admin can access quotes index" do
     admin = User.create!(first_name: "Admin", last_name: "User", phone: "+34600000001",
-      email_address: "admin@example.com", password: "password123", admin: true)
+      email_address: "admin@example.com", password: "password123", admin: true,
+      email_verified_at: Time.current)
     authenticate_as(admin)
 
     get quotes_path
@@ -324,6 +568,18 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
       password: "password123"
     }
 
+    assert_equal @user.id, quote.reload.user_id
+  end
+
+  test "quote creation grants claim authority only in the creating browser session" do
+    post quotes_path, params: valid_quote_params.merge(email: @user.email_address)
+    quote = Quote.last
+
+    assert_equal 1, Quote.where(id: quote.id).count
+    assert_nil quote.user_id
+    token = URI.decode_www_form(URI(response.location).query).to_h.fetch("token")
+    get new_session_path, params: { quote_token: token }
+    post session_path, params: { email_address: @user.email_address, password: "password123" }
     assert_equal @user.id, quote.reload.user_id
   end
 
@@ -393,6 +649,7 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_select "form.quote-form label[for='email']", count: 0
     assert_select "form.quote-form input[name='phone']", count: 0
     assert_select "form.quote-form input[name='consent_given']", count: 0
+    assert_select "form.quote-form input[name='idempotency_key'][value]", count: 1
   end
 
   test "authenticated quote ignores an email submitted by a modified client" do
@@ -430,8 +687,10 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_equal @user.email_address, quote.lead.email
   end
 
-  test "authenticated contact request rejects a quote associated with another email" do
+  test "authorized quote token allows claiming an anonymous quote with a different email" do
     quote = create_anonymous_quote(contact_email: "someone-else@example.com")
+    lead = quote.create_lead!(email: "someone-else@example.com", phone: "+34600000000",
+      contact_preference: "PHONE", consent_given: true, consent_at: Time.current, status: "NEW")
     authenticate_as(@user)
 
     assert_no_difference [ "Quote.count", "Lead.count" ] do
@@ -439,9 +698,178 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
         params: { token: public_token_for(quote), contact_preference: "EMAIL_CONTACT" }
     end
 
-    assert_equal public_quotes_path, URI.parse(response.location).path
+    assert_redirected_to new_operational_consent_path
+    assert_equal @user.id, quote.reload.user_id
+    assert_equal "someone-else@example.com", quote.contact_email
+    assert_equal lead.id, quote.reload.lead.id
+    assert_equal "someone-else@example.com", lead.reload.email
+    assert_equal "PHONE", lead.contact_preference
+    follow_redirect!
+    assert_response :success
+    assert_select ".auth-notice[role=status][aria-live=polite]",
+      text: I18n.t("quotes.public.contact.owner_updated", email: @user.email_address)
+  end
+
+  test "public view token alone cannot authorize claiming an anonymous quote" do
+    quote = Quote.create!(origin: "Barcelona", destination: "Madrid", contact_email: "someone-else@example.com",
+      distance_km: 620, estimated_duration_minutes: 360, fuel_cost: 74.4, toll_cost: 0,
+      vehicle_cost: 62, driver_cost: 150, loading_cost: 20, waiting_cost: 0,
+      other_cost: 10, margin: 25, total_cost: 316.4, recommended_price: 395.5)
+    authenticate_as(@user)
+    token = public_token_for(quote)
+
+    post request_quote_contact_path,
+      params: { token: token, contact_preference: "EMAIL_CONTACT" }
+
+    assert_redirected_to public_quotes_path(token: token)
+    assert_equal I18n.t("quotes.public.contact.account_mismatch"), flash[:alert]
+    assert_nil flash[:notice]
+    assert_nil quote.reload.user_id
+  end
+
+  test "repeated authorized contact requests reuse the same quote and lead" do
+    @user.grant_operational_email_consent!(consent_text: "Explicit test consent")
+    quote = create_anonymous_quote(contact_email: "original@example.com")
+    token = public_token_for(quote)
+    authenticate_as(@user)
+
+    assert_difference "Lead.count", 1 do
+      post request_quote_contact_path,
+        params: { token: token, contact_preference: "EMAIL_CONTACT" }
+    end
+    assert_redirected_to contact_confirmation_path
+    lead_id = quote.reload.lead.id
+
+    assert_no_difference [ "Quote.count", "Lead.count" ] do
+      post request_quote_contact_path,
+        params: { token: token, contact_preference: "EMAIL_CONTACT" }
+    end
+    assert_redirected_to contact_confirmation_path
+    assert_equal lead_id, quote.reload.lead.id
+    assert_equal "original@example.com", quote.contact_email
+    assert_equal @user.id, quote.user_id
+  end
+
+  test "claim authorization for one quote cannot be reused for a different quote" do
+    authorized_quote = create_anonymous_quote(contact_email: "created-here@example.com")
+    other_quote = Quote.create!(origin: "Lleida", destination: "Tarragona", contact_email: "other@example.com",
+      distance_km: 100, estimated_duration_minutes: 90, fuel_cost: 12, toll_cost: 0,
+      vehicle_cost: 10, driver_cost: 40, loading_cost: 20, waiting_cost: 0,
+      other_cost: 10, margin: 25, total_cost: 92, recommended_price: 115)
+    authenticate_as(@user)
+    token = public_token_for(other_quote)
+
+    post request_quote_contact_path,
+      params: { token: token, contact_preference: "EMAIL_CONTACT" }
+
+    assert_redirected_to public_quotes_path(token: token)
+    assert_nil other_quote.reload.user_id
+    assert_nil flash[:notice]
+    post request_quote_contact_path,
+      params: { token: public_token_for(authorized_quote), contact_preference: "EMAIL_CONTACT" }
+    assert_equal @user.id, authorized_quote.reload.user_id
+  end
+
+  test "quote id alone cannot authorize claiming an anonymous quote" do
+    quote = Quote.create!(origin: "Barcelona", destination: "Madrid", contact_email: "someone-else@example.com",
+      distance_km: 620, estimated_duration_minutes: 360, fuel_cost: 74.4, toll_cost: 0,
+      vehicle_cost: 62, driver_cost: 150, loading_cost: 20, waiting_cost: 0,
+      other_cost: 10, margin: 25, total_cost: 316.4, recommended_price: 395.5)
+    authenticate_as(@user)
+
+    assert_no_difference [ "Quote.count", "Lead.count" ] do
+      post request_quote_contact_path,
+        params: { quote_id: quote.id, contact_preference: "EMAIL_CONTACT" }
+    end
+
+    assert_redirected_to dashboard_path
     assert_nil quote.reload.user_id
     assert_nil quote.lead
+  end
+
+  test "creating a lead sends one administrator notification" do
+    quote = create_anonymous_quote(contact_email: @user.email_address)
+    @user.grant_operational_email_consent!(consent_text: "Test operational email consent")
+    ActionMailer::Base.deliveries.clear
+    authenticate_as(@user)
+
+    assert_difference "Lead.count", 1 do
+      post request_quote_contact_path,
+        params: { token: public_token_for(quote), contact_preference: "EMAIL_QUOTE" }
+    end
+
+    assert_redirected_to contact_confirmation_path
+    assert_equal 1, ActionMailer::Base.deliveries.size
+    mail = ActionMailer::Base.deliveries.last
+    assert_equal [ "sergiescarpenter@gmail.com" ], mail.to
+    assert_equal "New VanQuote lead", mail.subject
+    assert quote.reload.lead.admin_notification_sent_at
+  end
+
+  test "retrying a contact request reuses its lead and does not resend the notice" do
+    quote = create_anonymous_quote(contact_email: @user.email_address)
+    @user.grant_operational_email_consent!(consent_text: "Test operational email consent")
+    ActionMailer::Base.deliveries.clear
+    authenticate_as(@user)
+    token = public_token_for(quote)
+
+    assert_difference "Lead.count", 1 do
+      2.times do
+        post request_quote_contact_path,
+          params: { token: token, contact_preference: "EMAIL_QUOTE" }
+      end
+    end
+
+    assert_equal 1, ActionMailer::Base.deliveries.size
+    assert quote.reload.lead.present?
+  end
+
+  test "failed lead notification can be retried without duplicating the lead" do
+    quote = create_anonymous_quote(contact_email: @user.email_address)
+    @user.grant_operational_email_consent!(consent_text: "Test operational email consent")
+    authenticate_as(@user)
+    token = public_token_for(quote)
+    original_method = LeadsMailer.delivery_method
+    LeadsMailer.delivery_method = :van_quote_failing_quote
+
+    assert_difference "Lead.count", 1 do
+      post request_quote_contact_path,
+        params: { token: token, contact_preference: "EMAIL_QUOTE" }
+    end
+
+    lead = quote.reload.lead
+    assert_nil lead.admin_notification_sent_at
+    assert_equal I18n.t("quotes.public.contact.email_failed"), flash[:alert]
+    assert_not_equal I18n.t("quotes.contact_confirmation.flash"), flash[:notice]
+    LeadsMailer.delivery_method = original_method
+    ActionMailer::Base.deliveries.clear
+
+    assert_no_difference "Lead.count" do
+      post request_quote_contact_path,
+        params: { token: token, contact_preference: "EMAIL_QUOTE" }
+    end
+
+    assert_equal 1, ActionMailer::Base.deliveries.size
+    assert lead.reload.admin_notification_sent_at
+  ensure
+    LeadsMailer.delivery_method = original_method
+  end
+
+  test "failed quote claim keeps the quote anonymous and shows no success notice" do
+    quote = create_anonymous_quote(contact_email: "someone-else@example.com")
+    quote.update_columns(origin: nil)
+    authenticate_as(@user)
+    token = public_token_for(quote)
+
+    assert_no_difference [ "Quote.count", "Lead.count" ] do
+      post request_quote_contact_path,
+        params: { token: token, contact_preference: "EMAIL_CONTACT" }
+    end
+
+    assert_redirected_to public_quotes_path(token: token)
+    assert_equal I18n.t("quotes.public.contact.request_failed"), flash[:alert]
+    assert_nil flash[:notice]
+    assert_nil quote.reload.user_id
   end
 
   test "anonymous user sees email but not phone on the quote form" do
@@ -833,10 +1261,11 @@ assert_response :success
   end
 
   def create_anonymous_quote(contact_email:)
-    Quote.create!(origin: "Barcelona", destination: "Madrid", contact_email: contact_email,
-      distance_km: 620, estimated_duration_minutes: 360, fuel_cost: 74.4, toll_cost: 0,
-      vehicle_cost: 62, driver_cost: 150, loading_cost: 20, waiting_cost: 0,
-      other_cost: 10, margin: 25, total_cost: 316.4, recommended_price: 395.5)
+    post quotes_path, params: {
+      quote: { origin: "Barcelona", destination: "Madrid" },
+      email: contact_email
+    }
+    Quote.order(:id).last
   end
 
   def public_token_for(quote)

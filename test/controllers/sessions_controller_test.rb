@@ -1,13 +1,21 @@
 require "test_helper"
 
 class SessionsControllerTest < ActionDispatch::IntegrationTest
+  class FakeRoutesService
+    def initialize(origin:, destination:); end
+
+    def call
+      { distance_km: 620, duration_minutes: 360 }
+    end
+  end
   setup do
     @user = User.create!(
       first_name: "Test",
       last_name: "User",
       phone: "+34600000000",
       email_address: "user@example.com",
-      password: "password123"
+      password: "password123",
+      email_verified_at: Time.current
     )
   end
 
@@ -211,7 +219,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "account_operational_email", lead.consent_basis
   end
 
-  test "login with a different email cannot claim an anonymous quote" do
+  test "signed quote context lets an authenticated user claim an anonymous quote with a different email" do
     quote = create_unconsented_quote(contact_email: "different-owner@example.com")
     get new_session_path, params: { quote_token: public_token_for(quote) }
 
@@ -221,11 +229,34 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     }
 
     assert_equal public_quotes_path, URI.parse(response.location).path
-    assert_nil quote.reload.user_id
+    assert_equal @user.id, quote.reload.user_id
+    assert_equal "different-owner@example.com", quote.contact_email
     assert_nil quote.lead
     follow_redirect!
     assert_response :success
-    assert_includes response.body, I18n.t("quotes.public.contact.account_mismatch")
+    assert_select ".auth-notice[role=status][aria-live=polite]",
+      text: I18n.t("quotes.public.contact.owner_updated", email: @user.email_address)
+  end
+
+  test "quote already owned by the authenticated user is recovered without a claim notice or duplicates" do
+    quote = create_quote_for(@user)
+    token = public_token_for(quote)
+    lead_id = quote.lead.id
+
+    get new_session_path, params: { quote_token: token }
+    assert_no_difference [ "Quote.count", "Lead.count" ] do
+      post session_path, params: {
+        email_address: @user.email_address,
+        password: "password123"
+      }
+    end
+
+    assert_equal public_quotes_path, URI.parse(response.location).path
+    follow_redirect!
+    assert_response :success
+    assert_select ".auth-notice", count: 0
+    assert_equal @user.id, quote.reload.user_id
+    assert_equal lead_id, quote.lead.id
   end
 
   test "rejecting operational consent does not create a lead or confirmation" do
@@ -546,13 +577,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   def create_unconsented_quote(contact_email:)
-    Quote.create!(
-      origin: "Barcelona", destination: "Madrid", contact_email: contact_email,
-      distance_km: 620, estimated_duration_minutes: 360, fuel_cost: 74.4,
-      toll_cost: 0, vehicle_cost: 62, driver_cost: 150, loading_cost: 20,
-      waiting_cost: 0, other_cost: 10, margin: 25, total_cost: 316.4,
-      recommended_price: 395.5
-    )
+    create_quote_in_current_browser(contact_email)
   end
 
   def create_quote_for(user)
@@ -585,9 +610,19 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   def create_public_quote
-    create_quote_for(nil).tap do |quote|
-      quote.update!(contact_email: "user@example.com")
+    create_unconsented_quote(contact_email: "user@example.com").tap do |quote|
+      quote.create_lead!(email: "customer@example.com", consent_given: true,
+        consent_at: Time.current, status: "NEW")
     end
+  end
+
+  def create_quote_in_current_browser(email)
+    original_service = QuotesController.routes_service_class
+    QuotesController.routes_service_class = FakeRoutesService
+    post quotes_path, params: { quote: { origin: "Barcelona", destination: "Madrid" }, email: email }
+    Quote.order(:id).last
+  ensure
+    QuotesController.routes_service_class = original_service
   end
 
   def authenticate_as(user)

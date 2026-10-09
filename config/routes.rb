@@ -1,7 +1,12 @@
 Rails.application.routes.draw do
   resource :session
-  resources :passwords, param: :token
+  resources :passwords, only: [ :new, :create ]
+  get "/passwords/reset", to: "passwords#reset_link", as: :new_password_reset
+  post "/passwords/reset/verify", to: "passwords#verify_reset", as: :verify_password_reset
+  get "/passwords/reset/edit", to: "passwords#edit_reset", as: :edit_password_reset
+  patch "/passwords/reset/update", to: "passwords#update_reset", as: :update_password_reset
   resource :registration, only: [ :new, :create ]
+  get "/email-verification", to: "email_verifications#show", as: :verify_email
   post "/registration/cancel-oauth", to: "oauth#cancel", as: :cancel_oauth_registration
   resource :operational_consent, only: [ :new, :create, :destroy ], controller: "operational_consents"
   get "/terms", to: "terms#show", as: :terms

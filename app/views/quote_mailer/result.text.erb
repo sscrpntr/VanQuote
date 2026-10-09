@@ -1,0 +1,7 @@
+Your transport estimate
+
+From: <%= @quote.origin %>
+To: <%= @quote.destination %>
+Distance: <%= @quote.distance_km %> km
+Estimated duration: <%= @quote.estimated_duration_minutes %> minutes
+Recommended price: <%= number_to_currency(@calculator.recommended_price, unit: "€", format: "%n %u") %>
