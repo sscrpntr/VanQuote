@@ -33,6 +33,7 @@ html.landing-page-layout {
   --landing-header-offset: 84px;
   scroll-snap-type: y mandatory;
   scroll-padding-block-start: var(--landing-header-offset);
+  scroll-behavior: smooth;
 }
 
 html.landing-page-layout.landing-authenticated {
@@ -837,6 +838,42 @@ gmp-place-autocomplete {
   transform: translateY(1px);
 }
 
+.button-primary:disabled {
+  background: #eaecf0;
+  color: #667085;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.oauth-cancel-button {
+  margin-top: 12px;
+  border: 1px solid #c74662;
+  background: #f4a3b4;
+  color: #4a001f;
+}
+
+.oauth-cancel-button:hover {
+  border-color: #b93b56;
+  background: #ea879c;
+  color: #4a001f;
+}
+
+.oauth-cancel-button:active {
+  background: #df718a;
+  color: #4a001f;
+}
+
+.oauth-cancel-button:focus-visible {
+  outline-color: #172033;
+}
+
+.oauth-cancel-button:disabled {
+  border-color: #d0d5dd;
+  background: #eaecf0;
+  color: #667085;
+  cursor: not-allowed;
+}
+
 .button-primary:focus-visible,
 .button-secondary:focus-visible,
 .action-link:focus-visible,
@@ -1046,6 +1083,7 @@ gmp-place-autocomplete {
 @media (prefers-reduced-motion: reduce) {
   html.landing-page-layout {
     scroll-snap-type: y proximity;
+    scroll-behavior: auto;
   }
 }
 

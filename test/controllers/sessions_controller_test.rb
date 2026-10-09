@@ -171,7 +171,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
 
     quote.reload
 
-    assert_equal @user.id, quote.user_id
+    assert_equal @user.id, quote.reload.user_id
   end
 
   test "login preserves an unconsented quote until the user explicitly accepts operational email" do
@@ -181,15 +181,23 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
       quote_token: public_token_for(quote),
       contact_preference: "EMAIL_QUOTE"
     }
+    assert quote.contact_email.casecmp?(@user.email_address)
+    assert session[:quote_token_after_authenticating].present?
     post session_path, params: {
       email_address: @user.email_address,
       password: "password123"
     }
 
-    assert_redirected_to new_operational_consent_path
+    assert_equal public_quotes_path, URI.parse(response.location).path
     assert_equal @user.id, quote.reload.user_id
     assert_nil quote.lead
     assert_not @user.reload.operational_email_consent_valid?
+    follow_redirect!
+    assert_response :success
+
+    post request_quote_contact_path,
+      params: { token: public_token_for(quote), contact_preference: "EMAIL_QUOTE" }
+    assert_redirected_to new_operational_consent_path
 
     assert_difference "Lead.count", 1 do
       post operational_consent_path, params: { accept_operational_email: "1" }
@@ -212,9 +220,12 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
       password: "password123"
     }
 
-    assert_redirected_to dashboard_path
+    assert_equal public_quotes_path, URI.parse(response.location).path
     assert_nil quote.reload.user_id
     assert_nil quote.lead
+    follow_redirect!
+    assert_response :success
+    assert_includes response.body, I18n.t("quotes.public.contact.account_mismatch")
   end
 
   test "rejecting operational consent does not create a lead or confirmation" do
@@ -223,11 +234,17 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
       quote_token: public_token_for(quote),
       contact_preference: "EMAIL_CONTACT"
     }
+    assert session[:quote_token_after_authenticating].present?
     post session_path, params: {
       email_address: @user.email_address,
       password: "password123"
     }
 
+    assert_equal public_quotes_path, URI.parse(response.location).path
+    follow_redirect!
+    assert_response :success
+    post request_quote_contact_path,
+      params: { token: public_token_for(quote), contact_preference: "EMAIL_CONTACT" }
     assert_redirected_to new_operational_consent_path
     assert_no_difference "Lead.count" do
       post operational_consent_path, params: { accept_operational_email: "0" }
@@ -261,8 +278,9 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_nil lead.contact_preference
   end
 
-  test "EMAIL_QUOTE preference is stored after authentication" do
-    quote = create_public_quote
+  test "EMAIL_QUOTE authentication returns the same quote before creating a lead" do
+    quote = create_unconsented_quote(contact_email: @user.email_address)
+    @user.grant_operational_email_consent!(consent_text: "Test operational email consent")
 
     get new_session_path, params: {
       quote_token: public_token_for(quote),
@@ -276,12 +294,18 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :redirect
 
-    quote.reload
-    quote.lead.reload
+    assert_equal public_quotes_path, URI.parse(response.location).path
+    assert_equal @user.id, quote.reload.user_id
+    assert_nil quote.lead
+    follow_redirect!
+    assert_response :success
 
-    assert_equal @user.id, quote.user_id
-    assert_equal "EMAIL_QUOTE", quote.lead.contact_preference
-    assert_equal contact_confirmation_path, URI.parse(response.location).path
+    assert_difference "Lead.count", 1 do
+      post request_quote_contact_path,
+        params: { token: public_token_for(quote), contact_preference: "EMAIL_QUOTE" }
+    end
+    assert_redirected_to contact_confirmation_path
+    assert_equal "EMAIL_QUOTE", quote.reload.lead.contact_preference
   end
 
   test "EMAIL_QUOTE login authenticates the user and retains the selected quote context" do
@@ -304,15 +328,17 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :redirect
     assert_equal @user.id, Session.order(:created_at).last.user_id
     assert_equal @user.id, quote.reload.user_id
-    assert_equal "EMAIL_QUOTE", quote.lead.reload.contact_preference
-    assert_equal contact_confirmation_path, URI.parse(response.location).path
+    assert_nil quote.reload.lead.contact_preference
+    assert_equal public_quotes_path, URI.parse(response.location).path
 
     get quote_path(quote)
     assert_response :success
   end
 
-  test "EMAIL_CONTACT preference is stored after authentication" do
-    quote = create_public_quote
+  test "EMAIL_CONTACT can be requested from the recovered quote" do
+    quote = create_unconsented_quote(contact_email: @user.email_address)
+    assert quote.contact_email.casecmp?(@user.email_address)
+    @user.grant_operational_email_consent!(consent_text: "Test operational email consent")
 
     get new_session_path, params: {
       quote_token: public_token_for(quote),
@@ -326,16 +352,21 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :redirect
 
-    quote.reload
-    quote.lead.reload
+    assert_equal @user.id, quote.reload.user_id
+    assert_nil quote.lead
+    follow_redirect!
 
-    assert_equal @user.id, quote.user_id
-    assert_equal "EMAIL_CONTACT", quote.lead.contact_preference
-    assert_equal contact_confirmation_path, URI.parse(response.location).path
+    assert_difference "Lead.count", 1 do
+      post request_quote_contact_path,
+        params: { token: public_token_for(quote), contact_preference: "EMAIL_CONTACT" }
+    end
+    assert_redirected_to contact_confirmation_path
+    assert_equal "EMAIL_CONTACT", quote.reload.lead.contact_preference
   end
 
-  test "PHONE preference redirects to the phone form" do
-    quote = create_public_quote
+  test "PHONE preference is selected after authentication and routes to confirmation" do
+    quote = create_unconsented_quote(contact_email: @user.email_address)
+    @user.grant_operational_email_consent!(consent_text: "Test operational email consent")
 
     get new_session_path, params: {
       quote_token: public_token_for(quote),
@@ -349,19 +380,16 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :redirect
 
-    quote.reload
-    quote.lead.reload
-
-    assert_equal @user.id, quote.user_id
-    assert_equal "PHONE", quote.lead.contact_preference
-    assert_equal @user.phone, quote.lead.phone
-    assert_equal edit_lead_path(quote.lead),
-                URI.parse(response.location).path
-
+    assert_equal @user.id, quote.reload.user_id
     follow_redirect!
     assert_response :success
-    assert_select "select[name='lead[contact_preference]']", count: 0
-    assert_select ".contact-preference-value", text: "Llamada telefónica"
+    assert_difference "Lead.count", 1 do
+      post request_quote_contact_path,
+        params: { token: public_token_for(quote), contact_preference: "PHONE" }
+    end
+    assert_redirected_to contact_confirmation_path
+    assert_equal "PHONE", quote.reload.lead.contact_preference
+    assert_equal @user.phone, quote.lead.phone
   end
 
   test "invalid public token does not attach a quote" do
@@ -427,9 +455,9 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     }
 
     assert_response :redirect
-    assert_equal contact_confirmation_path, URI.parse(response.location).path
+    assert_equal public_quotes_path, URI.parse(response.location).path
     assert_equal @user.id, quote.reload.user_id
-    assert_equal "EMAIL_QUOTE", quote.lead.reload.contact_preference
+    assert_nil quote.reload.lead.contact_preference
   end
 
   test "an authenticated user is not asked to sign in again for an EMAIL_QUOTE flow" do
@@ -443,21 +471,17 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     }
 
     assert_response :redirect
-    assert_equal contact_confirmation_path, URI.parse(response.location).path
+    assert_equal public_quotes_path, URI.parse(response.location).path
     assert_equal existing_session.id, Session.find_by!(user_id: @user.id).id
     assert_equal @user.id, quote.reload.user_id
-    assert_equal "EMAIL_QUOTE", quote.lead.reload.contact_preference
+    assert_nil quote.reload.lead.contact_preference
 
     follow_redirect!
     assert_response :success
-    assert_select "#contact-confirmation-title", "¡Solicitud recibida!"
-    assert_select "[role=status]", text: /Solicitud recibida/
-    assert_select "nav.site-navigation a[href=?]", new_quote_path
-    assert_select "nav.site-navigation a[href=?]", quotes_path
+    assert_includes response.body, quote.origin
+    assert_select "form[action=?]", request_quote_contact_path, count: 3
     assert_select "nav.site-navigation a[href=?]", profile_path
     assert_select "nav.site-navigation form[action=?]", session_path
-    assert_select "a[href=?]", quotes_path, text: "Ver mis presupuestos"
-    assert_select "form.auth-form", false
   end
 
   test "anonymous user can visit email contact confirmation without authenticated navigation" do
@@ -481,7 +505,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :redirect
     assert_equal request.host, URI.parse(response.location).host
-    assert_equal contact_confirmation_path, URI.parse(response.location).path
+    assert_equal public_quotes_path, URI.parse(response.location).path
   end
 
   test "cannot modify another user's quote with a public token" do
@@ -561,7 +585,9 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   def create_public_quote
-    create_quote_for(nil)
+    create_quote_for(nil).tap do |quote|
+      quote.update!(contact_email: "user@example.com")
+    end
   end
 
   def authenticate_as(user)

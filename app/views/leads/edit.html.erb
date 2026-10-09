@@ -22,7 +22,8 @@
       <%= form_with model: @lead,
             url: lead_path(@lead),
             method: :patch,
-            class: "auth-form" do |form| %>
+            class: "auth-form",
+            data: { locale_draft: "lead" } do |form| %>
 
         <div class="auth-field">
           <% if @phone_preference_locked %>
@@ -50,7 +51,7 @@
                         "EMAIL_CONTACT"
                       ]
                     ],
-                    @lead.contact_preference
+                    locale_form_value("lead", "lead[contact_preference]", @lead.contact_preference)
                   ),
                   {},
                   required: true %>
@@ -62,6 +63,7 @@
                 t("leads.edit.phone.label") %>
 
           <%= form.telephone_field :phone,
+                value: locale_form_value("lead", "lead[phone]", @lead.phone),
                 autofocus: true,
                 autocomplete: "tel",
                 required: true,

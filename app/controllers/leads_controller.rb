@@ -16,7 +16,7 @@ class LeadsController < ApplicationController
     selected_preference = phone_preference_locked ? "PHONE" : contact_preference_param
 
     if @lead.consent_basis == "account_operational_email" &&
-        (@lead.consent_withdrawn_at.present? || !Current.user.operational_email_consent_valid?)
+        (@lead.consent_withdrawn? || !Current.user.operational_email_consent_valid?)
       session[:pending_operational_consent_quote_id] = @lead.quote_id
       session[:pending_operational_consent_preference] = selected_preference
       redirect_to new_operational_consent_path

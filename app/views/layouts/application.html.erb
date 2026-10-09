@@ -45,7 +45,7 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
+  <body data-controller="locale-form-drafts">
     <header class="site-header <%= 'landing-site-header' if public_landing_page %>">
       <% if Current.user && controller_name != "dashboards" %>
         <nav class="site-navigation" aria-label="<%= t('navigation.account') %>">

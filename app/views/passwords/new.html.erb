@@ -25,7 +25,7 @@
         </div>
       <% end %>
 
-      <%= form_with url: passwords_path, class: "auth-form" do |form| %>
+      <%= form_with url: passwords_path, class: "auth-form", data: { locale_draft: "password_reset_request" } do |form| %>
         <div class="auth-field">
           <%= form.label :email_address,
                 t("passwords.new.email.label") %>
@@ -35,7 +35,7 @@
                 autofocus: true,
                 autocomplete: "username",
                 placeholder: t("passwords.new.email.placeholder"),
-                value: params[:email_address] %>
+                value: locale_form_value("password_reset_request", "email_address", params[:email_address]) %>
         </div>
 
         <%= form.submit t("passwords.new.submit"),

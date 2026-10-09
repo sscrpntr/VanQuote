@@ -67,10 +67,11 @@
             <%= form_with model: @quote.lead,
                   url: lead_path(@quote.lead),
                   method: :patch,
-                  class: "contact-option" do |form| %>
+                  class: "contact-option",
+                  data: { locale_draft: "quote_email_quote" } do |form| %>
 
               <%= form.hidden_field :contact_preference,
-                    value: "EMAIL_QUOTE" %>
+                    value: locale_form_value("quote_email_quote", "lead[contact_preference]", "EMAIL_QUOTE") %>
 
               <%= form.submit t("quotes.show.contact.email_quote"),
                     class: "button-secondary contact-button" %>
@@ -79,16 +80,18 @@
             <%= form_with model: @quote.lead,
                   url: lead_path(@quote.lead),
                   method: :patch,
-                  class: "contact-option" do |form| %>
+                  class: "contact-option",
+                  data: { locale_draft: "quote_phone" } do |form| %>
 
               <%= form.hidden_field :contact_preference,
-                    value: "PHONE" %>
+                    value: locale_form_value("quote_phone", "lead[contact_preference]", "PHONE") %>
 
               <%= form.label :phone,
                     t("quotes.show.contact.phone.label"),
                     class: "form-label" %>
 
               <%= form.telephone_field :phone,
+                    value: locale_form_value("quote_phone", "lead[phone]", @quote.lead.phone),
                     required: true,
                     placeholder: "+41 79 123 45 67",
                     class: "form-input" %>
@@ -100,10 +103,11 @@
             <%= form_with model: @quote.lead,
                   url: lead_path(@quote.lead),
                   method: :patch,
-                  class: "contact-option" do |form| %>
+                  class: "contact-option",
+                  data: { locale_draft: "quote_email_contact" } do |form| %>
 
               <%= form.hidden_field :contact_preference,
-                    value: "EMAIL_CONTACT" %>
+                    value: locale_form_value("quote_email_contact", "lead[contact_preference]", "EMAIL_CONTACT") %>
 
               <%= form.submit t("quotes.show.contact.email_contact"),
                     class: "button-secondary contact-button" %>

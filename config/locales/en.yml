@@ -22,6 +22,7 @@ en:
     title: "Operational email communications"
     accept: "I agree to receive operational communications by email."
     submit: "Save consent"
+    accept_button: "Accept"
     required: "You must select the checkbox to give this consent."
     active: "Active"
     inactive: "Not given or withdrawn"
@@ -190,10 +191,14 @@ en:
 
       contact:
         title: "How would you like to continue?"
-        description: "Choose how you would like to receive the quote or get in touch with us."
+        description: "Choose how VanQuote should handle this request. You will need to authorize operational communications before submitting it."
         email_quote: "Email me the quote"
         phone: "I want to receive a call"
         email_contact: "I want to be contacted by email"
+        account_mismatch: "This quote is linked to another email or account. Sign in with the account that created it to request contact."
+        expired: "This quote link has expired. Reopen the original quote to continue."
+        invalid_preference: "Choose a valid contact option."
+        request_failed: "We could not record the request. Review the quote and try again."
 
       new_quote: "New quote"
 
@@ -286,12 +291,14 @@ en:
         placeholder: "Repeat your password"
 
       submit: "Create account"
+      accept: "Accept"
       terms_prefix: "I accept the "
       terms_link: "terms and conditions"
       oauth_identity: "Continue with the verified Google account %{email}."
       cancel_oauth: "Cancel and go back"
       terms_required: "You must accept the terms and conditions to create an account."
       operational_consent_text: "I agree to receive quote results by email and messages needed to manage transport requests I start. This permission does not include advertising or newsletters and I can withdraw it from my profile."
+      operational_consent_required: "You must accept operational communications to create an account. If you do not want to accept them, cancel and continue using the quote without requesting contact."
 
       or: "or"
 

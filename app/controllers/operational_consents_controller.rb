@@ -10,24 +10,26 @@ class OperationalConsentsController < ApplicationController
       return
     end
 
-    Current.user.grant_operational_email_consent!(
-      consent_text: I18n.t("registrations.new.operational_consent_text")
-    )
-
     quote = pending_quote
-    preference = session.delete(:pending_operational_consent_preference)
-    session.delete(:pending_operational_consent_quote_id)
+    preference = session[:pending_operational_consent_preference]
 
-    if quote && Lead::CONTACT_PREFERENCES.include?(preference)
+    ActiveRecord::Base.transaction do
+      unless Current.user.operational_email_consent_valid?
+        Current.user.grant_operational_email_consent!(
+          consent_text: I18n.t("registrations.new.operational_consent_text")
+        )
+      end
+
+      if quote && Lead::CONTACT_PREFERENCES.include?(preference)
       phone = Current.user.phone
       lead_preference = preference == "PHONE" && phone.blank? ? nil : preference
       lead = quote.lead || quote.create_lead!(
-        email: quote.contact_email.presence || Current.user.email_address,
-          phone: phone,
+        email: Current.user.email_address,
+        phone: phone,
         consent_given: true,
         consent_at: Current.user.operational_email_consent_at,
         consent_basis: "account_operational_email",
-          contact_preference: lead_preference,
+        contact_preference: lead_preference,
         status: "NEW"
       )
       if quote.lead
@@ -36,11 +38,16 @@ class OperationalConsentsController < ApplicationController
           phone: phone,
           consent_given: true,
           consent_at: Current.user.operational_email_consent_at,
-          consent_basis: "account_operational_email",
-          consent_withdrawn_at: nil
+          consent_basis: "account_operational_email"
         )
       end
+      end
+    end
 
+    session.delete(:pending_operational_consent_quote_id)
+    session.delete(:pending_operational_consent_preference)
+
+    if quote && Lead::CONTACT_PREFERENCES.include?(preference)
       if preference == "PHONE" && Current.user.phone.blank?
         session[:phone_contact_lead_id] = lead.id
         redirect_to edit_lead_path(lead)
@@ -53,6 +60,9 @@ class OperationalConsentsController < ApplicationController
     else
       redirect_to dashboard_path
     end
+  rescue ActiveRecord::RecordInvalid
+    flash.now[:alert] = I18n.t("quotes.public.contact.request_failed")
+    render :new, status: :unprocessable_entity
   end
 
   def destroy

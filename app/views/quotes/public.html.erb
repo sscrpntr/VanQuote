@@ -9,6 +9,10 @@
     </header>
 
     <div class="quote-card quote-result-card">
+      <% if flash[:alert] %>
+        <div class="auth-alert" role="alert"><%= flash[:alert] %></div>
+      <% end %>
+
       <div class="route-summary">
         <div class="route-point">
           <span class="route-label"><%= t("quotes.public.origin") %></span>
@@ -49,35 +53,23 @@
         </p>
 
         <div class="contact-options">
-          <%= link_to t("quotes.public.contact.email_quote"),
-                new_session_path(
-                  quote_token: @quote.signed_id(
-                    purpose: :public_view,
-                    expires_in: 24.hours
-                  ),
-                  contact_preference: "EMAIL_QUOTE"
-                ),
-                class: "button-secondary contact-button" %>
-
-          <%= link_to t("quotes.public.contact.phone"),
-                new_session_path(
-                  quote_token: @quote.signed_id(
-                    purpose: :public_view,
-                    expires_in: 24.hours
-                  ),
-                  contact_preference: "PHONE"
-                ),
-                class: "button-secondary contact-button" %>
-
-          <%= link_to t("quotes.public.contact.email_contact"),
-                new_session_path(
-                  quote_token: @quote.signed_id(
-                    purpose: :public_view,
-                    expires_in: 24.hours
-                  ),
-                  contact_preference: "EMAIL_CONTACT"
-                ),
-                class: "button-secondary contact-button" %>
+          <% token = @quote.signed_id(purpose: :public_view, expires_in: 24.hours) %>
+          <% contact_options = [["EMAIL_QUOTE", "quotes.public.contact.email_quote"], ["PHONE", "quotes.public.contact.phone"], ["EMAIL_CONTACT", "quotes.public.contact.email_contact"]] %>
+          <% if Current.user && !@can_request_contact %>
+            <p class="auth-alert" role="status"><%= t("quotes.public.contact.account_mismatch") %></p>
+          <% else %>
+            <% contact_options.each do |preference, label| %>
+              <% if Current.user %>
+                <%= form_with url: request_quote_contact_path, method: :post, class: "contact-option" do %>
+                  <%= hidden_field_tag :token, token %>
+                  <%= hidden_field_tag :contact_preference, preference %>
+                  <%= submit_tag t(label), class: "button-secondary contact-button" %>
+                <% end %>
+              <% else %>
+                <%= link_to t(label), new_session_path(quote_token: token), class: "button-secondary contact-button" %>
+              <% end %>
+            <% end %>
+          <% end %>
         </div>
       </div>
 

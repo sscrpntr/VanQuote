@@ -23,7 +23,8 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_not_includes response.body, "translation_missing"
     assert_not_includes response.body, "Próximamente"
     assert_select "input[name='user[accept_terms]'][required]"
-    assert_select "input[name='user[accept_operational_email]']"
+    assert_select "input[name='user[accept_operational_email]']:not([required])"
+    assert_select "input[type=submit][disabled][value='Crear cuenta']"
     assert_select "a[href=?]", terms_path, text: "términos y condiciones"
     terms_checkbox_position = response.body.index('name="user[accept_terms]"')
     communications_checkbox_position = response.body.index('name="user[accept_operational_email]"')
@@ -87,7 +88,7 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_equal User::OPERATIONAL_EMAIL_CONSENT_PURPOSE, event.purpose
   end
 
-  test "registration requires terms but operational email consent is optional" do
+  test "new registration requires terms but keeps operational communications optional" do
     assert_no_difference [ "User.count", "Session.count", "OperationalEmailConsentEvent.count" ] do
       submit_registration({
         first_name: "No", last_name: "Consent", email_address: "no-consent@example.com",
@@ -97,17 +98,21 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
     assert_select ".auth-alert", text: /términos y condiciones/
+    assert_select "input[name='user[accept_terms]']:not([checked])"
+    assert_select "input[name='user[accept_operational_email]'][checked]"
 
-    assert_difference "User.count", 1 do
-      submit_registration({
+    assert_difference [ "User.count", "Session.count" ], 1 do
+      assert_no_difference "OperationalEmailConsentEvent.count" do
+        submit_registration({
         first_name: "Optional", last_name: "Consent", email_address: "optional@example.com",
         password: "password123", password_confirmation: "password123"
-      }, operational_email: false)
+        }, operational_email: false)
+      end
     end
     user = User.find_by!(email_address: "optional@example.com")
     assert_redirected_to dashboard_path
+    assert user.terms_accepted?
     assert_not user.operational_email_consent_valid?
-    assert_empty user.operational_email_consent_events
   end
 
   test "registration cannot set consent fields through client submitted account attributes" do
@@ -202,7 +207,7 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "EMAIL_QUOTE registration authenticates the new user and retains the selected quote context" do
-    quote = create_public_quote
+    quote = create_public_quote(contact_email: "quote-customer@example.com")
 
     get new_registration_path, params: {
       quote_token: public_token_for(quote),
@@ -223,16 +228,16 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
 
     user = User.find_by!(email_address: "quote-customer@example.com")
     assert_response :redirect
-    assert_equal contact_confirmation_path, URI.parse(response.location).path
+    assert_equal public_quotes_path, URI.parse(response.location).path
     assert_equal user.id, Session.find_by!(user_id: user.id).user_id
     assert_nil user.phone
     assert_equal user.id, quote.reload.user_id
-    assert_equal "EMAIL_QUOTE", quote.lead.reload.contact_preference
+    assert_nil quote.reload.lead.contact_preference
 
     follow_redirect!
     assert_response :success
-    assert_select "#contact-confirmation-title", "¡Solicitud recibida!"
-    assert_select "[role=status]", text: /Solicitud recibida/
+    assert_includes response.body, quote.origin
+    assert_select "form[action=?]", request_quote_contact_path, count: 3
   end
 
   test "registration resumes an anonymous quote without duplicating the quote" do
@@ -255,10 +260,9 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
 
     user = User.find_by!(email_address: "resume@example.com")
     assert_equal user.id, quote.reload.user_id
-    assert_equal 1, Lead.where(quote: quote).count
-    assert_equal "EMAIL_CONTACT", quote.lead.contact_preference
-    assert_equal user.operational_email_consent_at, quote.lead.consent_at
-    assert_equal contact_confirmation_path, URI.parse(response.location).path
+    assert_equal 0, Lead.where(quote: quote).count
+    assert_equal public_quotes_path, URI.parse(response.location).path
+    assert user.operational_email_consent_valid?
   end
 
   test "canceling registration keeps a recoverable signed quote link" do
@@ -281,7 +285,7 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "invalid registration preserves quote context for the next attempt" do
-    quote = create_public_quote
+    quote = create_public_quote(contact_email: "retry@example.com")
 
     get new_registration_path, params: {
       quote_token: public_token_for(quote),
@@ -301,7 +305,8 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     user = User.find_by!(email_address: "retry@example.com")
     assert_response :redirect
     assert_equal user.id, quote.reload.user_id
-    assert_equal "EMAIL_QUOTE", quote.lead.reload.contact_preference
+    assert_nil quote.reload.lead.contact_preference
+    assert_equal public_quotes_path, URI.parse(response.location).path
   end
 
   test "invalid registration token cannot attach a quote" do
@@ -319,7 +324,7 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "EMAIL_CONTACT registration does not require or save a phone" do
-    quote = create_public_quote
+    quote = create_public_quote(contact_email: "email-contact@example.com")
 
     get new_registration_path, params: {
       quote_token: public_token_for(quote),
@@ -337,12 +342,12 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
 
     user = User.find_by!(email_address: "email-contact@example.com")
     assert_nil user.phone
-    assert_equal "EMAIL_CONTACT", quote.lead.reload.contact_preference
-    assert_equal contact_confirmation_path, URI.parse(response.location).path
+    assert_nil quote.reload.lead.contact_preference
+    assert_equal public_quotes_path, URI.parse(response.location).path
   end
 
   test "PHONE registration collects phone only on the locked contact screen" do
-    quote = create_public_quote
+    quote = create_public_quote(contact_email: "phone-customer@example.com")
 
     get new_registration_path, params: {
       quote_token: public_token_for(quote),
@@ -357,41 +362,9 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     })
 
     user = User.find_by!(email_address: "phone-customer@example.com")
-    lead = quote.lead.reload
     assert_nil user.phone
-    assert_nil lead.contact_preference
-    assert_redirected_to edit_lead_path(lead)
-
-    follow_redirect!
-    assert_response :success
-    assert_select "select[name='lead[contact_preference]']", count: 0
-    assert_select ".contact-preference-value", text: "Llamada telefónica"
-    assert_select "input[type=tel][name='lead[phone]']", count: 1
-
-    patch lead_path(lead), params: {
-      lead: {
-        contact_preference: "EMAIL_CONTACT",
-        phone: " "
-      }
-    }
-
-    assert_response :unprocessable_entity
-    assert_select "select[name='lead[contact_preference]']", count: 0
-    assert_select ".contact-preference-value", text: "Llamada telefónica"
-    assert_nil user.reload.phone
-    assert_nil lead.reload.contact_preference
-
-    patch lead_path(lead), params: {
-      lead: {
-        contact_preference: "EMAIL_QUOTE",
-        phone: "+41 79 555 01 02"
-      }
-    }
-
-    assert_redirected_to quote_path(quote)
-    assert_equal "+41 79 555 01 02", user.reload.phone
-    assert_equal "PHONE", lead.reload.contact_preference
-    assert_equal "+41 79 555 01 02", lead.phone
+    assert_nil quote.reload.lead.contact_preference
+    assert_equal public_quotes_path, URI.parse(response.location).path
   end
 
   test "does not create a user with an invalid email" do
@@ -464,8 +437,8 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     quote.signed_id(purpose: :public_view, expires_in: 24.hours)
   end
 
-  def create_public_quote
-    quote = Quote.create!(origin: "Barcelona", destination: "Madrid", distance_km: 620,
+  def create_public_quote(contact_email: nil)
+    quote = Quote.create!(origin: "Barcelona", destination: "Madrid", contact_email: contact_email, distance_km: 620,
       estimated_duration_minutes: 360, fuel_cost: 74.4, toll_cost: 0, vehicle_cost: 62,
       driver_cost: 150, loading_cost: 20, waiting_cost: 0, other_cost: 10,
       total_cost: 316.4, margin: 25, recommended_price: 395.5)

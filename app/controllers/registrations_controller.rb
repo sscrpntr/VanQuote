@@ -6,20 +6,23 @@ class RegistrationsController < ApplicationController
     oauth_signup = pending_oauth_signup
     @oauth_pending = oauth_signup.present?
     @user = oauth_signup ? oauth_user_for(oauth_signup) : User.new
+    prepare_acceptance_form(oauth_signup)
   end
 
   def create
     submitted_user = params.require(:user)
-    accepted_terms = ActiveModel::Type::Boolean.new.cast(submitted_user[:accept_terms])
-    accepted_communications = ActiveModel::Type::Boolean.new.cast(submitted_user[:accept_operational_email])
     oauth_signup = pending_oauth_signup
     @oauth_pending = oauth_signup.present?
     @user = oauth_signup ? oauth_user_for(oauth_signup) : User.new(user_params)
+    prepare_acceptance_form(oauth_signup)
+    accepted_terms = @show_terms_checkbox && ActiveModel::Type::Boolean.new.cast(submitted_user[:accept_terms])
+    accepted_communications = @show_operational_checkbox && ActiveModel::Type::Boolean.new.cast(submitted_user[:accept_operational_email])
     @user.valid?
-    @user.errors.add(:base, I18n.t("registrations.new.terms_required")) unless accepted_terms
+    @user.errors.add(:base, I18n.t("registrations.new.terms_required")) if @terms_required && !accepted_terms
+    @user.errors.add(:base, I18n.t("registrations.new.operational_consent_required")) if @operational_consent_required && !accepted_communications
 
     if @user.errors.empty?
-      save_registration!(accepted_communications, oauth_signup)
+      save_registration!(accepted_terms, accepted_communications, oauth_signup)
       session.delete(:pending_oauth_signup)
       start_new_session_for(@user)
       redirect_to after_authentication_url(default_url: dashboard_url)
@@ -46,6 +49,31 @@ class RegistrationsController < ApplicationController
     data
   end
 
+  def prepare_acceptance_form(oauth_signup)
+    @existing_oauth_user = oauth_signup&.key?("user_id") && oauth_signup["user_id"].present? && @user.persisted?
+    @terms_required = !@user.terms_accepted?
+    @show_terms_checkbox = @terms_required
+    @operational_consent_required = false
+    @show_operational_checkbox = !@existing_oauth_user ||
+      (pending_quote_contact_request? && !@user.operational_email_consent_valid?)
+    @registration_submit_label = @existing_oauth_user ? t("registrations.new.accept") : t("registrations.new.submit")
+  end
+
+  def pending_quote_contact_request?
+    token = session[:quote_token_after_authenticating]
+    preference = session[:contact_preference_after_authenticating]
+    return false unless token.present? && Lead::CONTACT_PREFERENCES.include?(preference)
+
+    quote = Quote.find_signed(token, purpose: :public_view)
+    return false if quote.user_id.present? && quote.user_id != @user.id
+    return false if quote.user_id.blank? && quote.contact_email.present? &&
+      !quote.contact_email.casecmp?(@user.email_address)
+
+    true
+  rescue ActiveSupport::MessageVerifier::InvalidSignature
+    false
+  end
+
   def oauth_user_for(oauth_signup)
     user = oauth_signup["user_id"].present? ? User.find_by(id: oauth_signup["user_id"]) : nil
     user ||= User.new(
@@ -56,11 +84,13 @@ class RegistrationsController < ApplicationController
     )
   end
 
-  def save_registration!(accepted_communications, oauth_signup)
+  def save_registration!(accepted_terms, accepted_communications, oauth_signup)
     now = Time.current
     User.transaction do
-      @user.terms_accepted_at = now
-      @user.terms_version = User::TERMS_VERSION
+      if accepted_terms
+        @user.terms_accepted_at = now
+        @user.terms_version = User::TERMS_VERSION
+      end
       @user.save!
 
       if accepted_communications && !@user.operational_email_consent_valid?
