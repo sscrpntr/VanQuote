@@ -71,4 +71,15 @@ class Lead < ApplicationRecord
   def complete!
     update!(status: "COMPLETED")
   end
+
+  def notify_admin_once!(mailer: LeadsMailer)
+    with_lock do
+      reload
+      next false if admin_notification_sent_at
+
+      mailer.new_lead(self).deliver_now
+      update!(admin_notification_sent_at: Time.current)
+      true
+    end
+  end
 end

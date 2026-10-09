@@ -196,6 +196,7 @@ en:
         phone: "I want to receive a call"
         email_contact: "I want to be contacted by email"
         account_mismatch: "This quote is linked to another email or account. Sign in with the account that created it to request contact."
+        owner_updated: "The owner of this quote was updated to the account %{email}."
         expired: "This quote link has expired. Reopen the original quote to continue."
         invalid_preference: "Choose a valid contact option."
         request_failed: "We could not record the request. Review the quote and try again."
@@ -231,6 +232,13 @@ en:
 
     errors:
       route_calculation_failed: "We couldn't calculate the route. Please try again."
+      anonymous_limit: "You have reached the limit of three anonymous quotes. Sign in or create an account to continue."
+      too_many_requests: "Too many requests. Please wait a moment and try again."
+      email_delivery_failed: "The quote email could not be accepted for delivery. You can still view the result on this page."
+      email_failed: "Your request was saved, but its notification email could not be accepted. Please try again later."
+      idempotency_key_invalid: "This quote request could not be processed. Refresh the page and try again."
+      quote_request_conflict: "This quote request could not be processed. Refresh the page and try again."
+      quote_request_in_progress: "Your quote request is still being processed. Please try again shortly."
 
   sessions:
     new:
@@ -259,6 +267,8 @@ en:
       back_to_vanquote: "← Back to VanQuote"
 
     alerts:
+      email_not_verified: "Verify your email address. We sent you a new verification link."
+      verification_delivery_failed: "The verification email could not be accepted for delivery. Please try again later."
       try_again_later: "Please try again later."
       invalid_credentials: "Try a different email or password."
 
@@ -269,6 +279,8 @@ en:
 
       errors:
         title: "We couldn't create your account:"
+        save_failed: "We couldn't save your account and acceptances. Please review the form and try again."
+        acceptance_storage_unavailable: "We can't save your acceptance right now. Your selections are preserved; please try again later or contact support."
 
       first_name:
         label: "First name"
@@ -309,6 +321,9 @@ en:
       sign_in: "Sign in"
 
       back_to_vanquote: "← Back to VanQuote"
+      verify_email: "We sent you a link to verify your email before signing in."
+      email_verified: "Email verified. You can now sign in."
+      email_verification_expired: "This verification link is invalid or expired. Register again to receive another."
 
   oauth:
     providers:
@@ -320,6 +335,7 @@ en:
       invalid_provider: "The sign-in provider is invalid."
       not_configured: "Sign-in with %{provider} needs external configuration."
       authentication_failed: "Sign-in could not be completed. Try email and password."
+      sign_in_to_link: "An account with this email already exists. Sign in to that account to link Google securely."
       account_creation_failed: "The account could not be created with this provider."
 
   activerecord:
@@ -351,6 +367,11 @@ en:
       back_to_sign_in: "← Back to sign in"
       back_to_vanquote: "← Back to VanQuote"
 
+    reset_link:
+      title: "Continue password reset"
+      instructions: "Checking your secure reset link. This page will continue automatically."
+      javascript_required: "JavaScript is required to validate this secure link. Enable it and reopen the email link."
+
     edit:
       title: "Update your password"
       subtitle: "Enter your new password and confirm the change."
@@ -369,11 +390,12 @@ en:
 
     alerts:
       try_again_later: "Please try again later."
+      delivery_failed: "The password reset email could not be accepted for delivery. Please try again later."
       passwords_did_not_match: "The passwords did not match."
       invalid_or_expired_link: "The password reset link is invalid or has expired."
 
     notices:
-      reset_instructions: "Password reset instructions have been sent if an account with that email address exists."
+      reset_instructions: "If an account exists for that email, use the password-reset email to continue."
       reset_success: "Your password has been reset successfully."
 
   leads:

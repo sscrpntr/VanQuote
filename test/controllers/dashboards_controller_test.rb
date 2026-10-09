@@ -7,7 +7,8 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
       last_name: "User",
       phone: "+34600000000",
       email_address: "sergi@example.com",
-      password: "password123"
+      password: "password123",
+      email_verified_at: Time.current
     )
   end
 

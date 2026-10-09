@@ -5,7 +5,8 @@ class LeadsControllerTest < ActionDispatch::IntegrationTest
     @user = User.create!(
       first_name: "Test", last_name: "User", phone: "+34600000000",
       email_address: "user@example.com",
-      password: "password123"
+      password: "password123",
+      email_verified_at: Time.current
     )
   end
 
@@ -66,7 +67,8 @@ class LeadsControllerTest < ActionDispatch::IntegrationTest
       first_name: "Admin", last_name: "User", phone: "+34600000001",
       email_address: "admin@example.com",
       password: "password123",
-      admin: true
+      admin: true,
+      email_verified_at: Time.current
     )
     quote = quotes(:one)
     quote.update!(user: @user)

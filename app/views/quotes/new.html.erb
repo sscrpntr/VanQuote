@@ -21,10 +21,20 @@
         >
           <h2><%= t("landing.form_title") %></h2>
 
+          <% if @quote.errors.any? %>
+            <div class="auth-alert" role="alert">
+              <% @quote.errors.full_messages.each do |message| %>
+                <p><%= message %></p>
+              <% end %>
+            </div>
+          <% end %>
+
           <%= form_with model: @quote,
                 local: true,
                 class: "quote-form",
                 data: { locale_draft: "quote" } do |form| %>
+
+            <%= hidden_field_tag :idempotency_key, @idempotency_key %>
 
             <div class="form-field">
               <%= form.label :origin,

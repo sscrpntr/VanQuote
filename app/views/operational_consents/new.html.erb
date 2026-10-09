@@ -7,6 +7,9 @@
       <% if flash[:alert] %>
         <p class="auth-alert" role="alert"><%= flash[:alert] %></p>
       <% end %>
+      <% if flash[:notice] %>
+        <p class="auth-notice flash-notice" role="status" aria-live="polite"><%= flash[:notice] %></p>
+      <% end %>
 
       <%= form_with url: operational_consent_path, method: :post, class: "auth-form", data: { locale_draft: "operational_consent" } do %>
         <div class="form-consent">

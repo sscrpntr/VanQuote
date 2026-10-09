@@ -19,7 +19,12 @@ module Authentication
     end
 
     def require_authentication
-      resume_session || request_authentication
+      if resume_session && Current.user&.email_verified?
+        true
+      else
+        terminate_session if Current.session
+        request_authentication
+      end
     end
 
     def resume_session
@@ -55,32 +60,66 @@ module Authentication
         purpose: :public_view
       )
 
-      claimable = quote.with_lock do
-        quote.reload
-        if quote.user_id.present?
-          quote.user_id == Current.user.id
-        elsif quote.contact_email.present? && quote.contact_email.casecmp?(Current.user.email_address)
-          quote.update!(user: Current.user)
-          true
-        else
-          false
-        end
-      end
-
       session.delete(:quote_token_after_authenticating)
       session.delete(:contact_preference_after_authenticating)
-      flash[:alert] = I18n.t("quotes.public.contact.account_mismatch") unless claimable
-      { quote: quote }
+      claim_result = claim_anonymous_quote(quote)
+      if claim_result == :claimed
+        flash[:notice] = I18n.t("quotes.public.contact.owner_updated", email: Current.user.email_address)
+      elsif claim_result == :unauthorized || claim_result == :owned_by_another
+        flash[:alert] = I18n.t("quotes.public.contact.account_mismatch")
+      end
+      { quote: quote, claimed: claim_result == :claimed }
     rescue ActiveSupport::MessageVerifier::InvalidSignature,
            ActiveRecord::RecordNotFound
       session.delete(:quote_token_after_authenticating)
       session.delete(:contact_preference_after_authenticating)
       flash[:alert] = I18n.t("quotes.public.contact.expired")
       { invalid: true }
+    rescue ActiveRecord::RecordInvalid, ActiveRecord::StatementInvalid,
+           ActiveRecord::ConnectionNotEstablished => error
+      Rails.logger.error("Anonymous quote claim failed (#{error.class})")
+      flash[:alert] = I18n.t("quotes.public.contact.request_failed")
+      quote ? { quote: quote } : { invalid: true }
     end
 
     def public_quote_token(quote)
       quote.signed_id(purpose: :public_view, expires_in: 24.hours)
+    end
+
+    # Rails' encrypted cookie session records which anonymous quotes this
+    # browser created. A public_view link alone never grants claim authority.
+    def authorize_anonymous_quote_claim(quote)
+      return if quote.user_id.present?
+
+      ids = Array(session[:anonymous_quote_claim_quote_ids]).map(&:to_s)
+      ids << quote.id.to_s
+      session[:anonymous_quote_claim_quote_ids] = ids.uniq.last(10)
+    end
+
+    def anonymous_quote_claim_authorized?(quote)
+      Array(session[:anonymous_quote_claim_quote_ids]).include?(quote.id.to_s)
+    end
+
+    def claim_anonymous_quote(quote)
+      return :unauthorized unless Current.user
+
+      claim_result = quote.with_lock do
+        quote.reload
+        if quote.user_id.present?
+          quote.user_id == Current.user.id ? :already_owned : :owned_by_another
+        elsif anonymous_quote_claim_authorized?(quote)
+          quote.update!(user: Current.user)
+          :claimed
+        else
+          :unauthorized
+        end
+      end
+
+      if %i[claimed already_owned].include?(claim_result)
+        ids = Array(session[:anonymous_quote_claim_quote_ids]).map(&:to_s)
+        session[:anonymous_quote_claim_quote_ids] = ids - [ quote.id.to_s ]
+      end
+      claim_result
     end
 
     def start_new_session_for(user)
@@ -93,7 +132,8 @@ module Authentication
         cookies.signed.permanent[:session_id] = {
           value: session.id,
           httponly: true,
-          same_site: :lax
+          same_site: :lax,
+          secure: Rails.env.production?
         }
       end
     end

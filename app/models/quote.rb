@@ -23,4 +23,15 @@ class Quote < ApplicationRecord
 
   validates :margin,
             numericality: { greater_than_or_equal_to: 0 }
+
+  def deliver_result_email_once!(mailer: QuoteMailer)
+    with_lock do
+      reload
+      next false if result_email_sent_at
+
+      mailer.result(self).deliver_now
+      update!(result_email_sent_at: Time.current)
+      true
+    end
+  end
 end

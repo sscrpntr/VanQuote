@@ -1,6 +1,14 @@
 require "test_helper"
 
 class RegistrationsControllerTest < ActionDispatch::IntegrationTest
+  class FakeRoutesService
+    def initialize(origin:, destination:); end
+
+    def call
+      { distance_km: 620, duration_minutes: 360 }
+    end
+  end
+
   test "shows registration form" do
     get new_registration_path
 
@@ -86,6 +94,33 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     event = user.operational_email_consent_events.find_by!(action: "granted")
     assert_equal I18n.t("registrations.new.operational_consent_text"), event.consent_text
     assert_equal User::OPERATIONAL_EMAIL_CONSENT_PURPOSE, event.purpose
+  end
+
+  test "a password account cannot authenticate until its email verification link is used" do
+    ActionMailer::Base.deliveries.clear
+    assert_no_difference "Session.count" do
+      post registration_path, params: { user: {
+        first_name: "Verify", last_name: "Me", email_address: "verify-me@example.com",
+        password: "password123", password_confirmation: "password123",
+        accept_terms: "1", accept_operational_email: "0"
+      } }
+    end
+
+    user = User.find_by!(email_address: "verify-me@example.com")
+    assert_not user.email_verified?
+    assert_equal "verify-me@example.com", ActionMailer::Base.deliveries.last.to.first
+    post session_path, params: { email_address: user.email_address, password: "password123" }
+    assert_redirected_to new_session_path
+    assert_empty user.sessions
+
+    link = ActionMailer::Base.deliveries.last.body.to_s.lines.find { |line| line.include?("/email-verification?") }.strip
+    assert_difference "Session.count", 1 do
+      get URI.parse(link).request_uri
+    end
+    assert_redirected_to dashboard_path
+    assert user.reload.email_verified?
+    get dashboard_path
+    assert_response :success
   end
 
   test "new registration requires terms but keeps operational communications optional" do
@@ -241,13 +276,7 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "registration resumes an anonymous quote without duplicating the quote" do
-    quote = Quote.create!(
-      origin: "Barcelona", destination: "Madrid", contact_email: "resume@example.com",
-      distance_km: 620, estimated_duration_minutes: 360, fuel_cost: 74.4,
-      toll_cost: 0, vehicle_cost: 62, driver_cost: 150, loading_cost: 20,
-      waiting_cost: 0, other_cost: 10, margin: 25, total_cost: 316.4,
-      recommended_price: 395.5
-    )
+    quote = create_anonymous_quote_through_form("resume@example.com")
     token = public_token_for(quote)
     get new_registration_path, params: { quote_token: token, contact_preference: "EMAIL_CONTACT" }
 
@@ -425,12 +454,20 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
   private
 
   def submit_registration(attributes, terms: true, operational_email: true)
+    delivery_count = ActionMailer::Base.deliveries.size
     post registration_path, params: {
       user: attributes.merge(
         accept_terms: terms ? "1" : nil,
         accept_operational_email: operational_email ? "1" : nil
       )
     }
+
+    verification_email = ActionMailer::Base.deliveries.last
+    return unless ActionMailer::Base.deliveries.size > delivery_count
+    return unless verification_email&.body&.to_s&.include?("/email-verification?")
+
+    link = verification_email.body.to_s.lines.find { |line| line.include?("/email-verification?") }&.strip
+    get URI.parse(link).request_uri if link
   end
 
   def public_token_for(quote)
@@ -438,12 +475,20 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   def create_public_quote(contact_email: nil)
-    quote = Quote.create!(origin: "Barcelona", destination: "Madrid", contact_email: contact_email, distance_km: 620,
-      estimated_duration_minutes: 360, fuel_cost: 74.4, toll_cost: 0, vehicle_cost: 62,
-      driver_cost: 150, loading_cost: 20, waiting_cost: 0, other_cost: 10,
-      total_cost: 316.4, margin: 25, recommended_price: 395.5)
+    quote = create_anonymous_quote_through_form(contact_email)
     quote.create_lead!(email: "customer@example.com", consent_given: true,
       consent_at: Time.current, status: "NEW")
     quote
+  end
+
+  def create_anonymous_quote_through_form(contact_email)
+    original_service = QuotesController.routes_service_class
+    QuotesController.routes_service_class = FakeRoutesService
+    post quotes_path, params: {
+      quote: { origin: "Barcelona", destination: "Madrid" }, email: contact_email.presence || "quote@example.com"
+    }
+    Quote.order(:id).last
+  ensure
+    QuotesController.routes_service_class = original_service
   end
 end

@@ -11,12 +11,22 @@ class OauthController < ApplicationController
   end
 
   def callback
-    profile = Identity.profile_from(request.env["omniauth.auth"])
+    auth = request.env["omniauth.auth"]
+    log_google_auth_hash_structure(auth) if Rails.env.development?
+    profile = Identity.profile_from(auth)
     identity = Identity.find_by(provider: profile.fetch("provider"), uid: profile.fetch("uid"))
-    user = identity&.user || User.find_by(email_address: profile.fetch("email_address"))
+    user = identity&.user
+    user&.verify_email! if identity
+
+    if !identity && User.exists?(email_address: profile.fetch("email_address"))
+      session[:pending_oauth_link] = profile
+      redirect_to new_session_path, alert: I18n.t("oauth.errors.sign_in_to_link")
+      return
+    end
 
     if user&.terms_accepted?
-      user.identities.find_or_create_by!(provider: profile.fetch("provider"), uid: profile.fetch("uid")) unless identity
+      raise Identity::AuthenticationError, "unverified account" unless user.email_verified?
+
       session.delete(:pending_oauth_signup)
       start_new_session_for(user)
       redirect_to after_authentication_url(default_url: dashboard_url)
@@ -59,5 +69,20 @@ class OauthController < ApplicationController
 
   def oauth_error(key, **options)
     I18n.t("oauth.errors.#{key}", **options)
+  end
+
+  def log_google_auth_hash_structure(auth)
+    auth_keys = auth.respond_to?(:keys) ? auth.keys.map(&:to_s).sort : []
+    credentials = auth.respond_to?(:[]) ? (auth["credentials"] || auth[:credentials]) : nil
+    extra = auth.respond_to?(:[]) ? (auth["extra"] || auth[:extra]) : nil
+    credentials_keys = credentials.respond_to?(:keys) ? credentials.keys.map(&:to_s).sort : []
+    extra_keys = extra.respond_to?(:keys) ? extra.keys.map(&:to_s).sort : []
+    id_token_present = extra.respond_to?(:[]) && (extra["id_token"] || extra[:id_token]).present?
+
+    Rails.logger.info(
+      "Google OAuth callback hash structure: auth_keys=#{auth_keys.inspect} " \
+      "credentials_keys=#{credentials_keys.inspect} extra_keys=#{extra_keys.inspect} " \
+      "id_token_present_in_extra=#{id_token_present}"
+    )
   end
 end

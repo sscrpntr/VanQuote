@@ -4,18 +4,57 @@ class QuotesController < ApplicationController
   allow_unauthenticated_access only: %i[new create public contact_confirmation request_contact]
   before_action :resume_session, only: %i[new create public contact_confirmation request_contact]
 
+  rate_limit to: 10, within: 3.minutes, only: :create,
+             with: -> { render plain: I18n.t("quotes.errors.too_many_requests"), status: :too_many_requests }
+
   def index
     @quotes = Current.user.quotes.order(created_at: :desc)
   end
 
   def new
     @quote = Quote.new
+    @idempotency_key = QuoteCreationRequest.generate_key
+    session[:quote_creation_binding] ||= SecureRandom.urlsafe_base64(32)
   end
 
   def create
     @quote = Quote.new(quote_params)
     @quote.user = Current.user if Current.user
     @quote.contact_email = lead_email
+    @idempotency_key = params[:idempotency_key].to_s
+    session[:quote_creation_binding] ||= SecureRandom.urlsafe_base64(32)
+
+    unless quote_request_input_valid?
+      @idempotency_key = QuoteCreationRequest.generate_key unless QuoteCreationRequest.valid_key?(@idempotency_key)
+      return render :new, status: :unprocessable_entity
+    end
+
+    unless QuoteCreationRequest.valid_key?(@idempotency_key)
+      @quote.errors.add(:base, I18n.t("quotes.errors.idempotency_key_invalid"))
+      @idempotency_key = QuoteCreationRequest.generate_key
+      return render :new, status: :unprocessable_entity
+    end
+
+    request_digest = QuoteCreationRequest.request_digest(
+      origin: @quote.origin,
+      destination: @quote.destination,
+      contact_email: @quote.contact_email
+    )
+    reservation = QuoteCreationRequest.claim!(
+      key: @idempotency_key,
+      request_digest: request_digest,
+      user: Current.user,
+      session_binding: session[:quote_creation_binding],
+      http_request: request
+    )
+
+    if reservation[:status] == :completed
+      @quote = reservation.fetch(:quote)
+      return render_completed_quote
+    end
+
+    operation = reservation.fetch(:operation)
+    claim_token = reservation.fetch(:claim_token)
 
     begin
       route = routes_service_class.new(
@@ -31,8 +70,9 @@ class QuotesController < ApplicationController
         I18n.t("quotes.errors.route_calculation_failed")
       )
 
-      Rails.logger.error("Google Routes error: #{e.message}")
+      Rails.logger.error("Google Routes error (#{e.class})")
 
+      operation.fail!(claim_token)
       return render :new, status: :unprocessable_entity
     end
 
@@ -44,17 +84,35 @@ class QuotesController < ApplicationController
       @quote.total_cost = calculator.total_cost
       @quote.recommended_price = calculator.recommended_price
 
-      @quote.save!
+      operation.complete!(claim_token) do
+        @quote.save!
+        @quote
+      end
+      authorize_anonymous_quote_claim(@quote) unless Current.user
 
-      redirect_to public_quotes_path(
-        token: @quote.signed_id(
-          purpose: :public_view,
-          expires_in: 24.hours
-        )
-      )
+      render_completed_quote
     else
+      operation.fail!(claim_token)
       render :new, status: :unprocessable_entity
     end
+  rescue QuoteCreationRequest::AnonymousLimitReached
+    @quote.errors.add(:base, I18n.t("quotes.errors.anonymous_limit"))
+    render :new, status: :too_many_requests
+  rescue QuoteCreationRequest::RequestInProgress
+    @quote.errors.add(:base, I18n.t("quotes.errors.quote_request_in_progress"))
+    response.set_header("Retry-After", QuoteCreationRequest::LEASE_DURATION.to_i.to_s)
+    render :new, status: :conflict
+  rescue QuoteCreationRequest::KeyConflict
+    @quote.errors.add(:base, I18n.t("quotes.errors.quote_request_conflict"))
+    @idempotency_key = QuoteCreationRequest.generate_key
+    render :new, status: :conflict
+  rescue QuoteCreationRequest::LostClaim
+    @quote.errors.add(:base, I18n.t("quotes.errors.quote_request_in_progress"))
+    response.set_header("Retry-After", QuoteCreationRequest::LEASE_DURATION.to_i.to_s)
+    render :new, status: :conflict
+  rescue ActiveRecord::RecordInvalid
+    operation&.fail!(claim_token) if operation && claim_token
+    raise
   end
 
   def show
@@ -110,24 +168,34 @@ class QuotesController < ApplicationController
 
     phone = preference == "PHONE" ? Current.user.phone : nil
     lead_preference = preference == "PHONE" && phone.blank? ? nil : preference
-    lead = quote.lead || quote.create_lead!(
-      email: Current.user.email_address,
-      phone: phone,
-      contact_preference: lead_preference,
-      consent_given: true,
-      consent_at: Current.user.operational_email_consent_at,
-      consent_basis: "account_operational_email",
-      status: "NEW"
-    )
-    if quote.lead
-      lead.update!(
+    lead = quote.with_lock do
+      quote.reload
+      raise ActiveRecord::RecordNotFound unless quote.user_id == Current.user.id
+
+      existing_lead = quote.lead
+      attributes = {
         email: Current.user.email_address,
         phone: phone,
         contact_preference: lead_preference,
         consent_given: true,
         consent_at: Current.user.operational_email_consent_at,
         consent_basis: "account_operational_email"
-      )
+      }
+      if existing_lead
+        existing_lead.update!(attributes)
+        existing_lead
+      else
+        quote.create_lead!(attributes.merge(status: "NEW"))
+      end
+    end
+
+    begin
+      lead.notify_admin_once!
+    rescue StandardError => error
+      Rails.logger.error("Lead notification email failed (#{error.class})")
+      flash[:alert] = I18n.t("quotes.public.contact.email_failed")
+      redirect_to public_quotes_path(token: token)
+      return
     end
 
     if preference == "PHONE" && phone.blank?
@@ -165,6 +233,30 @@ class QuotesController < ApplicationController
       @quote.valid?
   end
 
+  def quote_request_input_valid?
+    email = lead_email
+    @quote.origin.present? && @quote.destination.present? &&
+      email.present? && email.match?(URI::MailTo::EMAIL_REGEXP)
+  end
+
+  def render_completed_quote
+    authorize_anonymous_quote_claim(@quote) if @quote.user_id.nil?
+
+    begin
+      @quote.deliver_result_email_once!
+    rescue StandardError => error
+      Rails.logger.error("Quote email delivery failed (#{error.class})")
+      flash[:alert] = I18n.t("quotes.errors.email_delivery_failed")
+    end
+
+    redirect_to public_quotes_path(
+      token: @quote.signed_id(
+        purpose: :public_view,
+        expires_in: 24.hours
+      )
+    )
+  end
+
   def lead_email
     if Current.user
       Current.user.email_address
@@ -177,18 +269,13 @@ class QuotesController < ApplicationController
     return false unless user
     return quote.user_id == user.id if quote.user_id.present?
 
-    quote.contact_email.present? && quote.contact_email.casecmp?(user.email_address)
+    anonymous_quote_claim_authorized?(quote)
   end
 
   def claim_quote_for_current_user(quote)
-    quote.with_lock do
-      quote.reload
-      return quote.user_id == Current.user.id if quote.user_id.present?
-      return false unless quote_claimable_by?(quote, Current.user)
-
-      quote.update!(user: Current.user)
-      true
-    end
+    result = claim_anonymous_quote(quote)
+    flash[:notice] = I18n.t("quotes.public.contact.owner_updated", email: Current.user.email_address) if result == :claimed
+    %i[claimed already_owned].include?(result)
   end
 
   def apply_internal_defaults(quote)

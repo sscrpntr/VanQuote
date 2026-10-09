@@ -3,9 +3,9 @@ require "test_helper"
 class ProfilesControllerTest < ActionDispatch::IntegrationTest
   setup do
     @admin = User.create!(first_name: "Admin", last_name: "User", phone: "+34600000001",
-      email_address: "admin@example.com", password: "password123", admin: true)
+      email_address: "admin@example.com", password: "password123", admin: true, email_verified_at: Time.current)
     @user = User.create!(first_name: "Test", last_name: "User", phone: "+34600000000",
-      email_address: "user@example.com", password: "password123")
+      email_address: "user@example.com", password: "password123", email_verified_at: Time.current)
   end
 
   test "authenticated user can access profile" do

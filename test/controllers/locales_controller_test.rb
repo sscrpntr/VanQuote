@@ -12,7 +12,7 @@ class LocalesControllerTest < ActionDispatch::IntegrationTest
 
   test "authenticated user can change locale" do
     user = User.create!(first_name: "Locale", last_name: "User", phone: "+34600000004",
-      email_address: "locale-user@example.com", password: "password123",
+      email_address: "locale-user@example.com", password: "password123", email_verified_at: Time.current,
                         password_confirmation: "password123")
     post session_path, params: { email_address: user.email_address, password: "password123" }
 
@@ -72,7 +72,7 @@ class LocalesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "profile draft fields survive a locale change for the authenticated account" do
-    user = User.create!(first_name: "Original", last_name: "User", email_address: "profile@example.com", password: "password123")
+    user = User.create!(first_name: "Original", last_name: "User", email_address: "profile@example.com", password: "password123", email_verified_at: Time.current)
     post session_path, params: { email_address: user.email_address, password: "password123" }
     post locale_path, params: {
       locale: "ca",

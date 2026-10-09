@@ -196,6 +196,7 @@ ca:
         phone: "Vull rebre una trucada"
         email_contact: "Vull rebre contacte per email"
         account_mismatch: "Aquest pressupost està associat a un altre email o compte. Inicia sessió amb el compte que el va crear per sol·licitar contacte."
+        owner_updated: "S'ha actualitzat el propietari d'aquest pressupost al compte %{email}."
         expired: "L'enllaç del pressupost ha caducat. Torna a obrir el pressupost original per continuar."
         invalid_preference: "Selecciona una opció de contacte vàlida."
         request_failed: "No s'ha pogut registrar la sol·licitud. Revisa el pressupost i torna-ho a provar."
@@ -231,6 +232,13 @@ ca:
 
     errors:
       route_calculation_failed: "No s'ha pogut calcular la ruta. Torna-ho a provar."
+      anonymous_limit: "Has arribat al límit de tres pressupostos anònims. Inicia sessió o crea un compte per continuar."
+      too_many_requests: "Hi ha massa sol·licituds. Espera un moment i torna-ho a provar."
+      email_delivery_failed: "No s'ha pogut acceptar l'enviament del pressupost per email. Pots consultar el resultat en aquesta pàgina."
+      email_failed: "La sol·licitud s'ha desat, però no s'ha pogut acceptar l'enviament de la notificació. Torna-ho a provar més tard."
+      idempotency_key_invalid: "No s'ha pogut processar la sol·licitud. Actualitza la pàgina i torna-ho a provar."
+      quote_request_conflict: "No s'ha pogut processar la sol·licitud. Actualitza la pàgina i torna-ho a provar."
+      quote_request_in_progress: "La sol·licitud de pressupost encara s'està processant. Torna-ho a provar d'aquí a un moment."
 
   sessions:
     new:
@@ -259,6 +267,8 @@ ca:
       back_to_vanquote: "← Tornar a VanQuote"
 
     alerts:
+      email_not_verified: "Verifica la teva adreça de correu. T'hem enviat un enllaç nou."
+      verification_delivery_failed: "No s'ha pogut acceptar l'enviament del correu de verificació. Torna-ho a provar més tard."
       try_again_later: "Torna-ho a provar més tard."
       invalid_credentials: "Prova amb un altre email o contrasenya."
 
@@ -269,6 +279,8 @@ ca:
 
       errors:
         title: "No hem pogut crear el teu compte:"
+        save_failed: "No hem pogut desar el teu compte i les acceptacions. Revisa el formulari i torna-ho a provar."
+        acceptance_storage_unavailable: "Ara no podem desar la teva acceptació. Conservem les seleccions; torna-ho a provar més tard o contacta amb suport."
 
       first_name:
         label: "Nom"
@@ -309,6 +321,9 @@ ca:
       sign_in: "Iniciar sessió"
 
       back_to_vanquote: "← Tornar a VanQuote"
+      verify_email: "T'hem enviat un enllaç per verificar el correu abans d'iniciar sessió."
+      email_verified: "Correu verificat. Ja pots iniciar sessió."
+      email_verification_expired: "L'enllaç de verificació no és vàlid o ha caducat. Registra't de nou per rebre'n un altre."
 
   oauth:
     providers:
@@ -320,6 +335,7 @@ ca:
       invalid_provider: "El proveïdor d'accés no és vàlid."
       not_configured: "L'accés amb %{provider} requereix configuració externa."
       authentication_failed: "No s'ha pogut completar l'accés. Prova-ho amb email i contrasenya."
+      sign_in_to_link: "Ja existeix un compte amb aquest email. Inicia sessió amb aquest compte per vincular Google de manera segura."
       account_creation_failed: "No s'ha pogut crear el compte amb aquest proveïdor."
 
   activerecord:
@@ -351,6 +367,11 @@ ca:
       back_to_sign_in: "← Tornar a iniciar sessió"
       back_to_vanquote: "← Tornar a VanQuote"
 
+    reset_link:
+      title: "Continua amb el canvi de contrasenya"
+      instructions: "Estem validant l'enllaç segur. La pàgina continuarà automàticament."
+      javascript_required: "Cal JavaScript per validar aquest enllaç segur. Activa'l i torna a obrir l'enllaç del correu."
+
     edit:
       title: "Actualitza la teva contrasenya"
       subtitle: "Introdueix la teva nova contrasenya i confirma el canvi."
@@ -369,11 +390,12 @@ ca:
 
     alerts:
       try_again_later: "Torna-ho a provar més tard."
+      delivery_failed: "No s'ha pogut acceptar l'enviament del correu de recuperació. Torna-ho a provar més tard."
       passwords_did_not_match: "Les contrasenyes no coincideixen."
       invalid_or_expired_link: "L'enllaç per restablir la contrasenya no és vàlid o ha caducat."
 
     notices:
-      reset_instructions: "Hem enviat les instruccions per restablir la contrasenya si existeix un compte amb aquest email."
+      reset_instructions: "Si existeix un compte amb aquest email, utilitza el correu de recuperació per continuar."
       reset_success: "La contrasenya s'ha restablert correctament."
 
   leads:

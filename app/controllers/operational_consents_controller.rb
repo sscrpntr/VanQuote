@@ -21,26 +21,26 @@ class OperationalConsentsController < ApplicationController
       end
 
       if quote && Lead::CONTACT_PREFERENCES.include?(preference)
-      phone = Current.user.phone
-      lead_preference = preference == "PHONE" && phone.blank? ? nil : preference
-      lead = quote.lead || quote.create_lead!(
-        email: Current.user.email_address,
-        phone: phone,
-        consent_given: true,
-        consent_at: Current.user.operational_email_consent_at,
-        consent_basis: "account_operational_email",
-        contact_preference: lead_preference,
-        status: "NEW"
-      )
-      if quote.lead
-        lead.update!(
-          contact_preference: lead_preference,
-          phone: phone,
-          consent_given: true,
-          consent_at: Current.user.operational_email_consent_at,
-          consent_basis: "account_operational_email"
-        )
-      end
+        phone = Current.user.phone
+        lead_preference = preference == "PHONE" && phone.blank? ? nil : preference
+        lead = quote.with_lock do
+          quote.reload
+          existing_lead = quote.lead
+          attributes = {
+            email: Current.user.email_address,
+            phone: phone,
+            consent_given: true,
+            consent_at: Current.user.operational_email_consent_at,
+            consent_basis: "account_operational_email",
+            contact_preference: lead_preference
+          }
+          if existing_lead
+            existing_lead.update!(attributes)
+            existing_lead
+          else
+            quote.create_lead!(attributes.merge(status: "NEW"))
+          end
+        end
       end
     end
 

@@ -7,58 +7,31 @@
     <div class="auth-card">
       <div class="auth-header">
         <h1><%= t("passwords.edit.title") %></h1>
-
-        <p>
-          <%= t("passwords.edit.subtitle") %>
-        </p>
+        <p><%= t("passwords.edit.subtitle") %></p>
       </div>
 
       <% if flash[:alert] %>
-        <div class="auth-alert">
-          <%= flash[:alert] %>
-        </div>
+        <div class="auth-alert" role="alert"><%= flash[:alert] %></div>
       <% end %>
 
-      <% if flash[:notice] %>
-        <div class="auth-notice">
-          <%= flash[:notice] %>
-        </div>
-      <% end %>
-
-      <%= form_with url: password_path(params[:token]),
-            method: :put,
-            class: "auth-form" do |form| %>
-
+      <%= form_with url: update_password_reset_path, method: :patch, class: "auth-form" do |form| %>
         <div class="auth-field">
-          <%= form.label :password,
-                t("passwords.edit.password.label") %>
-
-          <%= form.password_field :password,
-                required: true,
-                autocomplete: "new-password",
-                placeholder: t("passwords.edit.password.placeholder"),
-                maxlength: 72 %>
+          <%= form.label :password, t("passwords.edit.password.label") %>
+          <%= form.password_field :password, required: true, autocomplete: "new-password",
+                placeholder: t("passwords.edit.password.placeholder"), maxlength: 72 %>
         </div>
 
         <div class="auth-field">
-          <%= form.label :password_confirmation,
-                t("passwords.edit.password_confirmation.label") %>
-
-          <%= form.password_field :password_confirmation,
-                required: true,
-                autocomplete: "new-password",
-                placeholder: t("passwords.edit.password_confirmation.placeholder"),
-                maxlength: 72 %>
+          <%= form.label :password_confirmation, t("passwords.edit.password_confirmation.label") %>
+          <%= form.password_field :password_confirmation, required: true, autocomplete: "new-password",
+                placeholder: t("passwords.edit.password_confirmation.placeholder"), maxlength: 72 %>
         </div>
 
-        <%= form.submit t("passwords.edit.submit"),
-              class: "button-primary auth-submit" %>
+        <%= form.submit t("passwords.edit.submit"), class: "button-primary auth-submit" %>
       <% end %>
 
       <p class="auth-back-link">
-        <%= link_to t("passwords.edit.back_to_sign_in"),
-              new_session_path,
-              class: "action-link" %>
+        <%= link_to t("passwords.edit.back_to_sign_in"), new_session_path, class: "action-link" %>
       </p>
     </div>
 
